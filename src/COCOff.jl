@@ -6,14 +6,14 @@ function calcMorse(r, diff)
   r0     = 1.1282058129221093
   preF   = 2 * D * a / r0
   expf   = exp(a * (1 - r / r0))
-  energy = D * expf * (expf - 2)
+  E      = D * expf * (expf - 2)
   F      = preF * expf * (expf - 1) * diff / r
 
   return E,F
 end
 
-function V_disp(diff, Cij)
-  r2 = diff'diff
+function V_disp(r, diff, Cij)
+  r2 = r^2
   E  = Cij / r2^3
   F  = 6.0 * E * diff / r2
   return E,F
@@ -44,8 +44,7 @@ function calcDisp(rj0i0, rj1i1, rj0i1, rj1i0)
   return energy, Fcc, Foo, Fco, Foc
 end
 
-function V_exch(diff, Aij, Bij)
-  r = √(diff'diff)
+function V_exch(r, diff, Aij, Bij)
   E = Aij * exp(-Bij * r)
   F = Bij * E * diff / r
   return E,F
@@ -82,7 +81,7 @@ end
 
 function V_coul(r, diff, Qij)
   E = Qij / r
-  F = Qij * diff / r**3 	# = Qij / r**2 * diff / r
+  F = Qij * diff / r^3 	# = Qij / r**2 * diff / r
   return E, F
 end
 
@@ -136,7 +135,7 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
   rX2X1 = diffDotSqrt(rX2,rX1)
 
 # C-C
-  E, F    = V_coul(*rj0i0, QC1*QC2)
+  E, F    = V_coul(rj0i0..., QC1*QC2)
   energy  = E
   F_Q1    = alphaC * E * rCO1 / r1
   F_Q2    = alphaC * E * rCO2 / r2
@@ -146,7 +145,7 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
   Fj1     = F_Q2
 
 # C-X
-  E, F    = V_coul(*rX2i0, QC1*QX2)
+  E, F    = V_coul(rX2i0..., QC1*QX2)
   energy += E
   F_Q1    = alphaC * E * rCO1 / r1
   F_Q2    = - (alphaC * QC2 + alphaO * QO2) * E/QX2 * rCO2 / r2
@@ -156,7 +155,7 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
   Fj1    += (wO * F) + F_Q2
 
   # C-O
-  E, F    = V_coul(*rj1i0, QC1*QO2)
+  E, F    = V_coul(rj1i0..., QC1*QO2)
   energy += E
   F_Q1    = alphaC * E * rCO1 / r1
   F_Q2    = alphaO * E * rCO2 / r2
@@ -166,7 +165,7 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
   Fj0    -= F_Q2
 
   # X-C
-  E, F    = V_coul(*rj0X1, QX1*QC2)
+  E, F    = V_coul(rj0X1..., QX1*QC2)
   energy += E
   F_Q1    = - (alphaC * QC1 + alphaO * QO1) * E/QX1 * rCO1 / r1
   F_Q2    = alphaC * E * rCO2 / r2
@@ -176,7 +175,7 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
   Fj1    += F_Q2
 
   # X-X
-  E, F    = V_coul(*rX2X1, QX1*QX2)
+  E, F    = V_coul(rX2X1..., QX1*QX2)
   energy += E
   F_Q1    = - (alphaC * QC1 + alphaO * QO1) * E/QX1 * rCO1 / r1
   F_Q2    = - (alphaC * QC2 + alphaO * QO2) * E/QX2 * rCO2 / r2
@@ -187,7 +186,7 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
 
 
   # X-O
-  E, F    = V_coul(*rj1X1, QX1*QO2)
+  E, F    = V_coul(rj1X1..., QX1*QO2)
   energy += E
   F_Q1    = - (alphaC * QC1 + alphaO * QO1) * E/QX1 * rCO1 / r1
   F_Q2    = alphaO * E * rCO2 / r2
@@ -197,7 +196,7 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
   Fj1    += (F + F_Q2)
 
   # O-C
-  E, F    = V_coul(*rj0i1, QO1*QC2)
+  E, F    = V_coul(rj0i1..., QO1*QC2)
   energy += E
   F_Q1    = alphaO * E * rCO1 / r1
   F_Q2    = alphaC * E * rCO2 / r2
@@ -207,7 +206,7 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
   Fj1    += F_Q2
 
   # O-X
-  E, F    = V_coul(*rX2i1, QO1*QX2)
+  E, F    = V_coul(rX2i1..., QO1*QX2)
   energy += E
   F_Q1    = alphaO * E * rCO1 / r1
   F_Q2    = - (alphaC * QC2 + alphaO * QO2) * E/QX2 * rCO2 / r2
@@ -217,7 +216,7 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
   Fj1    += ((wO * F) + F_Q2)
 
   # O-O
-  E, F    = V_coul(*rj1i1, QO1*QO2)
+  E, F    = V_coul(rj1i1..., QO1*QO2)
   energy += E
   F_Q1    = alphaO * E * rCO1 / r1
   F_Q2    = alphaO * E * rCO2 / r2
@@ -231,33 +230,41 @@ end
 
 function diffDotSqrt(v2, v1)
   diff = v2 - v1
-  r    = sqrt(dot(diff, diff))
+  r    = sqrt(diff'diff)
   return (r, diff)
 end
 
 function COCOdyn(dv, v, u, p, t)
+  positions = u
+
   epsilon = 11.230139012256362
-  N       = len(positions)
-  MorseF  = zeros_like(positions)
-  ExchF   = zeros_like(positions)
-  DispF   = zeros_like(positions)
-  CoulF   = zeros_like(positions)
+  N       = length(positions)
+  MorseF  = zero(u)
+  ExchF   = zero(u)
+  DispF   = zero(u)
+  CoulF   = zero(u)
   MorseE  = ExchE = DispE = CoulE = 0.0
 
-  for i in range(0, N//2, 1):
-    posi0 = positions[2*i]
-    posi1 = positions[2*i+1]
+  for i in range(1, N, step=2)
+    posi0 = positions[i]
+    posi1 = positions[i+1]
     ri1i0 = diffDotSqrt(posi1, posi0)
 
     #Calculate Morse
-    E, F           = calculate_Morse(*ri1i0)
+    E, F           = calcMorse(ri1i0...)
     MorseE        += E
-    MorseF[2*i]   -= F
-    MorseF[2*i+1] += F
+    MorseF[i]   = MorseF[i]   - F
+    MorseF[i+1] = MorseF[i+1] + F
 
-    for j in range(i+1, N//2, 1):
-      posj0 = positions[2*j]
-      posj1 = positions[2*j+1]
+    #SVectors need to update in place,
+    # MorseF[i] = MorseF[i] +/- F
+    #It won't work with += or -=
+    #SVector should be faster so its
+    #best to incorporate it
+
+    for j in range(1, N, step=2)
+      posj0 = positions[j]
+      posj1 = positions[j+1]
 
       rj0i0 = diffDotSqrt(posj0, posi0)
       rj1i1 = diffDotSqrt(posj1, posi1)
@@ -265,30 +272,33 @@ function COCOdyn(dv, v, u, p, t)
       rj1i0 = diffDotSqrt(posj1, posi0)
 
       #Calculate Dispersion
-      E, Fcc, Foo, Fco, Foc = calculate_Disp(rj0i0, rj1i1, rj0i1, rj1i0)
+      E, Fcc, Foo, Fco, Foc = calcDisp(rj0i0, rj1i1, rj0i1, rj1i0)
       DispE                += E
-      DispF[2*i]           -= (Fcc + Foc)
-      DispF[2*i+1]         -= (Foo + Fco)
-      DispF[2*j]           += (Fcc + Fco)
-      DispF[2*j+1]         += (Foo + Foc)
+      DispF[i]           = DispF[i] - (Fcc + Foc)
+      DispF[i+1]         = DispF[i+1] - (Foo + Fco)
+      DispF[j]           += (Fcc + Fco)
+      DispF[j+1]         += (Foo + Foc)
 
       #Calculate Exchange
-      E, Fcc, Foo, Fco, Foc = calculate_Exch(rj0i0, rj1i1, rj0i1, rj1i0)
+      E, Fcc, Foo, Fco, Foc = calcExch(rj0i0, rj1i1, rj0i1, rj1i0)
       ExchE                += E
-      ExchF[2*i]           -= (Fcc + Foc)
-      ExchF[2*i+1]         -= (Foo + Fco)
-      ExchF[2*j]           += (Fcc + Fco)
-      ExchF[2*j+1]         += (Foo + Foc)
+      ExchF[i]           -= (Fcc + Foc)
+      ExchF[i+1]         -= (Foo + Fco)
+      ExchF[j]           += (Fcc + Fco)
+      ExchF[j+1]         += (Foo + Foc)
 
       #Calculate Coulomb
-      E, Fi0, Fi1, Fj0, Fj1 = calculate_Coul(posi0, posi1, posj0, posj1,
-                                             rj0i0, rj1i1, rj0i1, rj1i0,
-                                             ri1i0)
+      E, Fi0, Fi1, Fj0, Fj1 = calcCoul(posi0, posi1, posj0, posj1,
+                                       rj0i0, rj1i1, rj0i1, rj1i0,
+                                       ri1i0)
       CoulE                += E
-      CoulF[2*i]           += Fi0
-      CoulF[2*i+1]         += Fi1
-      CoulF[2*j]           += Fj0
-      CoulF[2*j+1]         += Fj1
+      CoulF[i]           += Fi0
+      CoulF[i+1]         += Fi1
+      CoulF[j]           += Fj0
+      CoulF[j+1]         += Fj1
+
+    end # j loop
+  end # i loop
 
   # In order to normalize the minimal morse potential to zero,
   # the following energy will be added to change the zero point

@@ -12,6 +12,10 @@ module JMD
 using NBodySimulator
 using StaticArrays
 
+include("./io.jl")
+include("./bodies.jl")
+include("./COCOff.jl")
 
+export readASExyz, COCOdyn
 
 end # module

@@ -12,6 +12,7 @@ function readASExyz(xyz)
   for i in range(1,N)
     props = parse.(Float64, sys[i][2:end])
     pos   = SVector{3}(props[1:3])
+    s     = sys[i][1]
     q     = Q[s]
 
     if occursin("masses", hed)
