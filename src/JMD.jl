@@ -9,7 +9,7 @@ author: Brian C. Ferrari
 
 module JMD
 
-using NBodySimulator
+# using NBodySimulator
 using StaticArrays
 
 include("./io.jl")

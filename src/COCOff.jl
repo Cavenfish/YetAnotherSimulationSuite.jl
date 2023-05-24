@@ -245,7 +245,7 @@ function COCOdyn(dv, v, u, p, t)
   CoulF   = zero(u)
   MorseE  = ExchE = DispE = CoulE = 0.0
 
-  for i in range(1, N, step=2)
+  for i in 1:2:N
     posi0 = positions[i]
     posi1 = positions[i+1]
     ri1i0 = diffDotSqrt(posi1, posi0)
@@ -256,13 +256,7 @@ function COCOdyn(dv, v, u, p, t)
     MorseF[i]   = MorseF[i]   - F
     MorseF[i+1] = MorseF[i+1] + F
 
-    #SVectors need to update in place,
-    # MorseF[i] = MorseF[i] +/- F
-    #It won't work with += or -=
-    #SVector should be faster so its
-    #best to incorporate it
-
-    for j in range(1, N, step=2)
+    for j in i+2:2:N
       posj0 = positions[j]
       posj1 = positions[j+1]
 
@@ -274,28 +268,28 @@ function COCOdyn(dv, v, u, p, t)
       #Calculate Dispersion
       E, Fcc, Foo, Fco, Foc = calcDisp(rj0i0, rj1i1, rj0i1, rj1i0)
       DispE                += E
-      DispF[i]           = DispF[i] - (Fcc + Foc)
+      DispF[i]           = DispF[i]   - (Fcc + Foc)
       DispF[i+1]         = DispF[i+1] - (Foo + Fco)
-      DispF[j]           += (Fcc + Fco)
-      DispF[j+1]         += (Foo + Foc)
+      DispF[j]           = DispF[j]   + (Fcc + Fco)
+      DispF[j+1]         = DispF[j+1] + (Foo + Foc)
 
       #Calculate Exchange
       E, Fcc, Foo, Fco, Foc = calcExch(rj0i0, rj1i1, rj0i1, rj1i0)
       ExchE                += E
-      ExchF[i]           -= (Fcc + Foc)
-      ExchF[i+1]         -= (Foo + Fco)
-      ExchF[j]           += (Fcc + Fco)
-      ExchF[j+1]         += (Foo + Foc)
+      ExchF[i]           = ExchF[i]   - (Fcc + Foc)
+      ExchF[i+1]         = ExchF[i+1] - (Foo + Fco)
+      ExchF[j]           = ExchF[j]   + (Fcc + Fco)
+      ExchF[j+1]         = ExchF[j+1] + (Foo + Foc)
 
       #Calculate Coulomb
       E, Fi0, Fi1, Fj0, Fj1 = calcCoul(posi0, posi1, posj0, posj1,
                                        rj0i0, rj1i1, rj0i1, rj1i0,
                                        ri1i0)
       CoulE                += E
-      CoulF[i]           += Fi0
-      CoulF[i+1]         += Fi1
-      CoulF[j]           += Fj0
-      CoulF[j+1]         += Fj1
+      CoulF[i]           = CoulF[i]   + Fi0
+      CoulF[i+1]         = CoulF[i+1] + Fi1
+      CoulF[j]           = CoulF[j]   + Fj0
+      CoulF[j+1]         = CoulF[j+1] + Fj1
 
     end # j loop
   end # i loop

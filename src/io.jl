@@ -30,6 +30,30 @@ function readASExyz(xyz)
   return set
 end #read_ase_xyz
 
+function read_xyz(xyz)
+  stream = readlines(xyz)
+  amu    = Dict("C" => 12.011, "O" => 15.999)
+  Q      = Dict("C" => -1.786, "O" => -2.332)
+  set    = Atom[]
+
+  #Skip header lines then parse file
+  for line in stream[3:end]
+    s = split(line, " ")
+    s = deleteat!(s, findall(e -> e == "", s))
+
+    pos  = parse.(Float64, s[2:end])
+    pos  = SVector{3}(pos)
+    vel  = SVector{3}([0.0,0.0,0.0])
+    mas  = amu[s[1]]
+    q    = Q[s[1]]
+
+    atom = Atom(pos, vel, mas, q)
+    push!(set, atom)
+  end
+
+  return set
+end
+
 function write_xyz_traj(fileName::String, sr, dt)
   bodies = sr.simulation.system.bodies
   n      = length(bodies)
