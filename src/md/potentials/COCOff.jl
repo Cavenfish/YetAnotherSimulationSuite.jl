@@ -234,7 +234,7 @@ function diffDotSqrt(v2, v1)
   return (r, diff)
 end
 
-function COCOdyn(dv, v, u, p, t)
+function COCOdyn(dv, v, u, m, t)
   positions = u
 
   epsilon = 11.230139012256362
@@ -303,5 +303,10 @@ function COCOdyn(dv, v, u, p, t)
   Exch  = ( ExchE,  ExchF)
   Disp  = ( DispE,  DispF)
   Coul  = ( CoulE,  CoulF)
-  return Morse, Exch, Disp, Coul
+
+
+  forces = MorseF + ExchF + DispF + CoulF
+  
+  dv .= forces ./ m
+
 end

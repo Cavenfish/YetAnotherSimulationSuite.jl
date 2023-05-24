@@ -9,13 +9,10 @@ author: Brian C. Ferrari
 
 module JMD
 
-# using NBodySimulator
 using StaticArrays
 
 include("./io.jl")
-include("./bodies.jl")
-include("./COCOff.jl")
-
-export readASExyz, COCOdyn
+include("./md/bodies.jl")
+include("./md/potentials/COCOff.jl")
 
 end # module
