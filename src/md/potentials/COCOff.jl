@@ -306,7 +306,8 @@ function COCOdyn(dv, v, u, m, t)
 
 
   forces = MorseF + ExchF + DispF + CoulF
-  
+  energy = MorseE + ExchE + DispE + CoulE
+
   dv .= forces ./ m
 
 end

@@ -14,5 +14,6 @@ using StaticArrays
 include("./io.jl")
 include("./md/bodies.jl")
 include("./md/potentials/COCOff.jl")
+include("./md/simulation.jl")
 
 end # module
