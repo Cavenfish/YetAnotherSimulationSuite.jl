@@ -1,4 +1,7 @@
-using StaticArrays
+"""
+CO-CO Potential from van Hemert 2015
+"""
+# using StaticArrays
 
 function calcMorse(r, diff)
   D      = 11.230139012256362

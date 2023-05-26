@@ -1,4 +1,4 @@
-using StaticArrays
+# using StaticArrays
 
 abstract type Particle end
 
