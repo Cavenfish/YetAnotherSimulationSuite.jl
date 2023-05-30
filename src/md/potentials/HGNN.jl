@@ -7,6 +7,10 @@ Notation
   - Weights                   => w
   - Bias                      => b
 
+Units
+  - Energy  --> cm-1
+  - Spatial --> Bohr
+
 Author: Brian C. Ferrari
 
 ------ My Notes While Coding ------
@@ -248,4 +252,6 @@ function molPot(mol)
   return v, dv
 end
 
-
+function HGNNdyn(dv, v, u, m, t)
+  
+end
