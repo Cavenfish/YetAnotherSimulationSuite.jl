@@ -235,16 +235,16 @@ function molPot(mol)
   # 1st layer
   y  = b1 + w1 * x
   f  = tanh.(y)
-  f2 = f'f
 
   # output layer
   v  = b2 + w2'f
-  dv = (w2'w1 - f2*w2'w1) * dx * rhat
+  dv = (1 .- f.^2) .* w1
+  dv = w2'dv
 
   # remapping
-  v    = (v+1) * (vb-va)/2.0 + va
-  v   += 0.560096850315234
-  dv .*= (vb-va)
+  v   = (v+1) * (vb-va)/2.0 + va
+  v  += 0.560096850315234
+  dv *= (vb-va) / (rb-ra)
   return v, dv
 end
 
