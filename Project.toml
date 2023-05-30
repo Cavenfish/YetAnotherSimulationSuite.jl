@@ -1,0 +1,8 @@
+name = "JMD"
+uuid = "d3ec4d54-14c5-4f6e-8d2e-82ae0926cfed"
+authors = ["brian <ferraribrian1996@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
