@@ -8,40 +8,82 @@ Notation
   - Bias                      => b
 
 Author: Brian C. Ferrari
-"""
 
-"""
-Notes to keeps in mind:
+------ My Notes While Coding ------
 
 dgemv('t',n0,n1,1.d0,w1,n0,r,1,1.d0,rt1,1) 
     -> 1.d0 * Transpose(w1) * r + 1.d0 * rt1
+
+dgemm -> matrix -- matrix multiplication 
+
+dpdr takes the derivative of P wrt g. It becomes
+a matrix because it does dpdr[:,1] = del/delr1 P[:],
+where r1 =  r_{o1, c1}. It then follows like that
+for the rest. This can be seen as simple vector math
+Essentially:
+    dPdr = P[7] * dr[6]
+     ^      ^       ^
+  matrix  column   row
+          vector  vector 
 """
 
 function g(i,j)
-  lambda = 0.3#???
-  diff   = j - i
-  r      = sqrt(diff'diff)
-  p      = exp(-r * lambda)
+  ita  = 0.3
+  diff = j - i
+  r    = sqrt(diff'diff)
+  p    = exp(-r * ita)
   return p
 end
 
 function getPIPs(c1,o1,c2,o2)
 
-  p1 = g(o1, c1)   + g(o2, c2)
-  p2 = g(o1, c2)   + g(o2, c1)
-  p3 = g(o1, c1)^2 + g(o2, c2)^2
-  p4 = g(o1, c2)^2 + g(o2, c1)^2
+  # Predefine possible g calls to prevent repeating math
+  g1 = g(o1, c1)
+  g2 = g(o2, c2)
+  g3 = g(o1, c2)
+  g4 = g(o2, c1)
+  g5 = g(o1, o2)
+  g6 = g(c1, c2)
 
-  p5 = g(o1, c1) * g(o1, c2) + g(o2,  c1) * g(o2, c2)
-  p6 = g(o1, o2)
-  p7 = g(c1, c2)
+  # See Chen et al. 2020 for written out PIPs
+  p1 = g1   + g2
+  p2 = g3   + g4
+  p3 = g1^2 + g2^2
+  p4 = g3^2 + g4^2
+  p5 = g1 * g3 + g4 * g2
+  p6 = g5
+  p7 = g6
 
   #This part is in their code but not the paper
   p3 = sqrt(p3)
   p4 = sqrt(p4)
   p5 = sqrt(p5)
+
+  # The PIPs
+  P  = [p1, p2, p3, p4, p5, p6, p7]
+
+  # Make the dPdr matrix (see notes at top for info)
+  dPdr = zeros(Float64, 7, 6)
+
+  # Note: ita = 0.3
+  dPdr[1,1] = -0.3*g1 # dp1/dr1
+  dPdr[1,2] = -0.3*g2 # dp1/dr2
+  dPdr[2,3] = -0.3*g3 # dp2/dr3
+  dPdr[2,4] = -0.3*g4 # dp2/dr4
+  dPdr[6,5] = -0.3*g5 # dp6/dr5
+  dPdr[7,6] = -0.3*g6 # dp7/dr6
+
+  dPdr[3,1] = (-0.3 * g1^2) / p3 # dp3/dr1
+  dPdr[3,2] = (-0.3 * g2^2) / p3 # dp3/dr2 
+  dPdr[4,3] = (-0.3 * g3^2) / p4 # dp4/dr3 
+  dPdr[4,4] = (-0.3 * g4^2) / p4 # dp4/dr4 
+
+  dPdr[5,1] = (-0.3*g1*g3) / (2*p5) # dp5/dr1
+  dPdr[5,2] = (-0.3*g4*g2) / (2*p5) # dp5/dr1
+  dPdr[5,3] = (-0.3*g1*g3) / (2*p5) # dp5/dr1
+  dPdr[5,4] = (-0.3*g4*g2) / (2*p5) # dp5/dr1
   
-  return [p1, p2, p3, p4, p5, p6, p7]
+  return P, dPdr
 end
 
 function readInVars(file)
@@ -111,7 +153,7 @@ function pairPot(pair)
   inp = "/home/brian/Research/JMD/ogSRC/nn_ococ_w20.txt"
 
   # Get PIPs: P is a vector 
-  P = getPIPs(pair...)
+  P, dPdr = getPIPs(pair...)
 
   # Get weight and biases:
   #   - weights are matricies (except w3)
@@ -125,18 +167,23 @@ function pairPot(pair)
   # 1st layer
   y = b1 + transpose(w1) * P
   f = tanh.(y)
+  A = w1 * (w2 .* (1 .- f.^2))
 
   # 2nd layer
   y = b2 + transpose(w2) * f
   f = tanh.(y)
 
   # output layer
-  v = b3 + w3'f
+  v  = b3 + w3'f
+  dv = A * (w3 .* (1 .- f.^2))
 
   # remapping
   vgg = vg[2] - vg[1]
   v   = vgg * (v+1)/2 + vg[1]
-  return v
+  dv  = (dv .* vgg) ./ rgg
+
+  dv  = transpose(dPdr) * dv
+  return v, dv
 end
 
 function molPot(mol)
@@ -179,21 +226,26 @@ function molPot(mol)
   # Get bond length (r)
   diff = mol[2] - mol[1]
   r    = sqrt(diff'diff)
+  rhat = diff / r
 
   # Map min-max
-  x = 2.0 * (r-ra)/(rb-ra) - 1.0
+  x  = 2.0 * (r-ra)/(rb-ra) - 1.0
+  dx = 2 / (rb - ra)
 
   # 1st layer
-  y = b1 + w1 * x
-  f = tanh.(y)
+  y  = b1 + w1 * x
+  f  = tanh.(y)
+  f2 = f'f
 
   # output layer
-  v = b2 + w2'f
+  v  = b2 + w2'f
+  dv = (w2'w1 - f2*w2'w1) * dx * rhat
 
   # remapping
-  v  = (v+1) * (vb-va)/2.0 + va
-  v += 0.560096850315234
-  return v
+  v    = (v+1) * (vb-va)/2.0 + va
+  v   += 0.560096850315234
+  dv .*= (vb-va)
+  return v, dv
 end
 
 
