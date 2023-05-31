@@ -315,5 +315,6 @@ function COCOdyn(dv, v, u, p, t)
  
   push!(p.time, t)
   push!(p.energy, energy)
+  push!(p.forces, forces)
 
 end

@@ -152,12 +152,12 @@ function readInVars(file)
   return w1,b1,w2,b2,w3,b3,rg,vg
 end
 
-function pairPot(pair)
+function pairPot(co1, co2)
   # For now, I will hardcode the input file
   inp = "/home/brian/Research/JMD/ogSRC/nn_ococ_w20.txt"
 
   # Get PIPs: P is a vector 
-  P, dPdr = getPIPs(pair...)
+  P, dPdr = getPIPs(co1..., co2...)
 
   # Get weight and biases:
   #   - weights are matricies (except w3)
@@ -253,5 +253,18 @@ function molPot(mol)
 end
 
 function HGNNdyn(dv, v, u, p, t)
+  E = 0.0
+  m = [i.m for i in p.bdys]
 
+  for i in p.mols
+    v, dv = molPot(u[i])
+    E    += v
+  end
+
+  for i in p.pars
+    v, dv = pairPot(u[i[1]], u[i[2]])
+    E    += v
+  end
+  
+  
 end
