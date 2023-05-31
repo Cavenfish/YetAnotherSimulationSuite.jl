@@ -266,5 +266,10 @@ function HGNNdyn(dv, v, u, p, t)
     E    += v
   end
   
-  
+
+  push!(p.time, t)
+  push!(p.energy, E)
+  #TODO:
+  # - implement method for unit conversions
+  # - implement method for apply rhats to dv's to get forces
 end
