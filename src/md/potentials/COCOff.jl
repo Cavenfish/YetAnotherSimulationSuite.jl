@@ -237,9 +237,10 @@ function diffDotSqrt(v2, v1)
   return (r, diff)
 end
 
-function COCOdyn(dv, v, u, m, t)
+function COCOdyn(dv, v, u, p, t)
   positions = u
 
+  m       = [i.m for i in p.bdys]
   epsilon = 11.230139012256362
   N       = length(positions)
   MorseF  = zero(u)
@@ -307,10 +308,12 @@ function COCOdyn(dv, v, u, m, t)
   Disp  = ( DispE,  DispF)
   Coul  = ( CoulE,  CoulF)
 
-
   forces = MorseF + ExchF + DispF + CoulF
   energy = MorseE + ExchE + DispE + CoulE
 
   dv .= forces ./ m
+ 
+  push!(p.time, t)
+  push!(p.energy, energy)
 
 end

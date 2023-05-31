@@ -252,6 +252,6 @@ function molPot(mol)
   return v, dv
 end
 
-function HGNNdyn(dv, v, u, m, t)
-  
+function HGNNdyn(dv, v, u, p, t)
+
 end

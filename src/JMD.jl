@@ -10,6 +10,7 @@ author: Brian C. Ferrari
 module JMD
 
 using StaticArrays
+using OrdinaryDiffEq
 
 include("./io.jl")
 include("./md/bodies.jl")
