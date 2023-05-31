@@ -1,8 +1,4 @@
-# using StaticArrays
-
 abstract type Particle end
-
-abstract type Molecule end
 
 #Atoms in simulation
 struct Atom <: Particle
@@ -12,8 +8,29 @@ struct Atom <: Particle
   q::Float64
 end
 
-#CO molecule
-struct CO <: Molecule
-  C::Particle
-  O::Particle
+
+function getPairs(bdys)
+
+  #distance from vector 
+  norm(v) = sqrt(v'v)
+
+  # Get distance matrix 
+  d = [[norm(j.r - i.r) for j in bdys] for i in bdys]
+
+  # Get molecules (only works for CO)
+  mols = findall.(e -> e < 2, d)
+
+  # Drop duplicates
+  mols = unique(mols)
+  N    = size(mols)[1]
+
+  # Make all pairs
+  pars = Pair[]
+  for i in 1:N
+    for j in i+1:N
+      push!(pars, Pair(mols[i],mols[j]))
+    end
+  end
+
+  return pars, mols
 end
