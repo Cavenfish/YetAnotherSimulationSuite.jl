@@ -5,7 +5,7 @@ struct Atom <: Particle
   r::SVector{3,Float64}
   v::SVector{3,Float64}
   m::Float64
-  q::Float64
+  s::Char
 end
 
 
