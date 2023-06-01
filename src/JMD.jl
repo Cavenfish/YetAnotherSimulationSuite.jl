@@ -9,6 +9,7 @@ author: Brian C. Ferrari
 
 module JMD
 
+using FFTW
 using StaticArrays
 using OrdinaryDiffEq
 

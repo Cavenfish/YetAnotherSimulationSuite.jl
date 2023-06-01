@@ -60,7 +60,7 @@ function write_xyz_traj(fileName::String, solu)
 
   for i in 1:T
     t = solu.t[i]
-    u = solu.u[i].x[2] #strange but seems needed
+    u = solu.u[i].x[2] # x[1] -> vel || x[2] -> pos
 
     println(f, N)
     println(f, "i=$i, time=$t")
