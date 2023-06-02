@@ -12,6 +12,9 @@ function vacf(vel, mas, dt; atms=false, norm=true)
       tmp  = forw .* conj(forw)
       back = ifft(tmp) ./ T
       c  .+= mas[i] * real(back[1:T-1])
+    end
+  end
+  
 
   #Diffusion Coefficient
   

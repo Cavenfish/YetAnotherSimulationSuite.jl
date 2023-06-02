@@ -10,13 +10,20 @@ author: Brian C. Ferrari
 module JMD
 
 using FFTW
+using Optim
 using StaticArrays
 using OrdinaryDiffEq
 
 include("./io.jl")
+
 include("./md/bodies.jl")
 include("./md/potentials/COCOff.jl")
 include("./md/potentials/HGNN.jl")
 include("./md/simulation.jl")
+
+include("./analysis/vacf.jl")
+include("./analysis/vibrations.jl")
+include("./analysis/optimizations.jl")
+
 
 end # module

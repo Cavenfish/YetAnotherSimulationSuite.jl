@@ -273,7 +273,6 @@ function HGNNdyn(a, v, u, p, t)
   F = zero(u)
   m = [i.m for i in p.bdys]
   r = u ./ 0.5291772083 # to Bohr
-
   
   # Get weight and biases:
   #   - weights are matricies (except w3)
@@ -292,10 +291,10 @@ function HGNNdyn(a, v, u, p, t)
   for i in p.pars
     c1,o1  = i[1]
     c2,o2  = i[2]
-    rhats  = getUnitVectors(r[i[1]], r[i[2]])
     v, dv  = pairPot(r[i[1]], r[i[2]], vars)
     E     += v
-    
+    rhats  = getUnitVectors(r[i[1]], r[i[2]])
+
     # rhat: o1 --> c1
     F[o1] += dv[1] * rhats[1]
     F[c1] -= dv[1] * rhats[1]
@@ -321,11 +320,41 @@ function HGNNdyn(a, v, u, p, t)
     F[c1] -= dv[6] * rhats[6]
   end
   
-  E = E  * 0.000124 # cm-1 to eV
-  F = F .* (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
+  E  *= 0.000124 # cm-1 to eV
+  F .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
 
   a .= F ./ m
   push!(p.time, t)
   push!(p.energy, E)
   push!(p.forces, F)
+end
+
+
+function HGNNpot(x0, p)
+
+  # initialize things
+  E = 0.0
+  r = x0 ./ 0.5291772083 # to Bohr
+  
+  # Get weight and biases:
+  #   - weights are matricies (except w3)
+  #   - biases are vectors (except b3)
+  # For now, I will hardcode the input file
+  inp  = "/home/brian/Research/JMD/ogSRC/nn_ococ_w20.txt"
+  vars = readInVars(inp)
+
+  for i in p.mols
+    v, dv, f = molPot(r[i])
+    E       += v
+  end
+
+  for i in p.pars
+    c1,o1  = i[1]
+    c2,o2  = i[2]
+    v, dv  = pairPot(r[i[1]], r[i[2]], vars)
+    E     += v
+  end
+  
+  E  *= 0.000124 # cm-1 to eV
+  return E
 end
