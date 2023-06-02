@@ -17,7 +17,7 @@ function getNewBdys(bdys, res)
   new = Atom[]
 
   for i in 1:N
-    a = 4*i - 3
+    a = i + ((i-1)*3)
     b = 3*i
     r = SVector{3}(opt[a:b])
     v = bdys[i].v
