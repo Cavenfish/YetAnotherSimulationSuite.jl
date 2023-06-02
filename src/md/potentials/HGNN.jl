@@ -330,7 +330,17 @@ function HGNNdyn(a, v, u, p, t)
 end
 
 
-function HGNNpot(x0, p)
+function HGNNpot(y0, p)
+
+  # I couldn't get Optim to work with a 2D vector
+  # so I had to flatten the vector before sending 
+  # it through. This worked but I then need to 
+  # flatten -> send -> unflatten. Which is such 
+  # a pain. I need a better solution.
+  x0 = Vector[]
+  for i in 1:3:length(y0)
+    push!(x0, y0[i:i+2])
+  end
 
   # initialize things
   E = 0.0

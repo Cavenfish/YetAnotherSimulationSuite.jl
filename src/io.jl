@@ -76,3 +76,22 @@ function write_xyz_traj(fileName::String, solu)
   end
   close(f)
 end 
+
+
+function write_xyz(fileName::String, bdys)
+  f = open(fileName, "w")
+  N = length(bdys)
+
+  println(f, N)
+  println(f, "Made by JMD")
+
+  for j in 1:N
+
+    s     = bdys[j].s
+    x,y,z = bdys[j].r
+
+    println(f, "$s   $x   $y   $z")
+  end 
+
+  close(f)
+end 
