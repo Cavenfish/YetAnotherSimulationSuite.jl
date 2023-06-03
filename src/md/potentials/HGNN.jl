@@ -250,20 +250,18 @@ function molPot(mol)
   return v, dv, F
 end
 
-function getUnitVectors(co1, co2)
+function getUnitVectors!(r, co1, co2)
   rhat(v) = v / sqrt(v'v)
 
   c1,o1 = co1
   c2,o2 = co2
 
-  r1 = rhat(c1 - o1)
-  r2 = rhat(c2 - o2)
-  r3 = rhat(c2 - o1)
-  r4 = rhat(o2 - c1)
-  r5 = rhat(o1 - o2)
-  r6 = rhat(c1 - c2)
-
-  return [r1, r2, r3, r4, r5, r6]
+  r[1,:] = rhat(c1 - o1)
+  r[2,:] = rhat(c2 - o2)
+  r[3,:] = rhat(c2 - o1)
+  r[4,:] = rhat(o2 - c1)
+  r[5,:] = rhat(o1 - o2)
+  r[6,:] = rhat(c1 - c2)
 end
 
 function HGNNdyn(a, v, u, p, t)
@@ -274,6 +272,9 @@ function HGNNdyn(a, v, u, p, t)
   m = [i.m for i in p.bdys]
   r = u ./ 0.5291772083 # to Bohr
   
+  # Pre-allocate for performance gains
+  rhats = zeros(Float64, 6, 3)
+  
   # Get weight and biases:
   #   - weights are matricies (except w3)
   #   - biases are vectors (except b3)
@@ -281,43 +282,44 @@ function HGNNdyn(a, v, u, p, t)
   inp  = "/home/bcferrari/Research/JMD/nn_ococ_w20.txt"
   vars = readInVars(inp)
 
-  Threads.@threads for i in p.mols
+  for i in p.mols
     v, dv, f = molPot(r[i])
     E       += v
     F[i[1]] += f
     F[i[2]] -= f
   end
 
-  Threads.@threads for i in p.pars
+  for i in p.pars
     c1,o1  = i[1]
     c2,o2  = i[2]
     v, dv  = pairPot(r[i[1]], r[i[2]], vars)
     E     += v
-    rhats  = getUnitVectors(r[i[1]], r[i[2]])
+    getUnitVectors!(rhats, r[i[1]], r[i[2]])
+    rhats .*= dv
 
     # rhat: o1 --> c1
-    F[o1] += dv[1] * rhats[1]
-    F[c1] -= dv[1] * rhats[1]
+    @views F[o1] += rhats[1,:]
+    @views F[c1] -= rhats[1,:]
     
     # rhat: o2 --> c2
-    F[o2] += dv[2] * rhats[2]
-    F[c2] -= dv[2] * rhats[2]
+    @views F[o2] += rhats[2,:]
+    @views F[c2] -= rhats[2,:]
 
     # rhat: o1 --> c2
-    F[o1] += dv[3] * rhats[3]
-    F[c2] -= dv[3] * rhats[3]
+    @views F[o1] += rhats[3,:]
+    @views F[c2] -= rhats[3,:]
 
     # rhat: c1 --> o2
-    F[c1] += dv[4] * rhats[4]
-    F[o2] -= dv[4] * rhats[4]
+    @views F[c1] += rhats[4,:]
+    @views F[o2] -= rhats[4,:]
 
     # rhat: o2 --> o1
-    F[o2] += dv[5] * rhats[5]
-    F[o1] -= dv[5] * rhats[5]
+    @views F[o2] += rhats[5,:]
+    @views F[o1] -= rhats[5,:]
 
     # rhat: c2 --> c1
-    F[c2] += dv[6] * rhats[6]
-    F[c1] -= dv[6] * rhats[6]
+    @views F[c2] += rhats[6,:]
+    @views F[c1] -= rhats[6,:]
   end
   
   E  *= 0.000124 # cm-1 to eV
