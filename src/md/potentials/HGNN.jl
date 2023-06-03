@@ -39,7 +39,7 @@ function g(i,j)
   return p
 end
 
-function getPIPs(c1,o1,c2,o2)
+function getPIPs!(P,dPdr,c1,o1,c2,o2)
 
   # Predefine possible g calls to prevent repeating math
   g1 = g(o1, c1)
@@ -50,24 +50,18 @@ function getPIPs(c1,o1,c2,o2)
   g6 = g(c1, c2)
 
   # See Chen et al. 2020 for written out PIPs
-  p1 = g1   + g2
-  p2 = g3   + g4
-  p3 = g1^2 + g2^2
-  p4 = g3^2 + g4^2
-  p5 = g1 * g3 + g4 * g2
-  p6 = g5
-  p7 = g6
+  P[1] = g1   + g2
+  P[2] = g3   + g4
+  P[3] = g1^2 + g2^2
+  P[4] = g3^2 + g4^2
+  P[5] = g1 * g3 + g4 * g2
+  P[6] = g5
+  P[7] = g6
 
   #This part is in their code but not the paper
-  p3 = sqrt(p3)
-  p4 = sqrt(p4)
-  p5 = sqrt(p5)
-
-  # The PIPs
-  P  = [p1, p2, p3, p4, p5, p6, p7]
-
-  # Make the dPdr matrix (see notes at top for info)
-  dPdr = zeros(Float64, 7, 6)
+  @views P[3] = sqrt(P[3])
+  @views P[4] = sqrt(P[4])
+  @views P[5] = sqrt(P[5])
 
   # Note: ita = 0.3
   dPdr[1,1] = -0.3*g1 # dp1/dr1
@@ -77,17 +71,16 @@ function getPIPs(c1,o1,c2,o2)
   dPdr[6,5] = -0.3*g5 # dp6/dr5
   dPdr[7,6] = -0.3*g6 # dp7/dr6
 
-  dPdr[3,1] = (-0.3 * g1^2) / p3 # dp3/dr1
-  dPdr[3,2] = (-0.3 * g2^2) / p3 # dp3/dr2 
-  dPdr[4,3] = (-0.3 * g3^2) / p4 # dp4/dr3 
-  dPdr[4,4] = (-0.3 * g4^2) / p4 # dp4/dr4 
+  dPdr[3,1] = (-0.3 * g1^2) / P[3] # dp3/dr1
+  dPdr[3,2] = (-0.3 * g2^2) / P[3] # dp3/dr2 
+  dPdr[4,3] = (-0.3 * g3^2) / P[4] # dp4/dr3 
+  dPdr[4,4] = (-0.3 * g4^2) / P[4] # dp4/dr4 
 
-  dPdr[5,1] = (-0.3*g1*g3) / (2*p5) # dp5/dr1
-  dPdr[5,2] = (-0.3*g4*g2) / (2*p5) # dp5/dr1
-  dPdr[5,3] = (-0.3*g1*g3) / (2*p5) # dp5/dr1
-  dPdr[5,4] = (-0.3*g4*g2) / (2*p5) # dp5/dr1
-  
-  return P, dPdr
+  dPdr[5,1] = (-0.3*g1*g3) / (2*P[5]) # dp5/dr1
+  dPdr[5,2] = (-0.3*g4*g2) / (2*P[5]) # dp5/dr1
+  dPdr[5,3] = (-0.3*g1*g3) / (2*P[5]) # dp5/dr1
+  dPdr[5,4] = (-0.3*g4*g2) / (2*P[5]) # dp5/dr1
+ 
 end
 
 function readInVars(file)
@@ -155,9 +148,10 @@ function readInVars(file)
   return w1,b1,w2,b2,w3,b3,rg,rgg,vg,vgg
 end
 
-function pairPot(co1, co2, vars)
+function pairPot(co1, co2, vars, dPdr, P)
   # Get PIPs: P is a vector 
-  P, dPdr = getPIPs(co1..., co2...)
+  # P, dPdr = getPIPs(co1..., co2...)
+  getPIPs!(P,dPdr,co1..., co2...)
 
   # Weights and biases 
   w1,b1,w2,b2,w3,b3,rg,rgg,vg,vgg = vars
@@ -274,6 +268,8 @@ function HGNNdyn(a, v, u, p, t)
   
   # Pre-allocate for performance gains
   rhats = zeros(Float64, 6, 3)
+  dPdr  = zeros(Float64, 7, 6)
+  P     = zeros(Float64, 7)
   
   # Get weight and biases:
   #   - weights are matricies (except w3)
@@ -292,9 +288,9 @@ function HGNNdyn(a, v, u, p, t)
   for i in p.pars
     c1,o1  = i[1]
     c2,o2  = i[2]
-    v, dv  = pairPot(r[i[1]], r[i[2]], vars)
+    v, dv  = pairPot(r[i[1]], r[i[2]], vars, dPdr, P)
     E     += v
-    getUnitVectors!(rhats, r[i[1]], r[i[2]])
+    @views getUnitVectors!(rhats, r[i[1]], r[i[2]])
     rhats .*= dv
 
     # rhat: o1 --> c1
