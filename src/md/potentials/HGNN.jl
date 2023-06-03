@@ -149,7 +149,10 @@ function readInVars(file)
   deleteat!(tmp, findall(e -> e == "", tmp))
   vg[:] = parse.(Float64, tmp)
 
-  return w1,b1,w2,b2,w3,b3,rg,vg
+  vgg = vg[2] - vg[1]
+  rgg = rg[2,:] - rg[1,:]
+
+  return w1,b1,w2,b2,w3,b3,rg,rgg,vg,vgg
 end
 
 function pairPot(co1, co2, vars)
@@ -157,11 +160,10 @@ function pairPot(co1, co2, vars)
   P, dPdr = getPIPs(co1..., co2...)
 
   # Weights and biases 
-  w1,b1,w2,b2,w3,b3,rg,vg = vars
+  w1,b1,w2,b2,w3,b3,rg,rgg,vg,vgg = vars
 
   # Map min-max
-  rgg  = rg[2,:] - rg[1,:]
-  P[:] = 2 * (P[:]-rg[1,:]) ./ rgg[:] .- 1
+  @views P[:] = 2 * (P[:]-rg[1,:]) ./ rgg[:] .- 1
 
   # 1st layer
   y = b1 + transpose(w1) * P
@@ -177,7 +179,6 @@ function pairPot(co1, co2, vars)
   dv = A * (w3 .* (1 .- f.^2))
 
   # remapping
-  vgg = vg[2] - vg[1]
   v   = vgg * (v+1)/2 + vg[1]
   dv  = (dv .* vgg) ./ rgg
 
@@ -229,7 +230,6 @@ function molPot(mol)
 
   # Map min-max
   x  = 2.0 * (r-ra)/(rb-ra) - 1.0
-  dx = 2 / (rb - ra)
 
   # 1st layer
   y  = b1 + w1 * x
