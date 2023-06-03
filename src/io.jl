@@ -42,7 +42,7 @@ function read_xyz(xyz)
     pos  = SVector{3}(pos)
     vel  = SVector{3}([0.0,0.0,0.0])
     mas  = amu[s[1]]
-    sym  = s[1]
+    sym  = s[1][1]
 
     atom = Atom(pos, vel, mas, sym)
     push!(set, atom)

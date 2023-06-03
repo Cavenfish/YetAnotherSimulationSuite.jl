@@ -278,17 +278,17 @@ function HGNNdyn(a, v, u, p, t)
   #   - weights are matricies (except w3)
   #   - biases are vectors (except b3)
   # For now, I will hardcode the input file
-  inp  = "/home/brian/Research/JMD/ogSRC/nn_ococ_w20.txt"
+  inp  = "/home/bcferrari/Research/JMD/nn_ococ_w20.txt"
   vars = readInVars(inp)
 
-  for i in p.mols
+  Threads.@threads for i in p.mols
     v, dv, f = molPot(r[i])
     E       += v
     F[i[1]] += f
     F[i[2]] -= f
   end
 
-  for i in p.pars
+  Threads.@threads for i in p.pars
     c1,o1  = i[1]
     c2,o2  = i[2]
     v, dv  = pairPot(r[i[1]], r[i[2]], vars)
