@@ -25,5 +25,4 @@ include("./analysis/vacf.jl")
 include("./analysis/vibrations.jl")
 include("./analysis/optimizations.jl")
 
-
 end # module

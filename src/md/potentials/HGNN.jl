@@ -275,7 +275,7 @@ function HGNNdyn(a, v, u, p, t)
   #   - weights are matricies (except w3)
   #   - biases are vectors (except b3)
   # For now, I will hardcode the input file
-  inp  = "/home/bcferrari/Research/JMD/nn_ococ_w20.txt"
+  inp  = "/home/brian/Research/JMD/ogSRC/nn_ococ_w20.txt"
   vars = readInVars(inp)
 
   for i in p.mols
@@ -327,21 +327,27 @@ function HGNNdyn(a, v, u, p, t)
   push!(p.forces, F)
 end
 
+function HGNNpot(F, G, y0, p)
 
-function HGNNpot(y0, p)
+  # Pre-allocate for performance gains
+  rhats = zeros(Float64, 6, 3)
+  dPdr  = zeros(Float64, 7, 6)
+  P     = zeros(Float64, 7)
 
   # I couldn't get Optim to work with a 2D vector
   # so I had to flatten the vector before sending 
   # it through. This worked but I then need to 
   # flatten -> send -> unflatten. Which is such 
   # a pain. I need a better solution.
-  x0 = Vector[]
+  x0     = Vector[]
+  forces = Vector[]
   for i in 1:3:length(y0)
     push!(x0, y0[i:i+2])
+    push!(forces, [0.0, 0.0, 0.0])
   end
 
   # initialize things
-  E = 0.0
+  energy = 0.0
   r = x0 ./ 0.5291772083 # to Bohr
   
   # Get weight and biases:
@@ -353,16 +359,52 @@ function HGNNpot(y0, p)
 
   for i in p.mols
     v, dv, f = molPot(r[i])
-    E       += v
+    energy  += v
+    forces[i[1]] += f
+    forces[i[2]] -= f
   end
 
   for i in p.pars
-    c1,o1  = i[1]
-    c2,o2  = i[2]
-    v, dv  = pairPot(r[i[1]], r[i[2]], vars)
-    E     += v
+    c1,o1   = i[1]
+    c2,o2   = i[2]
+    v, dv   = pairPot(r[i[1]], r[i[2]], vars, dPdr, P)
+    energy += v
+    @views getUnitVectors!(rhats, r[i[1]], r[i[2]])
+    rhats .*= dv
+
+    # rhat: o1 --> c1
+    @views forces[o1] += rhats[1,:]
+    @views forces[c1] -= rhats[1,:]
+    
+    # rhat: o2 --> c2
+    @views forces[o2] += rhats[2,:]
+    @views forces[c2] -= rhats[2,:]
+
+    # rhat: o1 --> c2
+    @views forces[o1] += rhats[3,:]
+    @views forces[c2] -= rhats[3,:]
+
+    # rhat: c1 --> o2
+    @views forces[c1] += rhats[4,:]
+    @views forces[o2] -= rhats[4,:]
+
+    # rhat: o2 --> o1
+    @views forces[o2] += rhats[5,:]
+    @views forces[o1] -= rhats[5,:]
+
+    # rhat: c2 --> c1
+    @views forces[c2] += rhats[6,:]
+    @views forces[c1] -= rhats[6,:]
   end
   
-  E  *= 0.000124 # cm-1 to eV
-  return E
+  energy  *= 0.000124 # cm-1 to eV
+  forces .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
+
+  if G != nothing
+    G = [j for i in forces for j in i] 
+  end
+
+  if F != nothing
+    return energy
+  end
 end

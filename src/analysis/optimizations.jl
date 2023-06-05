@@ -16,26 +16,26 @@ function getNewBdys(bdys, res)
   opt = res.minimizer
   new = Atom[]
 
-  for i in 1:N
-    a = i + ((i-1)*3)
-    b = 3*i
-    r = SVector{3}(opt[a:b])
-    v = bdys[i].v
-    m = bdys[i].m
-    s = bdys[i].s
+  for i in 1:3:N*3
+    j::UInt16 = (i+2) / 3
+
+    r = SVector{3}(opt[i:i+2])
+    v = bdys[j].v
+    m = bdys[j].m
+    s = bdys[j].s
     push!(new, Atom(r,v,m,s))
   end
 
   return new
 end
 
-function opt(EoM, algo, bdys)
+function opt(EoM, algo, bdys; kwargs...)
 
   x0         = prep_x0(bdys)
   pars, mols = getPairs(bdys)
   vars       = optVars(mols, pars)
-
-  res        = optimize(x -> EoM(x, vars), x0, algo)
+  optFunc    = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
+  res        = optimize(optFunc, x0, algo; kwargs...)
   optBdys    = getNewBdys(bdys, res)
 
   return optBdys

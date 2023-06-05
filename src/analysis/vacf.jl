@@ -15,8 +15,8 @@ function vacf(vel, mas, dt; atms=false, norm=true)
     end
   end
   
-
-  #Diffusion Coefficient
-  
-
+  if norm
+    c ./= c[0]
+  end
+  return c
 end
