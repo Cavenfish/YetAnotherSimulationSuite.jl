@@ -35,7 +35,8 @@ function opt(EoM, algo, bdys; kwargs...)
   pars, mols = getPairs(bdys)
   vars       = optVars(mols, pars)
   optFunc    = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
-  res        = optimize(optFunc, x0, algo; kwargs...)
+  convCrit   = Optim.Options(; kwargs...)
+  res        = optimize(optFunc, x0, algo, convCrit)
   optBdys    = getNewBdys(bdys, res)
 
   return optBdys

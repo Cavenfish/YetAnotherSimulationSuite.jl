@@ -407,6 +407,9 @@ function HGNNpot(F, G, y0, p)
     end
   end
 
+  println(y0[5])
+  println(G[5])
+
   if F != nothing
     return energy
   end
