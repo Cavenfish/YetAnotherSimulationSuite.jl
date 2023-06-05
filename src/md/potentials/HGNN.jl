@@ -401,7 +401,10 @@ function HGNNpot(F, G, y0, p)
   forces .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
 
   if G != nothing
-    G = [j for i in forces for j in i] 
+    tmp = [j for i in forces for j in i]
+    for i in 1:length(G)
+      G[i] = tmp[i]
+    end
   end
 
   if F != nothing
