@@ -17,7 +17,6 @@ mutable struct vacfOut
   I::Vector{Float64}
 end
 
-
 Hann( i,N) = sin((pi*i)/N)^2
 Welch(i,N) = 1 - ((i-N/2)/(N/2))^2
 HannM(i,N) = cos((pi*i)/(2*(N-1)))^2
@@ -95,4 +94,12 @@ function VDOS(inp)
   out.I = abs.(I)
 
   return out
+end
+
+function getVelMas(solu)
+  T   = length(solu.t)
+  vel = [solu.u[i].x[1] for i in 1:T]
+  mas = [i.m for i in solu.prob.p.bdys]
+  
+  return vel, mas
 end
