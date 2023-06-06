@@ -403,12 +403,9 @@ function HGNNpot(F, G, y0, p)
   if G != nothing
     tmp = [j for i in forces for j in i]
     for i in 1:length(G)
-      G[i] = tmp[i]
+      G[i] = -tmp[i]
     end
   end
-
-  println(y0[5])
-  println(G[5])
 
   if F != nothing
     return energy
