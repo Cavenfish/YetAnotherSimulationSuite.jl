@@ -14,6 +14,8 @@ using Optim
 using StaticArrays
 using OrdinaryDiffEq
 
+const fs = 0.09822694788464063 # 1fs in ASE time
+
 include("./io.jl")
 
 include("./md/bodies.jl")
