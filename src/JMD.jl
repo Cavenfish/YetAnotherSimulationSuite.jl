@@ -12,6 +12,7 @@ module JMD
 using FFTW
 using Optim
 using StaticArrays
+using Distributions
 using OrdinaryDiffEq
 
 const fs = 0.09822694788464063 # 1fs in ASE time

@@ -275,7 +275,7 @@ function HGNNdyn(a, du, u, p, t)
   #   - weights are matricies (except w3)
   #   - biases are vectors (except b3)
   # For now, I will hardcode the input file
-  inp  = "/home/brian/Research/JMD/ogSRC/nn_ococ_w20.txt"
+  inp  = "./nn_ococ_w20.txt"
   vars = readInVars(inp)
 
   for i in p.mols
@@ -321,11 +321,12 @@ function HGNNdyn(a, du, u, p, t)
   E  *= 0.000124 # cm-1 to eV
   F .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
 
+  
+  a .= F ./ m
   if typeof(p) == NVTsimu
     p.thermostat!(p.temp,a, du, m, p.thermoInps)
   end
 
-  a .= F ./ m
   push!(p.energy, E)
   push!(p.forces, F)
 end

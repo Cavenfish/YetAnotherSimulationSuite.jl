@@ -26,22 +26,27 @@ function Berendsen!(T, a, v, m, inp)
   if Ekin == 0.0
     a .+= inp.gamma .* v
   else
-    a  .+= inp.gamma * (inp.T / Tsim - 1) .* v
+    a .+= inp.gamma * (inp.T / Tsim - 1) .* v
   end
 end
 
 function Langevin!(T, a, v, m, inp)
+  N    = length(m)
   tmp  = (m/2) .* v 
   Ekin = tmp'tmp
   Tsim = Ekin / (inp.kB * (3 * N))
   push!(T, Tsim)
 
-  eta = 
+  G   = Normal(0.0,1.0)
+  eta = [rand(G, 3) for i in 1:N]
 
-  @. sigma = sqrt(2 * inp.gamma * m * inp.kB * inp.T) 
+  sigma = @. sqrt(2 * inp.gamma * m * inp.kB * inp.T) 
   
-  @. a1 = -inp.gamma * v / m
-  @. a2 = sigma / m * eta 
+  a1 = @. -inp.gamma * v
+  a2 = @. sigma / m * eta
+  
+
+  @. a += a1 + a2
 end
 
 
