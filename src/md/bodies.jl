@@ -1,13 +1,18 @@
-abstract type Particle end
 
 #Atoms in simulation
-struct Atom <: Particle
+struct Atom
   r::SVector{3,Float64}
   v::SVector{3,Float64}
   m::Float64
   s::Char
 end
 
+struct Molecule{N}
+  r::SMatrix{N,3,Float64}
+  v::SMatrix{N,3,Float64}
+  m::SVector{N,Float64}
+  name::String
+end
 
 function getPairs(bdys)
 

@@ -258,7 +258,7 @@ function getUnitVectors!(r, co1, co2)
   r[6,:] = rhat(c1 - c2)
 end
 
-function HGNNdyn(a, v, u, p, t)
+function HGNNdyn(a, du, u, p, t)
 
   # initialize things
   E = 0.0
@@ -321,8 +321,11 @@ function HGNNdyn(a, v, u, p, t)
   E  *= 0.000124 # cm-1 to eV
   F .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
 
+  if typeof(p) == NVTsimu
+    p.thermostat!(p.temp,a, du, m, p.thermoInps)
+  end
+
   a .= F ./ m
-  push!(p.time, t)
   push!(p.energy, E)
   push!(p.forces, F)
 end
