@@ -11,6 +11,11 @@ struct Langevin
   gamma::Float64
 end
 
+function Maxwell_Boltzmann(v, m, T, kB)
+  #Need to make this for Langevin
+end
+
+
 function Berendsen!(T, a, v, m, inp)
   N    = length(m)
   tmp  = (m/2) .* v 
@@ -31,6 +36,13 @@ function Langevin!(T, a, v, m, inp)
   Tsim = Ekin / (inp.kB * (3 * N))
   push!(T, Tsim)
 
-  a1 = -inp.gamma .* v ./ m
+  eta = 
+
+  @. sigma = sqrt(2 * inp.gamma * m * inp.kB * inp.T) 
+  
+  @. a1 = -inp.gamma * v / m
+  @. a2 = sigma / m * eta 
+end
+
 
   
