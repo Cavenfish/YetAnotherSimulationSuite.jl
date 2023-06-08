@@ -28,7 +28,7 @@ function readASExyz(xyz)
   return set
 end #read_ase_xyz
 
-function read_xyz(xyz)
+function readXyz(xyz)
   stream = readlines(xyz)
   amu    = Dict("C" => 12.011, "O" => 15.999)
   set    = Atom[]
@@ -51,7 +51,7 @@ function read_xyz(xyz)
   return set
 end
 
-function write_xyz_traj(fileName::String, solu)
+function writeXyzTraj(fileName::String, solu)
   f    = open(fileName, "w")
   bdys = solu.prob.p.bdys
   N    = length(bdys)
@@ -78,7 +78,7 @@ function write_xyz_traj(fileName::String, solu)
 end 
 
 
-function write_xyz(fileName::String, bdys)
+function writeXyz(fileName::String, bdys)
   f = open(fileName, "w")
   N = length(bdys)
 

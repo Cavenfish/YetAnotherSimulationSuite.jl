@@ -7,7 +7,7 @@ function CoM(bdys)
 end
 
 
-function vib_excite!(mol, eignvec, E)
+function vibExcite!(mol, eignvec, E)
   v = sqrt.((2*E) ./ mol.m) # column vector of length of atoms in mol
 
   mol.v .+= v .* eignvec

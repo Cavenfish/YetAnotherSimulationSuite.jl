@@ -18,7 +18,7 @@ struct NVTsimu
   thermoInps
 end
 
-function run_NVE(EoM, tspan, dt, bdys; kwargs...)
+function runNVE(EoM, tspan, dt, bdys; kwargs...)
   pos   = [i.r for i in bdys]
   vel   = [i.v for i in bdys]
 
@@ -31,7 +31,7 @@ function run_NVE(EoM, tspan, dt, bdys; kwargs...)
   return solu
 end
 
-function run_NVT(EoM, tspan, dt, bdys, thermostat, thermoInps; kwargs...)
+function runNVT(EoM, tspan, dt, bdys, thermostat, thermoInps; kwargs...)
   pos   = [i.r for i in bdys]
   vel   = [i.v for i in bdys]
 

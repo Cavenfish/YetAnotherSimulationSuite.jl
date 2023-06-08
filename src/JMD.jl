@@ -9,13 +9,14 @@ author: Brian C. Ferrari
 
 module JMD
 
+using JLD2
 using FFTW
 using Optim
 using StaticArrays
 using Distributions
 using OrdinaryDiffEq
 
-const fs = 0.09822694788464063 # 1fs in ASE time
+const fs   = 0.09822694788464063 # 1fs in ASE time
 
 include("./io.jl")
 include("./helpers.jl")
@@ -30,4 +31,6 @@ include("./analysis/vacf.jl")
 include("./analysis/vibrations.jl")
 include("./analysis/optimizations.jl")
 
+
+include("./md/potentials/params/loadVars.jl")
 end # module
