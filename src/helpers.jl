@@ -1,4 +1,17 @@
 
+function getLastFrame(solu)
+  n = length(solu.prob.p.bdys)
+  
+  new = Atom[]
+  for i in 1:n
+    r = solu.u[end].x[2][i]
+    v = solu.u[end].x[1][i]
+    m = solu.prob.p.bdys[i].m
+    s = solu.prob.p.bdys[i].s
+    push!(new, Atom(r, v, m, s))
+  end
+  return new
+end
 
 function CoM(bdys)
   M = sum([i.m for i in bdys])
