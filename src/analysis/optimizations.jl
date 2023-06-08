@@ -5,7 +5,7 @@ struct optVars
 end
 
 
-function prep_x0(bdys)
+function prepX0(bdys)
   r  = [i.r for i in bdys]
   x0 = [j for i in r for j in i]
   return x0
@@ -31,7 +31,7 @@ end
 
 function opt(EoM, algo, bdys; kwargs...)
 
-  x0         = prep_x0(bdys)
+  x0         = prepX0(bdys)
   pars, mols = getPairs(bdys)
   vars       = optVars(mols, pars)
   optFunc    = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))

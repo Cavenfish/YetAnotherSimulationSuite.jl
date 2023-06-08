@@ -37,7 +37,10 @@ function Langevin!(T, a, v, m, inp)
   Tsim = Ekin / (inp.kB * (3 * N))
   push!(T, Tsim)
 
-  G   = Normal(0.0,1.0)
+  M   = sum(m) / N
+  mu  = sqrt(3 * inp.kB * inp.T / M)
+  sig = sqrt(inp.kB * inp.T / M)
+  G   = Normal(mu, sig)
   eta = [rand(G, 3) for i in 1:N]
 
   sigma = @. sqrt(2 * inp.gamma * m * inp.kB * inp.T) 

@@ -312,9 +312,92 @@ function COCOdyn(dv, v, u, p, t)
   energy = MorseE + ExchE + DispE + CoulE
 
   dv .= forces ./ m
+  if typeof(p) == NVTsimu
+    p.thermostat!(p.temp,dv, v, m, p.thermoInps)
+  end
  
-  push!(p.time, t)
   push!(p.energy, energy)
   push!(p.forces, forces)
 
+end
+
+
+function COCOpot(F, G, y0, p)
+  x0     = Vector[]
+  forces = Vector[]
+  for i in 1:3:length(y0)
+    push!(x0, y0[i:i+2])
+    push!(forces, [0.0, 0.0, 0.0])
+  end
+
+  positions = x0
+
+  epsilon = 11.230139012256362
+  N       = length(positions)
+  energy  = 0.0
+
+  for i in 1:2:N
+    posi0 = positions[i]
+    posi1 = positions[i+1]
+    ri1i0 = diffDotSqrt(posi1, posi0)
+
+    #Calculate Morse
+    E, F           = calcMorse(ri1i0...)
+    energy        += E
+    forces[i]   = forces[i]   - F
+    forces[i+1] = forces[i+1] + F
+
+    for j in i+2:2:N
+      posj0 = positions[j]
+      posj1 = positions[j+1]
+
+      rj0i0 = diffDotSqrt(posj0, posi0)
+      rj1i1 = diffDotSqrt(posj1, posi1)
+      rj0i1 = diffDotSqrt(posj0, posi1)
+      rj1i0 = diffDotSqrt(posj1, posi0)
+
+      #Calculate Dispersion
+      E, Fcc, Foo, Fco, Foc = calcDisp(rj0i0, rj1i1, rj0i1, rj1i0)
+      energy                += E
+      forces[i]           = forces[i]   - (Fcc + Foc)
+      forces[i+1]         = forces[i+1] - (Foo + Fco)
+      forces[j]           = forces[j]   + (Fcc + Fco)
+      forces[j+1]         = forces[j+1] + (Foo + Foc)
+
+      #Calculate Exchange
+      E, Fcc, Foo, Fco, Foc = calcExch(rj0i0, rj1i1, rj0i1, rj1i0)
+      energy                += E
+      forces[i]           = forces[i]   - (Fcc + Foc)
+      forces[i+1]         = forces[i+1] - (Foo + Fco)
+      forces[j]           = forces[j]   + (Fcc + Fco)
+      forces[j+1]         = forces[j+1] + (Foo + Foc)
+
+      #Calculate Coulomb
+      E, Fi0, Fi1, Fj0, Fj1 = calcCoul(posi0, posi1, posj0, posj1,
+                                       rj0i0, rj1i1, rj0i1, rj1i0,
+                                       ri1i0)
+      energy                += E
+      forces[i]           = forces[i]   + Fi0
+      forces[i+1]         = forces[i+1] + Fi1
+      forces[j]           = forces[j]   + Fj0
+      forces[j+1]         = forces[j+1] + Fj1
+
+    end # j loop
+  end # i loop
+
+  # In order to normalize the minimal morse potential to zero,
+  # the following energy will be added to change the zero point
+  # of all intramolecular interactions.
+  energy += epsilon * N / 2.0
+
+  if G != nothing
+    tmp = [j for i in forces for j in i]
+    for i in 1:length(G)
+      G[i] = -tmp[i]
+    end
+  end
+
+  if F != nothing
+    return energy
+  end
 end

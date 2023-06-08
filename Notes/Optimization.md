@@ -1,6 +1,8 @@
 
 The current geometry optimization process is a bit convoluted but it works for some algorithms. First I flatten the positions matrix into a vector, which once received by the potential calculator is "reinflated" (I make a matrix again).  Pairs and molecules are determined from the initial input and remain static during the optimization. 
 
+Optimizations are **VERY** slow, this is for both MvHFF and HGNN. 
+
 
 Algorithms that work:
  1. LBFGS
