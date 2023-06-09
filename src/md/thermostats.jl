@@ -56,7 +56,7 @@ struct BDP
   T::Float64
   kB::Float64
   dt::Float64
-  tau::Float64
+  tau::Float64 #0.075 works well for CO
 end
 
 function BDP!(T, a, v, m, inp)
