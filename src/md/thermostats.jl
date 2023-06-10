@@ -4,9 +4,11 @@ function Maxwell_Boltzmann(v, m, T, kB)
 end
 
 function getTemp(m, v, kB, N)
-  tmp  = (m) .* v # Leave out the 1/2 to get 2Ekin for T calc
-  Ekin = tmp'tmp
-  Tsim = Ekin / (kB * (3 * N))
+  # Leave out the 1/2 to get 2Ekin for T calc
+  Nf   = 3N - 3
+  v2   = [i'i for i in v]
+  Ekin = sum(m .* v2)
+  Tsim = Ekin / (kB * Nf)
   return Tsim
 end
 
@@ -56,7 +58,7 @@ struct BDP
   T::Float64
   kB::Float64
   dt::Float64
-  tau::Float64 #0.075 works well for CO
+  tau::Float64
 end
 
 function BDP!(T, a, v, m, inp)
@@ -64,31 +66,38 @@ function BDP!(T, a, v, m, inp)
   Tsim = getTemp(m, v, inp.kB, N)
   push!(T, Tsim)
 
-  if Tsim == 0.0
-    return
-  end
+  # if Tsim == 0.0
+  #   return
+  # end
 
-  n = Normal(0.0,1.0)
-  if (3N-1)%2 == 0
-    alpha = (3N - 1)/2
+  Nf = (3N) - 3
+  n  = Normal(0.0,1.0)
+  R1 = rand(n)
+  if (Nf-1)%2 == 0
+    alpha = (Nf - 1)/2
     G     = Gamma(alpha, 1)
+    R2    = 2 .* rand(G)
   else
-    alpha = (3N - 2)/2
+    alpha = (Nf - 2)/2
     G     = Gamma(alpha, 1)
+    R2    = 2 .* rand(G) .+ (rand(n) .^2)
   end
 
-  R1 = rand(n, N) .^2
-  R2 = rand(G, N)
+  if inp.tau > 0.1
+    c1 = exp(-1/inp.tau)
+  else
+    c1 = 0.0
+  end
 
-  tmp  = (m/2) .* v 
-  K    = (tmp'tmp) / N
-  Kbar = 3N * inp.kB * inp.T
+  v2    = [i'i for i in v]
+  K     = sum(0.5 .* m .* v2)
+  sigma = 0.5 * Nf * inp.kB * inp.T
 
-  c1 = exp(- inp.dt / inp.tau)
-  c2 = Kbar / (3N * K)
-  c3 = exp(- inp.dt / (2*inp.tau))
+  Knew   = @. ( 
+                K + (1-c1) * (sigma * (R2 + R1^2) / Nf - K) + 
+                2 * R1 * sqrt(K * sigma / Nf * (1-c1) * c1)
+              )
+  alpha2 = @. sqrt(Knew / K)
 
-  alpha2 = @. c1 + c2 * (1-c1) * (R1 + R2) + 2*c3 * sqrt(c2 * (1-c1) * R1)
-
-  @. v *= sqrt(alpha2) / m
+  @. v *= alpha2
 end
