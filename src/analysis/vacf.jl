@@ -33,9 +33,7 @@ function padZeros!(out, f)
   z = zeros(N*f)
 
   @views z[1:N] = out.C
-  println(length(z))
   out.C = z
-  println(length(out.C))
 end
 
 function mirror!(out)
@@ -78,12 +76,10 @@ function VDOS(inp)
   vacf!(inp, out)
   window!(out, inp.win)
   padZeros!(out, inp.pad)
-  println(length(out.C))
   
   if inp.mir
     mirror!(out)
   end
-  println(length(out.C))
 
   k = 29979245800.0 # Divide by this to convert from Hz to cm^-1
   N = length(out.C)
