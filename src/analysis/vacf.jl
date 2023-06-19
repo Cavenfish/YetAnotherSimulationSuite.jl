@@ -21,25 +21,25 @@ Hann( i,N) = sin((pi*i)/N)^2
 Welch(i,N) = 1 - ((i-N/2)/(N/2))^2
 HannM(i,N) = cos((pi*i)/(2*(N-1)))^2
 
-function window!(c, W)
-  N = length(c)
+function window!(out, W)
+  N = length(out.C)
+  w = [W(i,N) for i in 0:N-1]
 
-  for i in 1:N
-    c[i] *= W(i,N)
-  end
+  out.C .*= w
 end
 
-function padZeros!(c, f)
-  N = length(c)
+function padZeros!(out, f)
+  N = length(out.C)
   z = zeros(N*f)
 
-  @views z[1:N] = c
-  
-  c = z
+  @views z[1:N] = out.C
+  println(length(z))
+  out.C = z
+  println(length(out.C))
 end
 
-function mirror!(c)
-  c = [reverse(c); c[2:end]]
+function mirror!(out)
+  out.C = [reverse(out.C); out.C[2:end]]
 end
 
 function vacf!(inp, out; atms=false)
@@ -65,6 +65,8 @@ function vacf!(inp, out; atms=false)
   
   if inp.norm
     out.C = out.c ./ out.c[1]
+  else
+    out.C = out.c
   end
 
 end
@@ -74,12 +76,14 @@ function VDOS(inp)
   out = vacfOut(dum,dum,0.0,dum,dum)
 
   vacf!(inp, out)
-  window!(out.C, inp.win)
-  padZeros!(out.C, inp.pad)
+  window!(out, inp.win)
+  padZeros!(out, inp.pad)
+  println(length(out.C))
   
   if inp.mir
-    mirror!(out.C)
+    mirror!(out)
   end
+  println(length(out.C))
 
   k = 29979245800.0 # Divide by this to convert from Hz to cm^-1
   N = length(out.C)

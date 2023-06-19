@@ -66,9 +66,9 @@ function BDP!(T, a, v, m, inp)
   Tsim = getTemp(m, v, inp.kB, N)
   push!(T, Tsim)
 
-  # if Tsim == 0.0
-  #   return
-  # end
+  if Tsim == 0.0
+    return
+  end
 
   Nf = (3N) - 3
   n  = Normal(0.0,1.0)
