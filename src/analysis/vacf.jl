@@ -40,14 +40,18 @@ function mirror!(out)
   out.C = [reverse(out.C); out.C[2:end]]
 end
 
-function vacf!(inp, out; atms=false)
+function vacf!(inp, out; atms=nothing)
   T = length(inp.vel)       # Total timesteps 
   N = length(inp.vel[1])    # Total number of atoms
   D = length(inp.vel[1][1]) # Total number of dimensions
   
   out.c = zeros(Float64, T-1)
+
+  if atms == nothing
+    atms = 1:N
+  end
   
-  for i in 1:N
+  for i in atms
     for j in 1:D
       data = [a[i][j] for a in inp.vel]
       forw = fft(data)
@@ -69,11 +73,11 @@ function vacf!(inp, out; atms=false)
 
 end
 
-function VDOS(inp)
+function VDOS(inp; atms=nothing)
   dum = zeros(10)
   out = vacfOut(dum,dum,0.0,dum,dum)
 
-  vacf!(inp, out)
+  vacf!(inp, out; atms=atms)
   window!(out, inp.win)
   padZeros!(out, inp.pad)
   

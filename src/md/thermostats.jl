@@ -57,7 +57,6 @@ end
 struct BDP
   T::Float64
   kB::Float64
-  dt::Float64
   tau::Float64
 end
 

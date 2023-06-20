@@ -22,6 +22,17 @@ function runNVE(EoM, tspan, dt, bdys; kwargs...)
   pos   = [i.r for i in bdys]
   vel   = [i.v for i in bdys]
 
+  #Consider swapping to this format
+  #Might be much nicer to work with
+  #-------------
+  # N = length(pos)
+  # p = zeros((3,N))
+  # v = zeros((3,N))
+  # for i in 1:N
+  #   @views p[:,i] = pos[i][:]
+  #   @views v[:,i] = vel[i][:]
+  # end    
+
   pars, mols = getPairs(bdys)
   simu       = NVEsimu(bdys, pars, mols, [], [])
 
