@@ -13,8 +13,10 @@ using JLD2
 using FFTW
 using Optim
 using StaticArrays
+using LinearAlgebra
 using Distributions
 using OrdinaryDiffEq
+using FiniteDifferences
 
 const fs   = 0.09822694788464063 # 1fs in ASE time
 const kB   = 8.617333262e-5 # eV / K

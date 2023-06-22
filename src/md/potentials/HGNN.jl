@@ -80,9 +80,6 @@ function getPIPs!(P,dPdr,c1,o1,c2,o2)
   dPdr[5,2] = (-0.3*g4*g2) / (2*P[5]) # dp5/dr1
   dPdr[5,3] = (-0.3*g1*g3) / (2*P[5]) # dp5/dr1
   dPdr[5,4] = (-0.3*g4*g2) / (2*P[5]) # dp5/dr1
- 
-  # P    = SVector{7}(P)
-  # dPdr = SMatrix{7,6}(dPdr) 
 end
 
 function pairPot(co1, co2, vars, dPdr, P)
@@ -98,7 +95,13 @@ function pairPot(co1, co2, vars, dPdr, P)
   # 1st layer
   y = b1 + transpose(w1) * P
   f = tanh.(y)
-  A = w1 * (w2 .* (1 .- f.^2))
+
+  # A = w1 * @. (w2 * (1 - f^2))
+  # this seems to help speed
+  # see above for what it does
+  A = zeros(Float64, 7, 45)
+  mul!(A, w1, @. (w2 * (1 - f^2)))
+
 
   # 2nd layer
   y = b2 + transpose(w2) * f
@@ -230,9 +233,9 @@ end
 function HGNNpot(F, G, y0, p)
 
   # Pre-allocate for performance gains
-  rhats = zeros(Float64, 6, 3)
-  dPdr  = zeros(Float64, 7, 6)
-  P     = zeros(Float64, 7)
+  rhats = SizedMatrix{6,3}(zeros(Float64, 6, 3))
+  dPdr  = SizedMatrix{7,6}(zeros(Float64, 7, 6))
+  P     = SizedVector{7}(zeros(Float64, 7))
 
   # I couldn't get Optim to work with a 2D vector
   # so I had to flatten the vector before sending 
