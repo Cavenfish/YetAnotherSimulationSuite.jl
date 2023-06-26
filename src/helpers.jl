@@ -24,5 +24,3 @@ function vibExcite!(mol, eignvec, E)
 
   mol.v .+= v .* eignvec
 end
-
-

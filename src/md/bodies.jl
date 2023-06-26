@@ -1,8 +1,8 @@
 
 #Atoms in simulation
 struct Atom
-  r::SVector{3,Float64}
-  v::SVector{3,Float64}
+  r::Vector{Float64}
+  v::Vector{Float64}
   m::Float64
   s::Char
 end

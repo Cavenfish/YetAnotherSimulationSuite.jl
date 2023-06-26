@@ -24,7 +24,8 @@ function getHarmonicFreqs(EoM!, bdys; kwargs...)
     return G
   end
 
-  H = jacobian(central_fdm(6,1), x -> f(x, vars), x0)[1]
+  fdm = central_fdm(9,1)
+  H   = jacobian(fdm, x -> f(x, vars), x0)[1]
 
   mH    = m .* H
   freqs = eigvals(mH)
@@ -33,5 +34,4 @@ function getHarmonicFreqs(EoM!, bdys; kwargs...)
 
   return freqs, modes
 end
-
 

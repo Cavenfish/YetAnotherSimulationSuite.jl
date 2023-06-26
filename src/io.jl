@@ -10,15 +10,15 @@ function readASExyz(xyz)
 
   for i in range(1,N)
     props = parse.(Float64, sys[i][2:end])
-    pos   = SVector{3}(props[1:3])
+    pos   = Vector(props[1:3])
     s     = sys[i][1]
 
     if occursin("masses", hed)
       mas = props[4]
-      vel = SVector{3}(props[5:7] ./ mas)
+      vel = Vector(props[5:7] ./ mas)
     else
       mas = amu[s]
-      vel = SVector{3}(props[4:6] ./ mas)
+      vel = Vector(props[4:6] ./ mas)
     end #if-else
 
     particle = Atom(pos, vel, mas, s[1])
@@ -39,8 +39,8 @@ function readXyz(xyz)
     s = deleteat!(s, findall(e -> e == "", s))
 
     pos  = parse.(Float64, s[2:end])
-    pos  = SVector{3}(pos)
-    vel  = SVector{3}([0.0,0.0,0.0])
+    pos  = Vector(pos)
+    vel  = Vector([0.0,0.0,0.0])
     mas  = amu[s[1]]
     sym  = s[1][1]
 

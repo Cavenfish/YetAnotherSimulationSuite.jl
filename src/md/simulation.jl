@@ -19,8 +19,8 @@ struct NVTsimu
 end
 
 function runNVE(EoM, tspan, dt, bdys; kwargs...)
-  pos   = [i.r for i in bdys]
-  vel   = [i.v for i in bdys]
+  pos   = [SVector{3}(i.r) for i in bdys]
+  vel   = [SVector{3}(i.v) for i in bdys]
 
   #Consider swapping to this format
   #Might be much nicer to work with
@@ -43,8 +43,8 @@ function runNVE(EoM, tspan, dt, bdys; kwargs...)
 end
 
 function runNVT(EoM, tspan, dt, bdys, thermostat, thermoInps; kwargs...)
-  pos   = [i.r for i in bdys]
-  vel   = [i.v for i in bdys]
+  pos   = [SVector{3}(i.r) for i in bdys]
+  vel   = [SVector{3}(i.v) for i in bdys]
 
   pars, mols = getPairs(bdys)
   simu       = NVTsimu(bdys, pars, mols, [], [], [], thermostat, thermoInps)
