@@ -34,6 +34,7 @@ include("./analysis/vacf.jl")
 include("./analysis/vibrations.jl")
 include("./analysis/optimizations.jl")
 
+include("./building/hitAndStick.jl")
 
 include("./md/potentials/params/loadVars.jl")
 end # module

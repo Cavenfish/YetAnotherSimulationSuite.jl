@@ -11,6 +11,13 @@ function prepX0(bdys)
   return x0
 end
 
+function prep4pot(bdys)
+  x0         = prepX0(bdys)
+  pars, mols = getPairs(bdys)
+  vars       = optVars(mols, pars)
+  return x0, vars
+end
+
 function getNewBdys(bdys, res)
   N   = length(bdys)
   opt = res.minimizer

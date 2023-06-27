@@ -1,6 +1,6 @@
 
 #Atoms in simulation
-struct Atom
+mutable struct Atom
   r::Vector{Float64}
   v::Vector{Float64}
   m::Float64
