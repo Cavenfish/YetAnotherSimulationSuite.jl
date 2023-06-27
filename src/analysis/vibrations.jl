@@ -24,7 +24,7 @@ function getHarmonicFreqs(EoM!, bdys; kwargs...)
     return G
   end
 
-  fdm = central_fdm(9,1)
+  fdm = central_fdm(7,1)
   H   = jacobian(fdm, x -> f(x, vars), x0)[1]
 
   mH    = m .* H
@@ -34,4 +34,32 @@ function getHarmonicFreqs(EoM!, bdys; kwargs...)
 
   return freqs, modes
 end
+
+function animateMode(bdys, mode, fileName)
+  f = open(fileName, "w")
+  N = length(bdys)
+
+  m = Vector[]
+  for i in 1:3:length(mode)
+    push!(m, mode[i:i+2])
+  end
+
+  for i in 1:3
+    for j in 0:pi/100:2*pi
+      
+      println(f, N)
+      println(f, "Made by JMD")
+
+      for k in 1:N
+        
+        s     = bdys[k].s
+        x,y,z = bdys[k].r .+ sin(j) .* m[k]
+
+        println(f, "$s   $x   $y   $z")
+      end
+    end
+  end
+  close(f)
+end
+
 
