@@ -33,6 +33,7 @@ include("./md/thermostats.jl")
 include("./analysis/vacf.jl")
 include("./analysis/vibrations.jl")
 include("./analysis/optimizations.jl")
+include("./analysis/structral.jl")
 
 include("./building/hitAndStick.jl")
 

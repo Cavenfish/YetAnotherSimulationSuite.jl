@@ -28,6 +28,7 @@ function getHarmonicFreqs(EoM!, bdys; kwargs...)
   H   = jacobian(fdm, x -> f(x, vars), x0)[1]
 
   mH    = m .* H
+  mH    = Symmetric(mH) #Ensures eigvecs are not imaginary
   freqs = eigvals(mH)
   modes = eigvecs(mH)
   freqs = c * sqrt.(Complex.(freqs))

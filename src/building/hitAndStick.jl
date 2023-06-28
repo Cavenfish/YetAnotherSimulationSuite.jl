@@ -84,5 +84,6 @@ function hitAndStick(inp)
   #Run NVE
 
   #Run NVT
+  end
 
 end
