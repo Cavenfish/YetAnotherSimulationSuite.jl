@@ -1,4 +1,4 @@
-
+export getHarmonicFreqs, animateMode, getModePES
 
 function getHarmonicFreqs(EoM!, bdys; kwargs...)
   _hbar = 1.0545718001391127e-34

@@ -6,6 +6,7 @@ struct HnS
   xyz::String
   mol::String
   save::String
+  thermo
   thermoInps
 end
 
@@ -54,24 +55,29 @@ end
 function giveKE!(mol, com, KE)
   r  = com - CoM(mol)
   r /= norm(r)
+  ke = KE * 8.6173e-5 #convert Kelvin to eV
+
+  for i in mol
+    i.v += sqrt(2ke / i.m) .* r
+  end
 end
 
-function hitAndStick(inp)
+function hitAndStick(EoM, inp)
 
   #Initialize System at Center
   bdys = readXyz(inp.xyz)
   mol  = readXyz(inp.mol)
   com  = CoM(bdys)
-  N    = inp.size - length(bdys)
 
-  for i in 1:N
+  while length(bdys) < inp.size
+    #println(length(bdys))
 
     #Get furthest molecule from CoM
-    d = maximum([norm(i.r-com) for i in bdys])
+    d = maximum([norm(i.r-com) for i in bdys]) + 8
 
     #Randomly rotate incoming molecule
     randRotate!(mol) 
-    #If i dont rest the rotations are cummulative
+    #If i dont reset mol, then the rotations are cummulative
     # is this more random??
 
     #Spawn New Molecule
@@ -80,10 +86,20 @@ function hitAndStick(inp)
     #Update velocities
     giveKE!(new, com, inp.KE)
 
+    #Add new to bdys
+    push!(bdys, new...)
+    
+    #Run NVE
+    time = inp.htime*1000*fs
+    solu = runNVE(EoM, (0, time), fs, bdys)
+    bdys = getLastFrame(solu)
+    
+    #Run NVT
+    time = inp.stime*1000*fs
+    solu = runNVT(EoM, (0, time), fs, bdys, inp.thermo, inp.thermoInps)
+    bdys = getLastFrame(solu)
 
-  #Run NVE
-
-  #Run NVT
   end
 
+  writeXyz(inp.save, bdys)
 end
