@@ -67,10 +67,10 @@ function hitAndStick(EoM, inp)
   #Initialize System at Center
   bdys = readXyz(inp.xyz)
   mol  = readXyz(inp.mol)
-  com  = CoM(bdys)
 
   while length(bdys) < inp.size
-    #println(length(bdys))
+    #Get current center of mass
+    com = CoM(bdys)
 
     #Get furthest molecule from CoM
     d = maximum([norm(i.r-com) for i in bdys]) + 8
@@ -90,12 +90,12 @@ function hitAndStick(EoM, inp)
     push!(bdys, new...)
     
     #Run NVE
-    time = inp.htime*1000*fs
+    time = inp.htime * ps
     solu = runNVE(EoM, (0, time), fs, bdys)
     bdys = getLastFrame(solu)
     
     #Run NVT
-    time = inp.stime*1000*fs
+    time = inp.stime * ps
     solu = runNVT(EoM, (0, time), fs, bdys, inp.thermo, inp.thermoInps)
     bdys = getLastFrame(solu)
 

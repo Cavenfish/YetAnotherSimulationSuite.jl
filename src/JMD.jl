@@ -19,6 +19,7 @@ using OrdinaryDiffEq
 using FiniteDifferences
 
 const fs   = 0.09822694788464063 # 1fs in ASE time
+const ps   = 1000 * fs
 const kB   = 8.617333262e-5 # eV / K
 
 include("./io.jl")
