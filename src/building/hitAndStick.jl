@@ -62,7 +62,7 @@ function giveKE!(mol, com, KE)
   end
 end
 
-function hitAndStick(EoM, inp)
+function hitAndStick(EoM, inp; callback=nothing)
 
   #Initialize System at Center
   bdys = readXyz(inp.xyz)
@@ -98,6 +98,11 @@ function hitAndStick(EoM, inp)
     time = inp.stime * ps
     solu = runNVT(EoM, (0, time), fs, bdys, inp.thermo, inp.thermoInps)
     bdys = getLastFrame(solu)
+
+    #If needed, execute callback function
+    if callback != nothing
+      callback(bdys)
+    end
 
   end
 
