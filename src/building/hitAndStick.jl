@@ -44,8 +44,10 @@ function randRotate!(mol)
   end
 end
 
-function spawnMol(mol, d, com)
-  R     = d * randVector() + com
+function spawnMol(mol, bdys, com)
+  v     = randVector()
+  d     = maximum([dot(i.r-com, v) for i in bdys]) + 8
+  R     = d * v + com
   spawn = Atom[]
 
   for i in mol
@@ -76,16 +78,13 @@ function hitAndStick(EoM, inp; callback=nothing)
     #Get current center of mass
     com = CoM(bdys)
 
-    #Get furthest molecule from CoM
-    d = maximum([norm(i.r-com) for i in bdys]) + 8
-
     #Randomly rotate incoming molecule
     randRotate!(mol) 
     #If i dont reset mol, then the rotations are cummulative
     # is this more random??
 
     #Spawn New Molecule
-    new = spawnMol(mol, d, com)
+    new = spawnMol(mol, bdys, com)
 
     #Update velocities
     giveKE!(new, com, inp.KE)
