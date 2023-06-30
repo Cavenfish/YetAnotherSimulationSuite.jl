@@ -11,8 +11,9 @@ include("../src/JMD.jl")
   # vars = JMD.readInVars("../src/md/potentials/params/nn_ococ_w20.txt")
   dPdr  = zeros(Float64, 7, 6)
   P     = zeros(Float64, 7)
+  A     = zeros(Float64, 7, 45)
 
-  vint, dv = JMD.pairPot([c1,o1], [c2,o2], JMD.hgnnPairVars, dPdr, P)
+  vint, dv = JMD.pairPot([c1,o1], [c2,o2], JMD.hgnnPairVars, dPdr, P, A)
   vco1, dvco1, f = JMD.molPot([c1,o1], JMD.hgnnMolVars)
   vco2, dvco2, f = JMD.molPot([c2,o2], JMD.hgnnMolVars)
 

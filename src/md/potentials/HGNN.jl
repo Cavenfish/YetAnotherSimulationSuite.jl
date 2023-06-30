@@ -34,7 +34,7 @@ Essentially:
 function g(i,j)
   ita  = 0.3
   diff = j - i
-  r    = sqrt(diff'diff)
+  r    = sqrt(dot(diff,diff))
   p    = exp(-r * ita)
   return p
 end
@@ -82,7 +82,7 @@ function getPIPs!(P,dPdr,c1,o1,c2,o2)
   dPdr[5,4] = (-0.3*g4*g2) / (2*P[5]) # dp5/dr1
 end
 
-function pairPot(co1, co2, vars, dPdr, P)
+function pairPot(co1, co2, vars, dPdr, P, A)
   # Get PIPs: P is a vector, dPdr is a matrix
   getPIPs!(P,dPdr,co1..., co2...)
 
@@ -90,30 +90,27 @@ function pairPot(co1, co2, vars, dPdr, P)
   w1,b1,w2,b2,w3,b3,rg,rgg,vg,vgg = vars
 
   # Map min-max
-  @views P[:] .= 2 * (P[:]-rg[1,:]) ./ rgg[:] .- 1
+  @views P .= 2 * (P[:]-rg[1,:]) ./ rgg[:] .- 1
 
   # 1st layer
   y = b1 + transpose(w1) * P
   f = tanh.(y)
 
-  # A = w1 * @. (w2 * (1 - f^2))
-  # this seems to help speed
-  # see above for what it does
-  A = zeros(Float64, 7, 45)
+  #Zero out matrix, then inplace fill with multiplied matrices 
+  A .= 0.0
   mul!(A, w1, @. (w2 * (1 - f^2)))
 
-
   # 2nd layer
-  y = b2 + transpose(w2) * f
-  f = tanh.(y)
+  y .= b2 + transpose(w2) * f
+  f .= tanh.(y)
 
   # output layer
-  v  = b3 + w3'f
-  dv = A * (w3 .* (1 .- f.^2))
+  v  = b3 + dot(w3,f)
+  dv = A * @. (w3 * (1 - f^2))
 
   # remapping
   v   = vgg * (v+1)/2 + vg[1]
-  dv  = (dv .* vgg) ./ rgg
+  @. dv  = (dv * vgg) / rgg
 
   dv  = transpose(dPdr) * dv
   return v, dv
@@ -125,7 +122,7 @@ function molPot(mol, vars)
   
   # Get bond length (r)
   diff = mol[2] - mol[1]
-  r    = sqrt(diff'diff)
+  r    = sqrt(dot(diff,diff))
   rhat = diff / r
 
   # Map min-max
@@ -136,9 +133,8 @@ function molPot(mol, vars)
   f  = tanh.(y)
 
   # output layer
-  v  = b2 + w2'f
-  dv = (1 .- f.^2) .* w1
-  dv = w2'dv
+  v  = b2 + dot(w2,f)
+  dv = dot(w2, @. (1 - f^2) * w1)
 
   # remapping
   v   = (v+1) * (vb-va)/2.0 + va
@@ -151,7 +147,7 @@ function molPot(mol, vars)
 end
 
 function getUnitVectors!(r, co1, co2)
-  rhat(v) = v / sqrt(v'v)
+  rhat(v) = v / sqrt(dot(v,v))
 
   c1,o1 = co1
   c2,o2 = co2
@@ -176,6 +172,7 @@ function HGNNdyn(a, du, u, p, t)
   rhats = SizedMatrix{6,3}(zeros(Float64, 6, 3))
   dPdr  = SizedMatrix{7,6}(zeros(Float64, 7, 6))
   P     = SizedVector{7}(zeros(Float64, 7))
+  A     = zeros(Float64, 7, 45)
 
   for i in p.mols
     v, dv, f = molPot(r[i], hgnnMolVars)
@@ -187,7 +184,7 @@ function HGNNdyn(a, du, u, p, t)
   for i in p.pars
     c1,o1  = i[1]
     c2,o2  = i[2]
-    v, dv  = pairPot(r[i[1]], r[i[2]], hgnnPairVars, dPdr, P)
+    v, dv  = pairPot(r[i[1]], r[i[2]], hgnnPairVars, dPdr, P, A)
     E     += v
     @views getUnitVectors!(rhats, r[i[1]], r[i[2]])
     rhats .*= dv
@@ -236,6 +233,7 @@ function HGNNpot(F, G, y0, p)
   rhats = SizedMatrix{6,3}(zeros(Float64, 6, 3))
   dPdr  = SizedMatrix{7,6}(zeros(Float64, 7, 6))
   P     = SizedVector{7}(zeros(Float64, 7))
+  A     = zeros(Float64, 7, 45)
 
   # I couldn't get Optim to work with a 2D vector
   # so I had to flatten the vector before sending 
@@ -263,7 +261,7 @@ function HGNNpot(F, G, y0, p)
   for i in p.pars
     c1,o1   = i[1]
     c2,o2   = i[2]
-    v, dv   = pairPot(r[i[1]], r[i[2]], hgnnPairVars, dPdr, P)
+    v, dv   = pairPot(r[i[1]], r[i[2]], hgnnPairVars, dPdr, P, A)
     energy += v
     @views getUnitVectors!(rhats, r[i[1]], r[i[2]])
     rhats .*= dv
@@ -306,4 +304,152 @@ function HGNNpot(F, G, y0, p)
   if F != nothing
     return energy
   end
+end
+
+
+function molPot!(F, u, i, vars)
+  # Define weights and biases
+  w1,b1,w2,b2,ra,rb,va,vb = vars
+  
+  # Get bond length (r)
+  diff = u[i[2]] - u[i[1]]
+  r    = sqrt(dot(diff,diff))
+  rhat = diff / r
+
+  # Map min-max
+  x  = 2.0 * (r-ra)/(rb-ra) - 1.0
+
+  # 1st layer
+  y  = b1 + w1 * x
+  f  = tanh.(y)
+
+  # output layer
+  v  = b2 + dot(w2,f)
+  dv = dot(w2, @. (1 - f^2) * w1)
+
+  # remapping
+  v   = (v+1) * (vb-va)/2.0 + va
+  v  += 0.560096850315234
+  dv *= (vb-va) / (rb-ra)
+
+  # apply rhat to get F
+  # f = dv * rhat
+
+  F[i[1]] += dv * rhat
+  F[i[2]] -= dv * rhat
+
+  return v
+end
+
+function getUnitVectors!(r, c1, o1, c2, o2)
+  rhat(v) = v / sqrt(dot(v,v))
+
+  r[1,:] = rhat(c1 - o1)
+  r[2,:] = rhat(c2 - o2)
+  r[3,:] = rhat(c2 - o1)
+  r[4,:] = rhat(o2 - c1)
+  r[5,:] = rhat(o1 - o2)
+  r[6,:] = rhat(c1 - c2)
+end
+
+function pairPot!(F, u, c1, o1, c2, o2, vars, rhats, dPdr, P, A)
+  # Get PIPs: P is a vector, dPdr is a matrix
+  getPIPs!(P,dPdr, u[c1], u[o1], u[c2], u[o2])
+  getUnitVectors!(rhats, u[c1], u[o1], u[c2], u[o2])
+
+  # Weights and biases 
+  w1,b1,w2,b2,w3,b3,rg,rgg,vg,vgg = vars
+
+  # Map min-max
+  @views P .= 2 * (P[:]-rg[1,:]) ./ rgg[:] .- 1
+
+  # 1st layer
+  y = b1 + transpose(w1) * P
+  f = tanh.(y)
+
+  #Zero out matrix, then inplace fill with multiplied matrices 
+  A .= 0.0
+  mul!(A, w1, @. (w2 * (1 - f^2)))
+
+  # 2nd layer
+  y .= b2 + transpose(w2) * f
+  f .= tanh.(y)
+
+  # output layer
+  v  = b3 + dot(w3,f)
+  dv = A * @. (w3 * (1 - f^2))
+
+  # remapping
+  v      = vgg * (v+1)/2 + vg[1]
+  @. dv  = (dv * vgg) / rgg
+
+  rhats .*= transpose(dPdr) * dv
+
+  # rhat: o1 --> c1
+  @views F[o1] += rhats[1,:]
+  @views F[c1] -= rhats[1,:]
+  
+  # rhat: o2 --> c2
+  @views F[o2] += rhats[2,:]
+  @views F[c2] -= rhats[2,:]
+
+  # rhat: o1 --> c2
+  @views F[o1] += rhats[3,:]
+  @views F[c2] -= rhats[3,:]
+
+  # rhat: c1 --> o2
+  @views F[c1] += rhats[4,:]
+  @views F[o2] -= rhats[4,:]
+
+  # rhat: o2 --> o1
+  @views F[o2] += rhats[5,:]
+  @views F[o1] -= rhats[5,:]
+
+  # rhat: c2 --> c1
+  @views F[c2] += rhats[6,:]
+  @views F[c1] -= rhats[6,:]
+
+  return v
+end
+
+function HGNNtst(a, du, u, p, t)
+
+  # initialize things
+  E = 0.0
+  F = zero(u)
+  m = [i.m for i in p.bdys]
+  r = u ./ 0.5291772083 # to Bohr
+  
+  # Pre-allocate for performance gains
+  rhats = SizedMatrix{6,3}(zeros(Float64, 6, 3))
+  dPdr  = SizedMatrix{7,6}(zeros(Float64, 7, 6))
+  P     = SizedVector{7}(zeros(Float64, 7))
+  A     = zeros(Float64, 7, 45)
+
+  for i in p.mols
+    E += molPot!(F, r, i, hgnnMolVars)
+  end
+
+  for i in p.pars
+    c1,o1  = i[1]
+    c2,o2  = i[2]
+
+    if norm(r[c1] - r[c2]) > 18
+      continue
+    end
+
+    E += pairPot!(F, r, c1, o1, c2, o2, hgnnPairVars, rhats, dPdr, P, A)
+  end
+  
+  E  *= 0.000124 # cm-1 to eV
+  F .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
+
+  
+  a .= F ./ m
+  if typeof(p) == NVTsimu
+    p.thermostat!(p.temp,a, du, m, p.thermoInps)
+  end
+
+  push!(p.energy, E)
+  push!(p.forces, F)
 end

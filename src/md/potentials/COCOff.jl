@@ -233,7 +233,7 @@ end
 
 function diffDotSqrt(v2, v1)
   diff = v2 - v1
-  r    = sqrt(diff'diff)
+  r    = sqrt(dot(diff, diff))
   return (r, diff)
 end
 
