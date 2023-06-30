@@ -11,13 +11,17 @@ struct HnS
 end
 
 function randVector()
-  R = 1
-  θ = rand() * pi
-  ϕ = rand() * 2 * pi 
+  # Method taken from https://mathworld.wolfram.com/SpherePointPicking.html
+  # only I swap phi and theta 
+
+  u = rand()
+  v = rand()
+  θ = acos(2v - 1)
+  ϕ = 2pi*u
   
-  x = R * cos(ϕ) * sin(θ)
-  y = R * sin(ϕ) * sin(θ)
-  z = R * cos(θ)
+  x = cos(ϕ) * sin(θ)
+  y = sin(ϕ) * sin(θ)
+  z = cos(θ)
 
   r  = [x,y,z]
   r /= norm(r) 
@@ -92,12 +96,20 @@ function hitAndStick(EoM, inp; callback=nothing)
     #Run NVE
     time = inp.htime * ps
     solu = runNVE(EoM, (0, time), fs, bdys)
-    bdys = getLastFrame(solu)
+    getLastFrame!(bdys, solu)
     
+    #Free memory
+    solu = 0
+    GC.gc()
+
     #Run NVT
     time = inp.stime * ps
     solu = runNVT(EoM, (0, time), fs, bdys, inp.thermo, inp.thermoInps)
-    bdys = getLastFrame(solu)
+    getLastFrame!(bdys, solu)
+    
+    #Free memory
+    solu = 0
+    GC.gc()
 
     #If needed, execute callback function
     if callback != nothing

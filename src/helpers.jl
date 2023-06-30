@@ -13,6 +13,17 @@ function getLastFrame(solu)
   return new
 end
 
+function getLastFrame!(bdys, solu)
+  N = length(bdys)
+  
+  for i in 1:N
+    bdys[i].r = solu.u[end].x[2][i]
+    bdys[i].v = solu.u[end].x[1][i]
+    bdys[i].m = solu.prob.p.bdys[i].m
+    bdys[i].s = solu.prob.p.bdys[i].s
+  end
+end
+
 function CoM(bdys)
   M = sum([i.m for i in bdys])
   r = sum([i.m*i.r for i in bdys])

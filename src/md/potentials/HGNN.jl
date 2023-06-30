@@ -90,7 +90,7 @@ function pairPot(co1, co2, vars, dPdr, P)
   w1,b1,w2,b2,w3,b3,rg,rgg,vg,vgg = vars
 
   # Map min-max
-  @views P[:] = 2 * (P[:]-rg[1,:]) ./ rgg[:] .- 1
+  @views P[:] .= 2 * (P[:]-rg[1,:]) ./ rgg[:] .- 1
 
   # 1st layer
   y = b1 + transpose(w1) * P
