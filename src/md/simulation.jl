@@ -14,6 +14,7 @@ struct NVTsimu
   mols::Vector
   energy::Vector{Float64}
   forces::Vector
+  m::Vector
   temp::Vector{Float64}
   thermostat!::Function
   thermoInps
