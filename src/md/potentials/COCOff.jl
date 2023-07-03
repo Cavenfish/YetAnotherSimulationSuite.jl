@@ -240,7 +240,6 @@ end
 function COCOdyn(dv, v, u, p, t)
   positions = u
 
-  m       = [i.m for i in p.bdys]
   epsilon = 11.230139012256362
   N       = length(positions)
   MorseF  = zero(u)
@@ -311,9 +310,9 @@ function COCOdyn(dv, v, u, p, t)
   forces = MorseF + ExchF + DispF + CoulF
   energy = MorseE + ExchE + DispE + CoulE
 
-  dv .= forces ./ m
+  dv .= forces ./ p.m
   if typeof(p) == NVTsimu
-    p.thermostat!(p.temp,dv, v, m, p.thermoInps)
+    p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
   end
  
   push!(p.energy, energy)

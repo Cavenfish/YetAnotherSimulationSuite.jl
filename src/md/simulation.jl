@@ -14,18 +14,13 @@ struct NVTsimu
   mols::Vector
   energy::Vector{Float64}
   forces::Vector
-  m::Vector
   temp::Vector{Float64}
+  m::Vector
   thermostat!::Function
   thermoInps
 end
 
-function runNVE(EoM, tspan, dt, bdys; kwargs...)
-  pos   = [SVector{3}(i.r) for i in bdys]
-  vel   = [SVector{3}(i.v) for i in bdys]
-  mas   = [i.m for i in bdys]
-
-  #Consider swapping to this format
+#Consider swapping to this format
   #Might be much nicer to work with
   #-------------
   # N = length(pos)
@@ -34,7 +29,12 @@ function runNVE(EoM, tspan, dt, bdys; kwargs...)
   # for i in 1:N
   #   @views p[:,i] = pos[i][:]
   #   @views v[:,i] = vel[i][:]
-  # end    
+  # end 
+
+function runNVE(EoM, tspan, dt, bdys; kwargs...)
+  pos   = [SVector{3}(i.r) for i in bdys]
+  vel   = [SVector{3}(i.v) for i in bdys]
+  mas   = [i.m for i in bdys]   
 
   pars, mols = getPairs(bdys)
   simu       = NVEsimu(bdys, pars, mols, [], [], mas)
@@ -48,9 +48,10 @@ end
 function runNVT(EoM, tspan, dt, bdys, thermostat, thermoInps; kwargs...)
   pos   = [SVector{3}(i.r) for i in bdys]
   vel   = [SVector{3}(i.v) for i in bdys]
+  mas   = [i.m for i in bdys]
 
   pars, mols = getPairs(bdys)
-  simu       = NVTsimu(bdys, pars, mols, [], [], [], thermostat, thermoInps)
+  simu       = NVTsimu(bdys, pars, mols, [], [], [], mas, thermostat, thermoInps)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   solu  = solve(prob, VelocityVerlet(), dt=dt)

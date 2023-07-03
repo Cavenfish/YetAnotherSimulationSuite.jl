@@ -219,7 +219,7 @@ function HGNNdyn(a, du, u, p, t)
   
   a .= F ./ p.m
   if typeof(p) == NVTsimu
-    p.thermostat!(p.temp,a, du, m, p.thermoInps)
+    p.thermostat!(p.temp,a, du, p.m, p.thermoInps)
   end
 
   push!(p.energy, E)
