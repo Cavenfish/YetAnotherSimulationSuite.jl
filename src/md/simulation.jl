@@ -5,6 +5,7 @@ struct NVEsimu
   mols::Vector
   energy::Vector
   forces::Vector
+  m::Vector
 end
 
 struct NVTsimu
@@ -21,6 +22,7 @@ end
 function runNVE(EoM, tspan, dt, bdys; kwargs...)
   pos   = [SVector{3}(i.r) for i in bdys]
   vel   = [SVector{3}(i.v) for i in bdys]
+  mas   = [i.m for i in bdys]
 
   #Consider swapping to this format
   #Might be much nicer to work with
@@ -34,7 +36,7 @@ function runNVE(EoM, tspan, dt, bdys; kwargs...)
   # end    
 
   pars, mols = getPairs(bdys)
-  simu       = NVEsimu(bdys, pars, mols, [], [])
+  simu       = NVEsimu(bdys, pars, mols, [], [], mas)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   solu  = solve(prob, VelocityVerlet(), dt=dt)
