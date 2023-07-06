@@ -30,6 +30,11 @@ function CoM(bdys)
   return r ./ M
 end
 
+function reducedMass(bdys)
+  u = sum([i.m^-1 for i in bdys])^-1
+  return u
+end
+
 function vibExcite!(mol, eignvec, E)
   v = sqrt.((2*E) ./ mol.m) # column vector of length of atoms in mol
 

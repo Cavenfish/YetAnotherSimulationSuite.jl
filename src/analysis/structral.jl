@@ -1,8 +1,7 @@
 export rdf, adf, density
 
-function rdf(bdys, elems)
+function rdf(bdys)
   
-
 end
 
 function adf()
