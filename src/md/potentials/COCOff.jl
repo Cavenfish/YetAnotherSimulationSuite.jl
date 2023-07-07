@@ -1,7 +1,6 @@
 """
 CO-CO Potential from van Hemert 2015
 """
-# using StaticArrays
 
 function calcMorse(r, diff)
   D      = 11.230139012256362
@@ -247,6 +246,8 @@ function COCO(dv, v, u, p, t)
   DispF   = zero(u)
   CoulF   = zero(u)
   MorseE  = ExchE = DispE = CoulE = 0.0
+  energy  = Dict()
+  forces  = Dict()
 
   for i in 1:2:N
     posi0 = positions[i]
@@ -302,18 +303,24 @@ function COCO(dv, v, u, p, t)
   # of all intramolecular interactions.
   MorseE += epsilon * N / 2.0
 
-  Morse = (MorseE, MorseF)
-  Exch  = ( ExchE,  ExchF)
-  Disp  = ( DispE,  DispF)
-  Coul  = ( CoulE,  CoulF)
+  totalF = MorseF + ExchF + DispF + CoulF
+  totalE = MorseE + ExchE + DispE + CoulE
 
-  forces = MorseF + ExchF + DispF + CoulF
-  energy = MorseE + ExchE + DispE + CoulE
-
-  dv .= forces ./ p.m
+  dv .= totalF ./ p.m
   if typeof(p) == NVTsimu
     p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
   end
+
+  forces["total"] = totalF
+  forces["Morse"] = MorseF
+  forces["Exch"]  = ExchF
+  forces["Disp"]  = DispF
+  forces["Coul"]  = CoulF
+  energy["total"] = totalE
+  energy["Morse"] = MorseE
+  energy["Exch"]  = ExchE
+  energy["Disp"]  = DispE
+  energy["Coul"]  = CoulE
  
   push!(p.energy, energy)
   push!(p.forces, forces)
