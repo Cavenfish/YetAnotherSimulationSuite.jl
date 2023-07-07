@@ -237,7 +237,7 @@ function diffDotSqrt(v2, v1)
   return (r, diff)
 end
 
-function COCOdyn(dv, v, u, p, t)
+function COCO(dv, v, u, p, t)
   positions = u
 
   epsilon = 11.230139012256362
@@ -321,7 +321,7 @@ function COCOdyn(dv, v, u, p, t)
 end
 
 
-function COCOpot(F, G, y0, p)
+function COCO(F, G, y0, p)
   x0     = Vector[]
   forces = Vector[]
   for i in 1:3:length(y0)

@@ -186,7 +186,7 @@ function getUnitVectors!(r, c1, o1, c2, o2)
   r[6,:] = rhat(c1 - c2)
 end
 
-function HGNNdyn(a, du, u, p, t)
+function HGNN(a, du, u, p, t)
 
   # initialize things
   E = 0.0
@@ -226,7 +226,7 @@ function HGNNdyn(a, du, u, p, t)
   push!(p.forces, F)
 end
 
-function HGNNpot(F, G, y0, p)
+function HGNN(F, G, y0, p)
 
   # Pre-allocate for performance gains
   rhats = SizedMatrix{6,3}(zeros(Float64, 6, 3))
