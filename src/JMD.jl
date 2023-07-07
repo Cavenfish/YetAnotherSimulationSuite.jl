@@ -15,6 +15,7 @@ using Optim
 using StaticArrays
 using LinearAlgebra
 using Distributions
+using KernelDensity
 using OrdinaryDiffEq
 using FiniteDifferences
 
