@@ -35,8 +35,34 @@ function reducedMass(bdys)
   return u
 end
 
-function vibExcite!(mol, eignvec, E)
-  v = sqrt.((2*E) ./ mol.m) # column vector of length of atoms in mol
-
-  mol.v .+= v .* eignvec
+function swapIso!(bdys, swap, mas)
+  for i in swap
+    bdys[i].m = mas[i]
+  end
 end
+
+function vibExcite!(mol, eignvec, E)
+  M = [i.m for i in mol for j in 1:3]
+  v = @. sqrt( 2E / M ) * eignvec
+
+  for i in 1:3:length(v)
+    j::UInt32 = (i+2)/3
+    mol[j].v += v[i:i+2]
+  end 
+
+end
+
+function getVibEnergy(mol, eignvec)
+  v = [i.v[j] for i in mol for j in 1:3]
+  m = [i.m    for i in mol for j in 1:3]
+
+  E = 0.5 * dot((m .^ 0.5) .* v, eignvec)^2
+  return E
+end
+
+function getPotEnergy(EoM, bdys)
+  x0, vars = prep4pot(bdys)
+  energy   = EoM(true, nothing, x0, vars)
+  return energy
+end
+
