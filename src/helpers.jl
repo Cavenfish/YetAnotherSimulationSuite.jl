@@ -53,10 +53,23 @@ function vibExcite!(mol, eignvec, E)
 end
 
 function getVibEnergy(mol, eignvec)
-  v = [i.v[j] for i in mol for j in 1:3]
-  m = [i.m    for i in mol for j in 1:3]
 
-  E = 0.5 * dot((m .^ 0.5) .* v, eignvec)^2
+  E = 0
+  for i in 1:3:length(eignvec)
+    j::UInt32 = (i+2)/3
+    ehat      = eignvec[i:i+2] / norm(eignvec[i:i+2])
+    E        += 0.5 * mol[j].m * dot(mol[j].v, ehat)^2
+  end
+
+  return E
+end
+
+function getVibEnergy(mol)
+  diff = mol[2].r - mol[1].r
+  rhat = diff / norm(diff)
+  v1   = dot(mol[1].v, rhat)
+  v2   = dot(mol[2].v, rhat)
+  E    = 0.5*mol[1].m*v1^2 + 0.5*mol[2].m*v2^2
   return E
 end
 
