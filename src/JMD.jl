@@ -12,6 +12,7 @@ module JMD
 using JLD2
 using FFTW
 using Optim
+using DataFrames
 using StaticArrays
 using LinearAlgebra
 using Distributions
@@ -31,6 +32,7 @@ include("./md/potentials/COCOff.jl")
 include("./md/potentials/HGNN.jl")
 include("./md/simulation.jl")
 include("./md/thermostats.jl")
+include("./md/post-processing.jl")
 
 include("./analysis/vacf.jl")
 include("./analysis/vibrations.jl")
