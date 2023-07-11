@@ -12,6 +12,7 @@ module JMD
 using JLD2
 using FFTW
 using Optim
+using MiniQhull
 using DataFrames
 using StaticArrays
 using LinearAlgebra
