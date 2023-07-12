@@ -40,6 +40,8 @@ include("./analysis/vibrations.jl")
 include("./analysis/optimizations.jl")
 include("./analysis/structral.jl")
 
+include("./mathtk/alphashape.jl")
+
 include("./building/hitAndStick.jl")
 
 include("./md/potentials/params/loadVars.jl")

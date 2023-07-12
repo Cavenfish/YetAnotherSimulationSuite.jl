@@ -2,6 +2,10 @@
 A Simplex in 3D looks like a pyramid. 
 Hence it has 4 points associated with it.
 
+The edge of a 3D Simplex is a 2D triangle.
+
+The volume of an edge is really an area
+
 My method:
   - Go through all simplexes and form two groups 
     1) perimeter edges
@@ -10,20 +14,60 @@ My method:
 """
 
 struct Edge 
-  p1::Vector{Float64}
-  p2::Vector{Float64}
+  pts::Vector{Vector{Float64}}
+  indices::Vector{Int64}
+  V::Float64
 end
 
-#Maybe this will be useful?
 struct Simplex
-  pts::Vector
+  pts::Vector{Vector{Float64}}
+  indices::Vector{Int64}
   r::Float64
   V::Float64
 end
 
+struct AlphaShape
+  perimeter::Vector
+  simplexes::Vector
+  area::Float64
+end
+
+function getEdges(simp)
+  n = length(simp.indices)
+  e = Edge[]
+
+  for i in 1:n
+    for j in i+1:n
+      for k in j+1:n
+        pts = [simp.pts[q] for q in [i,j,k]]
+        ind = [simp.indices[q] for q in [i,j,k]]
+        V   = getSimplexVolume(pts)
+        push!(e, Edge(pts, ind, V))
+      end
+    end
+  end
+
+  return e
+end
+
+function getSimplexes(pts)
+  DT = delaunay(pts)
+  n  = size(DT)[2]
+
+  simplexes = Simplex[]
+  for i in 1:n
+    p = pts[DT[:,i]]
+    j = DT[:,i]
+    r = getSimplexRadius(p)
+    V = getSimplexVolume(p)
+    push!(simplexes, Simplex(p,j,r,V))
+  end
+  return simplexes
+end
+
 function getSimplexVolume(pts)
   N = length(pts)
-  n = length(pts[1])
+  n = N - 1
 
   #First we build the CayleyMenger Matrix
   CM      = ones(N+1, N+1)
@@ -39,16 +83,6 @@ function getSimplexVolume(pts)
 
   #Get volume
   V = sqrt(det(CM) / c)
-  return V
-end
-
-function getAlphaVolume(simplexes)
-
-  V = 0.0
-  for pts in simplexes
-    V += getSimplexVolume(pts)
-  end
-
   return V
 end
 
@@ -69,7 +103,7 @@ function getSimplexRadius(pts)
   #Build b column vector
   b = ones(5)
   for i in 1:N
-    b[i] .= dot(pts[i], pts[i])
+    b[i] = dot(pts[i], pts[i])
   end
 
   #Solve linear equation Ax=b for column vector x
@@ -82,4 +116,75 @@ function getSimplexRadius(pts)
   r = norm(pts[1] - c)
 
   return r
+end
+
+function getAlpha(pts)
+  function f(x)
+    A = alphashape(pts; α=x[1])
+    # V = sum([i.V for i in A.perimeter])
+    # V = sum([i.V for i in A.simplexes])
+    p = [j for i in A.simplexes for j in i.pts]
+    
+    isempty(setdiff(pts,p)) ? r = -A.area : r = Inf
+    return r
+  end
+
+  # x0  = [1.0]
+  # cri = Optim.Options(; show_trace=true)
+  # res = optimize(f, x0, cri)
+  res = optimize(f, 0.0, 0.5; show_trace=true)
+  
+  return res.minimizer[1]
+end
+
+function alphashape(pts; α=nothing)
+
+  if α == nothing
+    α = getAlpha(pts)
+  end
+  
+  area      = 0.0
+  allEdges  = []
+  perimeter = []
+  simplexes = getSimplexes(pts)
+
+  for simp in simplexes
+
+    #Filter test
+    if simp.r < 1/α
+
+      #pull all edges from simplex
+      edges = getEdges(simp)
+
+      for edge in edges
+
+        ind = sort(edge.indices)
+
+        # Perimeter edges can only exist once,
+        # so here we check if the edge has been
+        # seen before. If yes, remove it from 
+        # perimeter list (only if it is there)
+        if ind in allEdges
+          i  = findfirst(e -> e == ind, perimeter)
+          
+          if i != nothing
+            popat!(perimeter, i)
+            area -= edge.V
+          end
+
+        else
+          push!(perimeter, ind)
+          area += edge.V
+        end
+
+        push!(allEdges, ind)
+      end
+    else
+      i = findfirst(e -> e == simp, simplexes)
+      popat!(simplexes, i)
+    end
+  end
+
+  A = AlphaShape(perimeter, simplexes, area)
+  return A
 end
