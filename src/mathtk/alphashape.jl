@@ -51,7 +51,8 @@ function getEdges(simp)
 end
 
 function getSimplexes(pts)
-  DT = delaunay(pts)
+  f  = "qhull d Qt Qbb Qc Qz Q12"
+  DT = delaunay(pts, f)
   n  = size(DT)[2]
 
   simplexes = Simplex[]
@@ -121,18 +122,15 @@ end
 function getAlpha(pts)
   function f(x)
     A = alphashape(pts; α=x[1])
-    # V = sum([i.V for i in A.perimeter])
-    # V = sum([i.V for i in A.simplexes])
+    V = sum([i.V for i in A.simplexes])
     p = [j for i in A.simplexes for j in i.pts]
     
-    isempty(setdiff(pts,p)) ? r = -A.area : r = Inf
+    isempty(setdiff(pts,p)) ? r = A.area : r = Inf
+    isempty(A.perimeter) ? r = Inf : r += V
     return r
   end
 
-  # x0  = [1.0]
-  # cri = Optim.Options(; show_trace=true)
-  # res = optimize(f, x0, cri)
-  res = optimize(f, 0.0, 0.5; show_trace=true)
+  res = optimize(f, 0.0, 1.0, GoldenSection(); show_trace=true)
   
   return res.minimizer[1]
 end

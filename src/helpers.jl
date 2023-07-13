@@ -120,3 +120,16 @@ function getPotEnergy(EoM, bdys)
   return energy
 end
 
+function getSurfaceMolecules(bdys; α=nothing)
+  pars, mols = getPairs(bdys)
+
+  pts  = [CoM(bdys[i]) for i in mols]
+
+  A    = alphashape(pts; α=α)
+  
+  tmp  = unique([j for i in A.perimeter for j in i])
+
+  surf = bdys[ [j for i in tmp for j in mols[i]] ]
+
+  return surf
+end
