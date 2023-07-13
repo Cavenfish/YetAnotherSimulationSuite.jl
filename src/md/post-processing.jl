@@ -7,8 +7,8 @@ struct Traj
   sys::Vector
 end
 
-function processDynamics(solu)
-  t = solu.t
+function processDynamics(solu; dt=fs)
+  t = solu.t / dt
 
   if typeof(solu.prob.p.energy[1]) == Dict{Any, Any}
     E = [i["total"] for i in solu.prob.p.energy]
@@ -40,4 +40,37 @@ function processDynamics(solu)
   end
 
   return Traj(t, E, T, F, sys)
+end
+
+function trackEnergyDissipation(traj, pot, mol)
+
+  N = length(traj.sys[1])
+
+  molVib, molRot, molTra = [],[],[]
+  avgVib, avgRot, avgTra = [],[],[]
+
+  for frame in traj.sys
+    push!(molVib, getCOVibEnergy(frame[mol]; pot=pot))
+    push!(molRot, getRotEnergy(frame[mol]))
+    push!(molTra, getTransEnergy(frame[mol]))
+
+    others = [frame[i:i+1] for i in 1:2:N if !(i in mol)]
+
+    tmp = mean(getCOVibEnergy.(others; pot=pot))
+    push!(avgVib, tmp)
+    tmp = mean(getRotEnergy.(others))
+    push!(avgRot, tmp)
+    tmp = mean(getTransEnergy.(others))
+    push!(avgTra, tmp)
+  end
+
+  df = DataFrame(  time=traj.t,
+                 molVib=molVib,
+                 molRot=molRot,
+                 molTra=molTra,
+                 avgVib=avgVib,
+                 avgRot=avgRot,
+                 avgTra=avgTra)
+
+  return df
 end

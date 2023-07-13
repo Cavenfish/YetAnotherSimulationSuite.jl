@@ -14,6 +14,7 @@ using FFTW
 using Optim
 using MiniQhull
 using DataFrames
+using Statistics
 using StaticArrays
 using LinearAlgebra
 using Distributions
@@ -23,6 +24,7 @@ using FiniteDifferences
 
 const fs   = 0.09822694788464063 # 1fs in ASE time
 const ps   = 1000 * fs
+const ns   = 1000 * ps
 const kB   = 8.617333262e-5 # eV / K
 
 include("./io.jl")
