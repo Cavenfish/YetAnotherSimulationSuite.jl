@@ -70,8 +70,9 @@ function reducedMass(mas::Vector{Float64})
 end
 
 function swapIso!(bdys, swap, mas)
-  for i in swap
-    bdys[i].m = mas[i]
+  for i in 1:length(swap)
+    j         = swap[i]
+    bdys[j].m = mas[i]
   end
 end
 
@@ -212,7 +213,7 @@ function pickRandomMol(bdys, loc)
 
   pts  = [CoM(bdys[i]) for i in mols]
 
-  A    = alphashape(pts; α=α)
+  A    = alphashape(pts)
   
   surf = unique([j for i in A.perimeter for j in i])
   bulk = [i for i in 1:length(pts) if !(i in surf)]

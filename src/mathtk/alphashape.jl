@@ -130,7 +130,7 @@ function getAlpha(pts)
     return r
   end
 
-  res = optimize(f, 0.0, 1.0; show_trace=true)
+  res = optimize(f, 0.0, 1.0)
   
   return res.minimizer[1]
 end
