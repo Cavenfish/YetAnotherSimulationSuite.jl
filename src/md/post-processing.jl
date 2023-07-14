@@ -4,67 +4,73 @@ struct Traj
   E::Vector{Float64}
   T::Vector{Float64}
   F::Vector
-  sys::Vector
+  r::Vector
+  v::Vector
+  m::Vector{Float64}
 end
 
-function processDynamics(solu; dt=fs)
-  t = solu.t / dt
+function processDynamics(solu; dt=fs, step=1)
+  t = solu.t[1:step:end] / dt
+  N = length(solu.t)
 
   if typeof(solu.prob.p.energy[1]) == Dict{Any, Any}
-    E = [i["total"] for i in solu.prob.p.energy]
+    E = [i["total"] for i in solu.prob.p.energy[1:step:end]]
   else
-    E = [i for i in solu.prob.p.energy]
+    E = solu.prob.p.energy[1:step:end]
   end
 
   if typeof(solu.prob.p.forces[1]) == Dict{Any, Any}
-    F = [i["total"] for i in solu.prob.p.forces]
+    F = [i["total"] for i in solu.prob.p.forces[1:step:end]]
   else
-    F = [i for i in solu.prob.p.forces]
+    F = solu.prob.p.forces[1:step:end]
   end
 
-  v,m = getVelMas(solu)
-  T   = [getTemp(m, i, kB, length(m)) for i in v]
+  r = [solu.u[i].x[2] for i in 1:step:N]
+  v = [solu.u[i].x[1] for i in 1:step:N]
+  m = solu.prob.p.m
+  T = [getTemp(m, i, kB, length(m)) for i in v]
 
-  sys  = []
-  bdys = solu.prob.p.bdys
-  for i in 1:length(t)
-    frame = Atom[]
-    for j in 1:length(bdys)
-      r = solu.u[i].x[2][j]
-      v = solu.u[i].x[1][j]
-      m = bdys[j].m
-      s = bdys[j].s
-      push!(frame, Atom(r,v,m,s))
-    end
-    push!(sys, frame)
-  end
-
-  return Traj(t, E, T, F, sys)
+  return Traj(t, E, T, F, r, v, m)
 end
 
 function trackEnergyDissipation(traj, pot, mol)
 
-  N = length(traj.sys[1])
+  m = traj.m
+  N = length(traj.t)
+  n = length(m)
 
   molVib, molRot, molTra = [],[],[]
   avgVib, avgRot, avgTra = [],[],[]
 
-  for frame in traj.sys
-    push!(molVib, getCOVibEnergy(frame[mol]; pot=pot))
-    push!(molRot, getRotEnergy(frame[mol]))
-    push!(molTra, getTransEnergy(frame[mol]))
+  others = [[i,i+1] for i in 1:2:n if !(i in mol)]
 
-    others = [frame[i:i+1] for i in 1:2:N if !(i in mol)]
+  for i in 1:N
+    r = traj.r[i]
+    v = traj.v[i]
 
-    tmp = mean(getCOVibEnergy.(others; pot=pot))
-    push!(avgVib, tmp)
-    tmp = mean(getRotEnergy.(others))
-    push!(avgRot, tmp)
-    tmp = mean(getTransEnergy.(others))
-    push!(avgTra, tmp)
+    mvib = getCOVibEnergy(r[mol], v[mol], m[mol]; pot=pot)
+    mrot = getRotEnergy(  r[mol], v[mol], m[mol])
+    mtra = getTransEnergy(r[mol], v[mol], m[mol])
+
+    push!(molVib, mvib)
+    push!(molRot, mrot)
+    push!(molTra, mtra)
+
+    avib,arot,atra = 0.0,0.0,0.0
+    for j in others
+      avib += getCOVibEnergy(r[j], v[j], m[j]; pot=pot)
+      arot += getRotEnergy(  r[j], v[j], m[j])
+      atra += getTransEnergy(r[j], v[j], m[j])
+    end
+
+
+    push!(avgVib, avib/n)
+    push!(avgRot, arot/n)
+    push!(avgTra, atra/n)
   end
 
   df = DataFrame(  time=traj.t,
+                   temp=traj.T,
                  molVib=molVib,
                  molRot=molRot,
                  molTra=molTra,

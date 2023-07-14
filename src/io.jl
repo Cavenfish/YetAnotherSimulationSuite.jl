@@ -52,14 +52,14 @@ function readXyz(xyz)
   return set
 end
 
-function writeXyzTraj(fileName::String, solu)
+function writeXyzTraj(fileName::String, solu; dt=1)
   f    = open(fileName, "w")
   bdys = solu.prob.p.bdys
   N    = length(bdys)
   T    = length(solu.t)
 
 
-  for i in 1:T
+  for i in 1:dt:T
     t = solu.t[i]
     u = solu.u[i].x[2] # x[1] -> vel || x[2] -> pos
 

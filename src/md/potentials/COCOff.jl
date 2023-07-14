@@ -237,10 +237,8 @@ function diffDotSqrt(v2, v1)
 end
 
 function COCO(dv, v, u, p, t)
-  positions = u
-
   epsilon = 11.230139012256362
-  N       = length(positions)
+  N       = length(u)
   MorseF  = zero(u)
   ExchF   = zero(u)
   DispF   = zero(u)
@@ -250,8 +248,8 @@ function COCO(dv, v, u, p, t)
   forces  = Dict()
 
   for i in 1:2:N
-    posi0 = positions[i]
-    posi1 = positions[i+1]
+    posi0 = u[i]
+    posi1 = u[i+1]
     ri1i0 = diffDotSqrt(posi1, posi0)
 
     #Calculate Morse
@@ -261,8 +259,8 @@ function COCO(dv, v, u, p, t)
     MorseF[i+1] = MorseF[i+1] + F
 
     for j in i+2:2:N
-      posj0 = positions[j]
-      posj1 = positions[j+1]
+      posj0 = u[j]
+      posj1 = u[j+1]
 
       rj0i0 = diffDotSqrt(posj0, posi0)
       rj1i1 = diffDotSqrt(posj1, posi1)
