@@ -9,6 +9,7 @@ author: Brian C. Ferrari
 
 module JMD
 
+using TOML
 using JLD2
 using FFTW
 using Optim
@@ -45,6 +46,8 @@ include("./analysis/structral.jl")
 include("./mathtk/alphashape.jl")
 
 include("./building/hitAndStick.jl")
+
+include("./experiments/energyDissipation.jl")
 
 include("./md/potentials/params/loadVars.jl")
 end # module

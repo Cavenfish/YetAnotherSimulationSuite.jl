@@ -29,7 +29,7 @@ function runNVE(EoM, tspan, dt, bdys; kwargs...)
   simu       = NVEsimu(bdys, pars, mols, [], [], mas)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
-  solu  = solve(prob, VelocityVerlet(), dt=dt)
+  solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
 
   return solu
 end
@@ -43,7 +43,7 @@ function runNVT(EoM, tspan, dt, bdys, thermostat, thermoInps; kwargs...)
   simu       = NVTsimu(bdys, pars, mols, [], [], [], mas, thermostat, thermoInps)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
-  solu  = solve(prob, VelocityVerlet(), dt=dt)
+  solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
 
   return solu
 end

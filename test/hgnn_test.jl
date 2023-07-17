@@ -37,7 +37,7 @@ include("../src/JMD.jl")
   dvco2  = dot(F[3], v)
 
   # pull magnitude of forces
-  vint   = JMD.pairPot!(F, r, 1, 2, 3, 4, JMD.hgnnPairVars, rhats, dPdr, P, A)
+  vint   = JMD.pairPot!(F, r, [1,2] => [3,4], JMD.hgnnPairVars, rhats, dPdr, P, A)
   for i in 1:6
     dv[i] = dot(rhats[i,:], hats[i,:])
   end

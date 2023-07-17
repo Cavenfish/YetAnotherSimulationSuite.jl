@@ -1,6 +1,11 @@
-using Pkg
+using Pkg, TOML
 Pkg.activate("../")
 md = include("../src/JMD.jl")
+
+#Read in inputs
+f   = open("./disp.toml", "r")
+inp = TOML.parse(f)
+close(f)
 
 # Predefine some things (ARGS eventually)
 EoM  = md.COCO
