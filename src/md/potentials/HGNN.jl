@@ -82,7 +82,10 @@ function getPIPs!(P,dPdr,c1,o1,c2,o2)
   dPdr[5,4] = (-0.3*g4*g2) / (2*P[5]) # dp5/dr1
 end
 
-function pairPot!(F, u, c1, o1, c2, o2, vars, rhats, dPdr, P, A)
+function pairPot!(F, u, i, vars, rhats, dPdr, P, A)
+  # ref i
+  c1, o1, c2, o2 = i[1][1], i[1][2], i[2][1], i[2][2]
+  
   # Get PIPs: P is a vector, dPdr is a matrix
   getPIPs!(P,dPdr, u[c1], u[o1], u[c2], u[o2])
   getUnitVectors!(rhats, u[c1], u[o1], u[c2], u[o2])
@@ -209,8 +212,7 @@ function HGNN(a, du, u, p, t)
     #   continue
     # end
 
-    E += pairPot!(F, r, i[1][1], i[1][2], i[2][1], i[2][2], 
-                  hgnnPairVars, rhats, dPdr, P, A)
+    E += pairPot!(F, r, i, hgnnPairVars, rhats, dPdr, P, A)
   end
   
   E  *= 0.000124 # cm-1 to eV
@@ -260,8 +262,7 @@ function HGNN(F, G, y0, p)
     #   continue
     # end
 
-    energy += pairPot!(forces, r, i[1][1], i[1][2], i[2][1], i[2][2], 
-                       hgnnPairVars, rhats, dPdr, P, A)
+    energy += pairPot!(forces, r, i, hgnnPairVars, rhats, dPdr, P, A)
   end
   
   energy  *= 0.000124 # cm-1 to eV
