@@ -96,6 +96,7 @@ function hitAndStick(EoM, inp; callback=nothing)
     time = inp.htime * ps
     solu = runNVE(EoM, (0, time), fs, bdys)
     getLastFrame!(bdys, solu)
+    zeroVCoM!(bdys)
     
     #Free memory
     solu = 0

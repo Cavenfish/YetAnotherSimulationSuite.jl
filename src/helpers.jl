@@ -90,7 +90,7 @@ function vibExcite!(mol, eignvec, E)
 
   if !isapprox(vCoM(mol), vcom; atol=1e-8)
     println("Uh Oh")
-    #TODO
+    zeroVCoM!(bdys)
   end
 
 end
