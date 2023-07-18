@@ -22,6 +22,9 @@ function vibDisp(inpFile::String)
   jld  = expt["jldfile"]
   clu  = expt["cluster"]
 
+  #splits
+  # splits=4
+
   # Load clusters
   jd = load(jld)
 
@@ -47,6 +50,25 @@ function vibDisp(inpFile::String)
   co  = bdys[mol]
   f,m = getHarmonicFreqs(EoM, co)
   vibExcite!(co, m[:,6], E)
+
+
+  # This is the new better method of doing this
+  # It will help prevent segfaults from too much
+  # RAM being used during long simulations
+  # still needs to be tested
+  # for i in 1:splits
+  #   t1  = ((i-1)/splits) * time
+  #   t2  = (i/splits) * time
+  #   nve = runNVE(EoM, (t1,t2), fs, bdys)
+  #   getLastFrame!(bdys, nve)
+    
+  #   open("$i.tmp", "w") do f
+  #     serialize(f, nve)
+  #   end
+
+  #   nve = nothing
+  #   GC.gc()
+  # end
 
   # Run NVE
   nve  = runNVE(EoM, (0, time), fs, bdys)

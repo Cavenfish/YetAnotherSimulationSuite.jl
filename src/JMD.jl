@@ -17,6 +17,7 @@ using MiniQhull
 using DataFrames
 using Statistics
 using StaticArrays
+using Serialization
 using LinearAlgebra
 using Distributions
 using KernelDensity
