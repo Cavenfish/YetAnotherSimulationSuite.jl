@@ -15,15 +15,13 @@ function vibDisp(inpFile::String)
   EoM = @eval $fn
 
   # Load other vars for easier usage
-  E    = expt["energy"]
-  time = expt["time"] * ps
-  loc  = expt["location"]
-  iso  = expt["isotope"]
-  jld  = expt["jldfile"]
-  clu  = expt["cluster"]
-
-  #splits
-  # splits=4
+  E      = expt["energy"]
+  time   = expt["time"] * ps
+  loc    = expt["location"]
+  iso    = expt["isotope"]
+  jld    = expt["jldfile"]
+  clu    = expt["cluster"]
+  splits = expt["splits"]
 
   # Load clusters
   jd = load(jld)
@@ -42,59 +40,45 @@ function vibDisp(inpFile::String)
   equil = runNVE(EoM, (0, 10ps), fs, bdys)
   getLastFrame!(bdys, equil)
 
-  # Free Memory
-  equil = 0
-  GC.gc()
+  # Save equil data
+  open("0.tmp", "w") do f
+    serialize(f, equil)
+  end
 
   # Excite CO
   co  = bdys[mol]
   f,m = getHarmonicFreqs(EoM, co)
   vibExcite!(co, m[:,6], E)
 
-
-  # This is the new better method of doing this
-  # It will help prevent segfaults from too much
-  # RAM being used during long simulations
-  # still needs to be tested
-  # for i in 1:splits
-  #   t1  = ((i-1)/splits) * time
-  #   t2  = (i/splits) * time
-  #   nve = runNVE(EoM, (t1,t2), fs, bdys)
-  #   getLastFrame!(bdys, nve)
+  # Run in parts to avoid segfaults
+  for i in 1:splits
+    t1  = ((i-1)/splits) * time + 10ps
+    t2  = (i/splits) * time + 10ps
+    nve = runNVE(EoM, t1, t2, fs, bdys)
+    getLastFrame!(bdys, nve)
     
-  #   open("$i.tmp", "w") do f
-  #     serialize(f, nve)
-  #   end
+    open("$i.tmp", "w") do f
+      serialize(f, nve)
+    end
 
-  #   nve = nothing
-  #   GC.gc()
-  # end
-
-  # Run NVE
-  nve  = runNVE(EoM, (0, time), fs, bdys)
+    nve = nothing
+    GC.gc()
+  end
 
   # Post-process
-  # tmp  = ["$i.tmp" for i in 1:splits]
-  # traj = processTmpFiles(tmp; step=100)
-  traj = processDynamics(nve; step=100)
+  tmp  = ["$i.tmp" for i in 0:splits]
+  traj = processTmpFiles(tmp; step=100)
   df   = trackEnergyDissipation(traj, EoM, mol)
-  v,m  = getVelMas(nve)
-
-  # For now, wont be kept
-  writeXyzTraj(tjName * ".xyz", nve; dt=100)
-
-  # Free Memory
-  nve = 0
-  GC.gc()
+  # v,m  = getVelMas(nve)
 
   # Load saving vars for easy usage
   dfName = savi["df"] 
   tjName = savi["tj"]
-  vmName = savi["vm"]
+  # vmName = savi["vm"]
 
   # Save data
   jldsave(dfName; df)
   jldsave(tjName * ".jld2"; traj)
-  jldsave("./myVnM.jld2"; v, m)
+  # jldsave("./myVnM.jld2"; v, m)
 
 end

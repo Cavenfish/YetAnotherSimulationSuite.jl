@@ -34,6 +34,21 @@ function runNVE(EoM, tspan, dt, bdys; kwargs...)
   return solu
 end
 
+function runNVE(EoM, t1, t2, dt, bdys; kwargs...)
+  pos   = [SVector{3}(i.r) for i in bdys]
+  vel   = [SVector{3}(i.v) for i in bdys]
+  mas   = [i.m for i in bdys]   
+  tspan = (t1,t2)
+
+  pars, mols = getPairs(bdys)
+  simu       = NVEsimu(bdys, pars, mols, [], [], mas)
+
+  prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
+  solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false, save_start=false)
+
+  return solu
+end
+
 function runNVT(EoM, tspan, dt, bdys, thermostat, thermoInps; kwargs...)
   pos   = [SVector{3}(i.r) for i in bdys]
   vel   = [SVector{3}(i.v) for i in bdys]

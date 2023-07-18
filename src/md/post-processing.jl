@@ -13,14 +13,14 @@ function processDynamics(solu; dt=fs, step=1)
   t = solu.t[1:step:end] / dt
   N = length(solu.t)
 
-  if typeof(solu.prob.p.energy[1]) == Dict{Any, Any}
-    E = [i["total"] for i in solu.prob.p.energy[1:step:end]]
+  if typeof(solu.prob.p.energy[1]) == NTuple{5, Float64}
+    E = [i[1] for i in solu.prob.p.energy[1:step:end]]
   else
     E = solu.prob.p.energy[1:step:end]
   end
 
-  if typeof(solu.prob.p.forces[1]) == Dict{Any, Any}
-    F = [i["total"] for i in solu.prob.p.forces[1:step:end]]
+  if typeof(solu.prob.p.forces[1]) == NTuple{5, Float64}
+    F = [i[1] for i in solu.prob.p.forces[1:step:end]]
   else
     F = solu.prob.p.forces[1:step:end]
   end
@@ -37,14 +37,14 @@ function processDynamics!(tj, solu; dt=fs, step=1)
   t = solu.t[1:step:end] / dt
   N = length(solu.t)
 
-  if typeof(solu.prob.p.energy[1]) == Dict{Any, Any}
-    E = [i["total"] for i in solu.prob.p.energy[1:step:end]]
+  if typeof(solu.prob.p.energy[1]) == NTuple{5, Float64}
+    E = [i[1] for i in solu.prob.p.energy[1:step:end]]
   else
     E = solu.prob.p.energy[1:step:end]
   end
 
-  if typeof(solu.prob.p.forces[1]) == Dict{Any, Any}
-    F = [i["total"] for i in solu.prob.p.forces[1:step:end]]
+  if typeof(solu.prob.p.forces[1]) == NTuple{5, Float64}
+    F = [i[1] for i in solu.prob.p.forces[1:step:end]]
   else
     F = solu.prob.p.forces[1:step:end]
   end
@@ -54,12 +54,12 @@ function processDynamics!(tj, solu; dt=fs, step=1)
   m = solu.prob.p.m
   T = [getTemp(m, i, kB, length(m)) for i in v]
 
-  push!(tj.t, t)
-  push!(tj.E, E)
-  push!(tj.T, T)
-  push!(tj.F, F)
-  push!(tj.r, r)
-  push!(tj.v, v)
+  push!(tj.t, t...)
+  push!(tj.E, E...)
+  push!(tj.T, T...)
+  push!(tj.F, F...)
+  push!(tj.r, r...)
+  push!(tj.v, v...)
 end
 
 function processTmpFiles(files; kwargs...)
