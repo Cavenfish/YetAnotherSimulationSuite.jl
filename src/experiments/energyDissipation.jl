@@ -73,7 +73,9 @@ function vibDisp(inpFile::String)
   # Run NVE
   nve  = runNVE(EoM, (0, time), fs, bdys)
 
-  # Post-process 
+  # Post-process
+  # tmp  = ["$i.tmp" for i in 1:splits]
+  # traj = processTmpFiles(tmp; step=100)
   traj = processDynamics(nve; step=100)
   df   = trackEnergyDissipation(traj, EoM, mol)
   v,m  = getVelMas(nve)
