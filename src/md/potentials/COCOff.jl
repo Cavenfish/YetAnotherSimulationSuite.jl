@@ -320,26 +320,24 @@ function COCO(F, G, y0, p)
     push!(forces, [0.0, 0.0, 0.0])
   end
 
-  positions = x0
-
   epsilon = 11.230139012256362
-  N       = length(positions)
+  N       = length(x0)
   energy  = 0.0
 
   for i in 1:2:N
-    posi0 = positions[i]
-    posi1 = positions[i+1]
+    posi0 = x0[i]
+    posi1 = x0[i+1]
     ri1i0 = diffDotSqrt(posi1, posi0)
 
     #Calculate Morse
     E, F           = calcMorse(ri1i0...)
     energy        += E
-    forces[i]   = forces[i]   - F
-    forces[i+1] = forces[i+1] + F
+    forces[i]     -= F
+    forces[i+1]   += F
 
     for j in i+2:2:N
-      posj0 = positions[j]
-      posj1 = positions[j+1]
+      posj0 = x0[j]
+      posj1 = x0[j+1]
 
       rj0i0 = diffDotSqrt(posj0, posi0)
       rj1i1 = diffDotSqrt(posj1, posi1)
@@ -348,29 +346,29 @@ function COCO(F, G, y0, p)
 
       #Calculate Dispersion
       E, Fcc, Foo, Fco, Foc = calcDisp(rj0i0, rj1i1, rj0i1, rj1i0)
-      energy                += E
-      forces[i]           = forces[i]   - (Fcc + Foc)
-      forces[i+1]         = forces[i+1] - (Foo + Fco)
-      forces[j]           = forces[j]   + (Fcc + Fco)
-      forces[j+1]         = forces[j+1] + (Foo + Foc)
+      energy      += E
+      forces[i]   -= (Fcc + Foc)
+      forces[i+1] -= (Foo + Fco)
+      forces[j]   += (Fcc + Fco)
+      forces[j+1] += (Foo + Foc)
 
       #Calculate Exchange
       E, Fcc, Foo, Fco, Foc = calcExch(rj0i0, rj1i1, rj0i1, rj1i0)
-      energy                += E
-      forces[i]           = forces[i]   - (Fcc + Foc)
-      forces[i+1]         = forces[i+1] - (Foo + Fco)
-      forces[j]           = forces[j]   + (Fcc + Fco)
-      forces[j+1]         = forces[j+1] + (Foo + Foc)
+      energy      += E
+      forces[i]   -= (Fcc + Foc)
+      forces[i+1] -= (Foo + Fco)
+      forces[j]   += (Fcc + Fco)
+      forces[j+1] += (Foo + Foc)
 
       #Calculate Coulomb
       E, Fi0, Fi1, Fj0, Fj1 = calcCoul(posi0, posi1, posj0, posj1,
                                        rj0i0, rj1i1, rj0i1, rj1i0,
                                        ri1i0)
-      energy                += E
-      forces[i]           = forces[i]   + Fi0
-      forces[i+1]         = forces[i+1] + Fi1
-      forces[j]           = forces[j]   + Fj0
-      forces[j+1]         = forces[j+1] + Fj1
+      energy      += E
+      forces[i]   += Fi0
+      forces[i+1] += Fi1
+      forces[j]   += Fj0
+      forces[j+1] += Fj1
 
     end # j loop
   end # i loop
