@@ -244,8 +244,6 @@ function COCO(dv, v, u, p, t)
   DispF   = zero(u)
   CoulF   = zero(u)
   MorseE  = ExchE = DispE = CoulE = 0.0
-  energy  = Dict()
-  forces  = Dict()
 
   for i in 1:2:N
     posi0 = u[i]
@@ -255,8 +253,8 @@ function COCO(dv, v, u, p, t)
     #Calculate Morse
     E, F           = calcMorse(ri1i0...)
     MorseE        += E
-    MorseF[i]   = MorseF[i]   - F
-    MorseF[i+1] = MorseF[i+1] + F
+    MorseF[i]     -= F
+    MorseF[i+1]   += F
 
     for j in i+2:2:N
       posj0 = u[j]
@@ -269,29 +267,29 @@ function COCO(dv, v, u, p, t)
 
       #Calculate Dispersion
       E, Fcc, Foo, Fco, Foc = calcDisp(rj0i0, rj1i1, rj0i1, rj1i0)
-      DispE                += E
-      DispF[i]           = DispF[i]   - (Fcc + Foc)
-      DispF[i+1]         = DispF[i+1] - (Foo + Fco)
-      DispF[j]           = DispF[j]   + (Fcc + Fco)
-      DispF[j+1]         = DispF[j+1] + (Foo + Foc)
+      DispE      += E
+      DispF[i]   -= (Fcc + Foc)
+      DispF[i+1] -= (Foo + Fco)
+      DispF[j]   += (Fcc + Fco)
+      DispF[j+1] += (Foo + Foc)
 
       #Calculate Exchange
       E, Fcc, Foo, Fco, Foc = calcExch(rj0i0, rj1i1, rj0i1, rj1i0)
-      ExchE                += E
-      ExchF[i]           = ExchF[i]   - (Fcc + Foc)
-      ExchF[i+1]         = ExchF[i+1] - (Foo + Fco)
-      ExchF[j]           = ExchF[j]   + (Fcc + Fco)
-      ExchF[j+1]         = ExchF[j+1] + (Foo + Foc)
+      ExchE      += E
+      ExchF[i]   -= (Fcc + Foc)
+      ExchF[i+1] -= (Foo + Fco)
+      ExchF[j]   += (Fcc + Fco)
+      ExchF[j+1] += (Foo + Foc)
 
       #Calculate Coulomb
       E, Fi0, Fi1, Fj0, Fj1 = calcCoul(posi0, posi1, posj0, posj1,
                                        rj0i0, rj1i1, rj0i1, rj1i0,
                                        ri1i0)
-      CoulE                += E
-      CoulF[i]           = CoulF[i]   + Fi0
-      CoulF[i+1]         = CoulF[i+1] + Fi1
-      CoulF[j]           = CoulF[j]   + Fj0
-      CoulF[j+1]         = CoulF[j+1] + Fj1
+      CoulE      += E
+      CoulF[i]   += Fi0
+      CoulF[i+1] += Fi1
+      CoulF[j]   += Fj0
+      CoulF[j+1] += Fj1
 
     end # j loop
   end # i loop
@@ -309,22 +307,10 @@ function COCO(dv, v, u, p, t)
     p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
   end
 
-  forces["total"] = totalF
-  forces["Morse"] = MorseF
-  forces["Exch"]  = ExchF
-  forces["Disp"]  = DispF
-  forces["Coul"]  = CoulF
-  energy["total"] = totalE
-  energy["Morse"] = MorseE
-  energy["Exch"]  = ExchE
-  energy["Disp"]  = DispE
-  energy["Coul"]  = CoulE
- 
-  push!(p.energy, energy)
-  push!(p.forces, forces)
+  push!(p.energy, (totalE, MorseE, ExchE, DispE, CoulE))
+  push!(p.forces, (totalF, MorseF, ExchF, DispF, CoulF))
 
 end
-
 
 function COCO(F, G, y0, p)
   x0     = Vector[]
@@ -405,3 +391,4 @@ function COCO(F, G, y0, p)
     return energy
   end
 end
+

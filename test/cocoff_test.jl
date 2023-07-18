@@ -14,16 +14,16 @@ include("../src/JMD.jl")
     JMD.COCO(zero(pos),zero(pos),pos,p,0)
 
     #Energy Tests
-    @test p.energy[1]["Morse"] ≈  1.7002672151988918e-05 atol=1e-15
-    @test p.energy[1]["Exch"]  ≈  0.285819645468938      atol=1e-12
-    @test p.energy[1]["Disp"]  ≈ -0.5667142867222983     atol=1e-12
-    @test p.energy[1]["Coul"]  ≈ -0.0786977801615315     atol=1e-12
+    @test p.energy[1][2] ≈  1.7002672151988918e-05 atol=1e-15
+    @test p.energy[1][3] ≈  0.285819645468938      atol=1e-12
+    @test p.energy[1][4] ≈ -0.5667142867222983     atol=1e-12
+    @test p.energy[1][5] ≈ -0.0786977801615315     atol=1e-12
 
     #Force Tests
-    @test p.forces[1]["Morse"][6] ≈ [-0.00087197, -0.00224147,  0.00105403] atol=1e-8
-    @test p.forces[1]["Exch"][ 9]  ≈ [-0.04894114, -0.06273592, -0.04394393] atol=1e-8
-    @test p.forces[1]["Disp"][13]  ≈ [ 0.02416868, -0.04554598, -0.00693859] atol=1e-8
-    @test p.forces[1]["Coul"][16]  ≈ [-0.00378278, -0.01104432, -0.0009977 ] atol=1e-8
+    @test p.forces[1][2][ 6] ≈ [-0.00087197, -0.00224147,  0.00105403] atol=1e-8
+    @test p.forces[1][3][ 9] ≈ [-0.04894114, -0.06273592, -0.04394393] atol=1e-8
+    @test p.forces[1][4][13] ≈ [ 0.02416868, -0.04554598, -0.00693859] atol=1e-8
+    @test p.forces[1][5][16] ≈ [-0.00378278, -0.01104432, -0.0009977 ] atol=1e-8
 
   end
 
