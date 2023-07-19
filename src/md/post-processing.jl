@@ -69,6 +69,12 @@ function processTmpFiles(files; kwargs...)
   tj   = processDynamics(solu; kwargs...) 
   close(f)
 
+  # Debating if I want to add this
+  # f    = open("$(file[1]).v", "w")
+  # v    = [solu.u[i].x[1] for i in 1:length(solu.t)]
+  # serialize(f, v)
+  # close(f)
+
   # Free memory
   @free solu
 
@@ -78,8 +84,15 @@ function processTmpFiles(files; kwargs...)
     processDynamics!(tj, solu; kwargs...)
     close(f)
 
+    # Debating if I want to add this
+    # f    = open("$file.v", "w")
+    # v    = [solu.u[i].x[1] for i in 1:length(solu.t)]
+    # serialize(f, v)
+    # close(f)
+
     #Free memory
     @free solu
+    # @free v
   end
 
   return tj
