@@ -30,6 +30,7 @@ const ns   = 1000 * ps
 const kB   = 8.617333262e-5 # eV / K
 
 include("./io.jl")
+include("./macros.jl")
 include("./helpers.jl")
 
 include("./md/bodies.jl")

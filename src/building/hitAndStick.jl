@@ -99,8 +99,7 @@ function hitAndStick(EoM, inp; callback=nothing)
     zeroVCoM!(bdys)
     
     #Free memory
-    solu = 0
-    GC.gc()
+    @free solu
 
     #Run NVT
     time = inp.stime * ps
@@ -108,8 +107,7 @@ function hitAndStick(EoM, inp; callback=nothing)
     getLastFrame!(bdys, solu)
     
     #Free memory
-    solu = 0
-    GC.gc()
+    @free solu
 
     #If needed, execute callback function
     if callback != nothing

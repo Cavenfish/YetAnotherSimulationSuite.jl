@@ -61,8 +61,8 @@ function vibDisp(inpFile::String)
       serialize(f, nve)
     end
 
-    nve = nothing
-    GC.gc()
+    #Free memory
+    @free nve
   end
 
   # Post-process

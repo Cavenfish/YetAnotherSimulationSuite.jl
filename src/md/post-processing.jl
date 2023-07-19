@@ -69,12 +69,19 @@ function processTmpFiles(files; kwargs...)
   tj   = processDynamics(solu; kwargs...) 
   close(f)
 
+  # Free memory
+  @free solu
+
   for file in files[2:end]
     f    = open(file, "r")
     solu = deserialize(f)
     processDynamics!(tj, solu; kwargs...)
     close(f)
+
+    #Free memory
+    @free solu
   end
+
   return tj
 end
 
