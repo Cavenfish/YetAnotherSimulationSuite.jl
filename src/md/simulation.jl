@@ -12,7 +12,7 @@ struct NVTsimu
   bdys::Vector
   pars::Vector
   mols::Vector
-  energy::Vector{Float64}
+  energy::Vector
   forces::Vector
   temp::Vector{Float64}
   m::Vector
