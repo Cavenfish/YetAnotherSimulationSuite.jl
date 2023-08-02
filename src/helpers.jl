@@ -24,6 +24,14 @@ function getLastFrame!(bdys, solu)
   end
 end
 
+function swapAtoms!(bdys, i, j)
+  a = bdys[i].r
+  b = bdys[j].r
+
+  bdys[i].r = b
+  bdys[j].r = a
+end
+
 function CoM(bdys)
   M = sum([i.m for i in bdys])
   r = sum([i.m*i.r for i in bdys])
