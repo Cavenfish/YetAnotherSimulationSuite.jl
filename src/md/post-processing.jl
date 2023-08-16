@@ -85,7 +85,7 @@ function processTmpFiles(files; kwargs...)
   return tj
 end
 
-function trackVACF(files; kwargs...)
+function trackVACF(files, safe)
 
   df = DataFrame()
 

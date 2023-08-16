@@ -85,7 +85,7 @@ function vibDisp(inpFile::String)
     j   = inp["vacf"]["inter"]
     tmp = ["$i.tmp" for i in 1:j:splits]
 
-    vd  = trackVACF(tmp; safe=safe)
+    vd  = trackVACF(tmp, safe)
 
     jldsave(vdName; vd)
   end
