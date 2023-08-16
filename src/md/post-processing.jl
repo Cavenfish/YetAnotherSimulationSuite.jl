@@ -96,7 +96,7 @@ function trackVACF(files; kwargs...)
 
     v,m  = getVelMas(solu)
 
-    inp  = vacfInps(v, m, 1e15, false, HannM, 8, true)
+    inp  = vacfInps(v[1:15000], m, 1e15, false, HannM, 8, true)
     out  = VDOS(inp)
     col  = replace(file, ".tmp" => "")
 
