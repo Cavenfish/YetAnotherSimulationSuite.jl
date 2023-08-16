@@ -80,11 +80,12 @@ function vibDisp(inpFile::String)
 
   if "vacf" in keys(inp)
     vdName = savi["vd"]
+    safe   = inp["vacf"]["safe"]
 
     j   = inp["vacf"]["inter"]
     tmp = ["$i.tmp" for i in 1:j:splits]
 
-    vd  = trackVACF(tmp)
+    vd  = trackVACF(tmp; safe=safe)
 
     jldsave(vdName; vd)
   end
