@@ -78,7 +78,7 @@ function vibDisp(inpFile::String)
 
   # Save data
   jldsave(dfName; df)
-  jldsave(tjName * ".jld2"; traj)
+  jldsave(tjName; traj)
   # jldsave("./myVnM.jld2"; v, m)
 
 end
