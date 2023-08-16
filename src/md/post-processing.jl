@@ -100,12 +100,14 @@ function trackVACF(files; kwargs...)
     out  = VDOS(inp)
     col  = replace(file, ".tmp" => "")
 
+    if isempty(df)
+      df[!, "v"] = out.v
+    end
+
     df[!, col] = out.I
 
     @free solu
   end
-
-  df[!, "v"] = out.v
 
   return df
 end
