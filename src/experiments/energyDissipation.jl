@@ -69,16 +69,24 @@ function vibDisp(inpFile::String)
   tmp  = ["$i.tmp" for i in 0:splits]
   traj = processTmpFiles(tmp; step=100)
   df   = trackEnergyDissipation(traj, EoM, mol)
-  # v,m  = getVelMas(nve)
 
   # Load saving vars for easy usage
   dfName = savi["df"] 
   tjName = savi["tj"]
-  # vmName = savi["vm"]
 
   # Save data
   jldsave(dfName; df)
   jldsave(tjName; traj)
-  # jldsave("./myVnM.jld2"; v, m)
+
+  if "vacf" in keys(inp)
+    vdName = savi["vd"]
+
+    j   = inp["vacf"]["inter"]
+    tmp = ["$i.tmp" for i in 0:j:end]
+
+    vd  = trackVACF(tmp)
+
+    jldsave(vdName; vd)
+  end
 
 end

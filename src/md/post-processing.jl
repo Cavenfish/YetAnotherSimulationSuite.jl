@@ -69,12 +69,6 @@ function processTmpFiles(files; kwargs...)
   tj   = processDynamics(solu; kwargs...) 
   close(f)
 
-  # Debating if I want to add this
-  # f    = open("$(file[1]).v", "w")
-  # v    = [solu.u[i].x[1] for i in 1:length(solu.t)]
-  # serialize(f, v)
-  # close(f)
-
   # Free memory
   @free solu
 
@@ -84,18 +78,34 @@ function processTmpFiles(files; kwargs...)
     processDynamics!(tj, solu; kwargs...)
     close(f)
 
-    # Debating if I want to add this
-    # f    = open("$file.v", "w")
-    # v    = [solu.u[i].x[1] for i in 1:length(solu.t)]
-    # serialize(f, v)
-    # close(f)
-
     #Free memory
     @free solu
-    # @free v
   end
 
   return tj
+end
+
+function trackVACF(files; kwargs...)
+
+  df = DataFrame()
+
+  for file in files
+    f    = open(file, "r")
+    solu = deserialize(f)
+    close(f)
+
+    v,m  = getVelMas(solu)
+
+    inp  = vacfInps(v, m, 1e15, false, HannM, 8, true)
+    out  = VDOS(inp)
+    col  = replace(file, ".tmp" => "")
+
+    df[!, col] = out.I
+  end
+
+  df[!, "v"] = out.v
+
+  return df
 end
 
 function trackEnergyDissipation(traj, pot, mol)
