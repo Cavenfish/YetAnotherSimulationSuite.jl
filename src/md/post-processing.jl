@@ -101,6 +101,8 @@ function trackVACF(files; kwargs...)
     col  = replace(file, ".tmp" => "")
 
     df[!, col] = out.I
+
+    @free solu
   end
 
   df[!, "v"] = out.v
