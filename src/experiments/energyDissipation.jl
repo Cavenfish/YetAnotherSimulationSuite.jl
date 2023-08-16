@@ -82,7 +82,7 @@ function vibDisp(inpFile::String)
     vdName = savi["vd"]
 
     j   = inp["vacf"]["inter"]
-    tmp = ["$i.tmp" for i in 0:j:end]
+    tmp = ["$i.tmp" for i in 0:j:splits]
 
     vd  = trackVACF(tmp)
 
