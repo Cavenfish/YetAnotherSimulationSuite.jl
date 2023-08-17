@@ -16,6 +16,7 @@ using Optim
 using MiniQhull
 using DataFrames
 using Statistics
+using CairoMakie
 using StaticArrays
 using Serialization
 using LinearAlgebra
@@ -44,6 +45,9 @@ include("./analysis/vacf.jl")
 include("./analysis/vibrations.jl")
 include("./analysis/optimizations.jl")
 include("./analysis/structral.jl")
+
+include("./plotting/config.jl")
+include("./plotting/vibDisp.jl")
 
 include("./mathtk/alphashape.jl")
 

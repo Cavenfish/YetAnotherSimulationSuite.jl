@@ -118,8 +118,8 @@ function trackEnergyDissipation(traj, pot, mol)
   N = length(traj.t)
   n = length(m)
 
-  molVib, molRot, molTra = [],[],[]
-  avgVib, avgRot, avgTra = [],[],[]
+  molVib, molRot, molTra = Float64[], Float64[], Float64[]
+  avgVib, avgRot, avgTra = Float64[], Float64[], Float64[]
 
   others = [[i,i+1] for i in 1:2:n if !(i in mol)]
 
