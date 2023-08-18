@@ -30,6 +30,14 @@ function vibDisp(inpFile::String)
   bdys = jd[clu]
   zeroVCoM!(bdys)
 
+  #Swap cluster isotope
+  if "cluIso" in keys(expt)
+    tmp  = expt["cluIso"]
+    swap = collect(1:length(bdys))
+    mas  = [tmp[1], tmp[2] for i in 1:length(bdys)/2]
+    swapIso!(bdys, swap, mas)
+  end
+
   # Randomly select molecule to excite
   mol = pickRandomMol(bdys, loc)
 

@@ -84,8 +84,6 @@ function swapIso!(bdys, swap, mas)
   end
 end
 
-#Can't use this currently
-#it does not ensure vCoM is zero
 function vibExcite!(mol, eignvec, E)
   M = [i.m for i in mol for j in 1:3]
   v = @. sqrt( 2E / M ) * eignvec
