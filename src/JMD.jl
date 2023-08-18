@@ -51,6 +51,7 @@ include("./plotting/vibDisp.jl")
 
 include("./mathtk/alphashape.jl")
 
+include("./building/anneal.jl")
 include("./building/hitAndStick.jl")
 
 include("./experiments/energyDissipation.jl")
