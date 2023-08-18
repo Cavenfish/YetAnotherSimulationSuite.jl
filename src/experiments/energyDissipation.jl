@@ -34,7 +34,7 @@ function vibDisp(inpFile::String)
   if "cluIso" in keys(expt)
     tmp  = expt["cluIso"]
     swap = collect(1:length(bdys))
-    mas  = [tmp[1], tmp[2] for i in 1:length(bdys)/2]
+    mas  = repeat(tmp, div(length(bdys),2) )
     swapIso!(bdys, swap, mas)
   end
 
