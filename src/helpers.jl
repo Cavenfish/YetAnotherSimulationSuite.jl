@@ -1,4 +1,10 @@
 
+function mkvar(x)
+  fn = Symbol(x)
+  X  = @eval $fn
+  return X
+end
+
 function getLastFrame(solu)
   n = length(solu.prob.p.bdys)
   

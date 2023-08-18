@@ -1,3 +1,30 @@
+"""
+Runs a vibrational energy dissipation simulation 
+based on conditions given via a toml input card.
+
+Example of Input Card 
+-----------------------
+
+[expt]
+EoM = "COCO"
+energy = 0.4
+time = 2000
+location = "bulk"
+isotope = [12.011, 15.999]
+jldfile = "/home/brian/COjl/10K-MvH.jld2"
+cluster = "250co"
+splits = 100
+cluIso = [13.003, 17.999]
+
+[vacf]
+inter = 10
+safe = 15000
+
+[saving]
+df = "co-am13C18O_MvH_DF_1.jld2"
+tj = "co-am13C18O_MvH_TJ_1.jld2"
+vd = "co-am13C18O_MvH_VD_1.jld2"
+"""
 
 function vibDisp(inpFile::String)
 
