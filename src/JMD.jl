@@ -42,6 +42,7 @@ include("./md/thermostats.jl")
 include("./md/post-processing.jl")
 
 include("./analysis/vacf.jl")
+include("./analysis/desorb.jl")
 include("./analysis/vibrations.jl")
 include("./analysis/optimizations.jl")
 include("./analysis/structral.jl")
