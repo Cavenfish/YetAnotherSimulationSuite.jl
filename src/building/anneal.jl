@@ -22,7 +22,11 @@ time.num = 5
 time.uni = "ps"
 
 [OPT]
-algo = "LBFGS"
+algo  = "LBFGS"
+kwargs.x_tol = 1e-4
+kwargs.f_tol = 1e-12
+kwargs.g_tol = 1e-4
+kwargs.iterations = 100000
 
 [Saving]
 xyz = "crystal.xyz"
@@ -45,6 +49,13 @@ function anneal(inpFile::String)
   nvtInp = mkvar(nvtd["thermoInps"])
   inps   = nvtInp(T, mkvar(nvtd["kB"]), tau)
   thermo = mkvar(nvtd["thermostat"])
+
+  #Build opt kwargs dict
+  kwargs = Dict()
+  for key in keys(inp["OPT"]["kwargs"])
+    value = inp["OPT"]["kwargs"][key]
+    kwargs[Symbol(key)] = value
+  end
 
   #Get leftover vars
   jld = cnfg["jldfile"]
@@ -71,10 +82,10 @@ function anneal(inpFile::String)
     @free nvt 
 
     #Optimize geometry
-    bdys = opt(EoM, algo, bdys; iterations=100000)
+    bdys = opt(EoM, algo, bdys; kwargs...)
     
   end
 
-  writeXyz(inps["Saving"]["xyz"], bdys)
+  writeXyz(inp["Saving"]["xyz"], bdys)
 
 end
