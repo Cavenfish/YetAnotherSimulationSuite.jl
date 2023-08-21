@@ -16,11 +16,13 @@ thermostat = "BDP!"
 thermoInps = "BDP"
 temp = 25
 kB = "kB"
-tau = "100fs"
-time = "5ps"
+tau.num = 100
+tau.uni = "fs"
+time.num = 5
+time.uni = "ps"
 
 [OPT]
-algo = "LBFGS()"
+algo = "LBFGS"
 
 [Saving]
 xyz = "crystal.xyz"
@@ -35,18 +37,20 @@ function anneal(inpFile::String)
 
   #Load up EoM and opt algo
   EoM  = mkvar(cnfg["EoM"])
-  algo = mkvar(inp["OPT"]["algo"])
+  algo = mkvar(inp["OPT"]["algo"])()
 
   #Prep nvt inputs
   T      = nvtd["temp"]
-  tau    = mkvar(nvtd["tau"])
+  tau    = nvtd["tau"]["num"] * mkvar(nvtd["tau"]["uni"])
   nvtInp = mkvar(nvtd["thermoInps"])
   inps   = nvtInp(T, mkvar(nvtd["kB"]), tau)
   thermo = mkvar(nvtd["thermostat"])
 
   #Get leftover vars
-  N = cfng["cycles"]
-  t = mkvar(nvtd["time"])
+  jld = cnfg["jldfile"]
+  clu = cnfg["cluster"]
+  N   = cnfg["cycles"]
+  t   = nvtd["time"]["num"] * mkvar(nvtd["time"]["uni"])
 
   # Load clusters
   jd = load(jld)
