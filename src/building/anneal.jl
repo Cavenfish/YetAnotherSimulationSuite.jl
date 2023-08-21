@@ -27,7 +27,7 @@ xyz = "crystal.xyz"
 """
 
 function anneal(inpFile::String)
-  inp = TOML.parsefile(inpfile)
+  inp = TOML.parsefile(inpFile)
 
   #Split dict for easier usage
   cnfg = inp["Settings"]
