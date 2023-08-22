@@ -1,11 +1,23 @@
 
+function avgDFs(arr)
+  ret = arr[1]
+
+  for df in arr[2:end]
+    ret .+= df
+  end
+
+  ret ./= length(arr)
+  
+  return ret
+end
+
 function spaghetti(files)
 
   N   = length(files)
   c   = 255
   k   = 220 / N
-  f   = Figure()
-  ax  = myAxis(f[1,1])  
+  fig = Figure()
+  ax  = myAxis(fig[1,1])  
   dfs = [jldopen(file)["df"] for file in files]
 
   for df in dfs
@@ -22,6 +34,71 @@ function spaghetti(files)
 
   lines!(ax, x, y, color=:gold)
 
-  return f
+  return fig
 end
+
+function mkIsoJld(fname, db)
+
+  function f(x)
+    dfs = [jldopen(file)["df"] for file in x[2]]
+
+    ret = x[1] => avgDFs(dfs)
     
+    return ret
+  end
+
+  isos = map(f, collect(db))
+
+  jldsave(fname; isos)
+end
+
+function pltIsotopes(db)
+
+  function f(x)
+    dfs = [jldopen(file)["df"] for file in x[2]]
+
+    ret = x[1] => avgDFs(dfs)
+    
+    return ret
+  end
+
+  isos = map(f, collect(db))
+  
+  set_theme!(myLightTheme)
+
+  fig = Figure()
+  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
+
+  for iso in isos
+    x = iso[2].time ./ 1000 
+    y = Float64.(iso[2].molVib)
+    l = iso[1]
+
+    lines!(ax, x, y, label=l)
+  end
+
+  axislegend(ax)
+
+  return fig
+end
+
+function pltIsotopes(jldFile::String)
+  isos = jldopen(jldFile)["isos"]
+
+  set_theme!(myLightTheme)
+
+  fig = Figure()
+  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
+
+  for iso in isos
+    x = iso[2].time ./ 1000 
+    y = Float64.(iso[2].molVib)
+    l = iso[1]
+
+    lines!(ax, x, y, label=l)
+  end
+
+  axislegend(ax)
+
+  return fig
+end
