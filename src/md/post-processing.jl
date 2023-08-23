@@ -159,3 +159,59 @@ function trackEnergyDissipation(traj, pot, mol)
 
   return df
 end
+
+function trackRadialEnergy(tj; pot=nothing)
+
+  N   = length(tj.r[1])
+
+  pos = tj.r[102]
+  vel = tj.v[102]
+  mas = tj.m
+
+  tmp = [getCOVibEnergy(pos[i:i+1], vel[i:i+1], mas[i:i+1]) for i in 1:2:N]
+
+  # This is the excited molecule
+  ind = findall(e -> e == maximum(tmp), tmp)[1]
+
+  dis = DataFrame()
+  vib = DataFrame()
+
+  dis[!, "time"] = tj.t
+  vib[!, "time"] = tj.t
+
+  for i in 1:div(N,2)
+    str = "mol$i"
+    
+    dis[!, str] = zero(tj.t)
+    vib[!, str] = zero(tj.t)
+  end
+
+  for i in 1:length(tj.t)
+    for j in 1:div(N,2)
+      #properties of excited molecule
+      epos = tj.r[i][ind*2-1:ind*2]
+      emas = tj.m[ind*2-1:ind*2]
+      ecom = CoM(epos, emas)
+
+      a   = j*2-1
+      b   = j*2
+
+      #properties of other molecule
+      pos = tj.r[i][a:b]
+      vel = tj.v[i][a:b]
+      mas = tj.m[a:b]
+      com = CoM(pos, mas)
+      
+      #distance and vib energy
+      d = norm(com - ecom)
+      v = getCOVibEnergy(pos, vel, mas; pot=pot)
+
+      #store in DFs
+      dis[i,j+1] = d
+      vib[i,j+1] = v
+
+    end
+  end
+
+  return dis, vib
+end
