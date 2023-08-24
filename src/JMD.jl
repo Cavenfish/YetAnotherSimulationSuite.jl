@@ -51,6 +51,7 @@ include("./plotting/config.jl")
 include("./plotting/vibDisp.jl")
 
 include("./mathtk/alphashape.jl")
+include("./mathtk/savitzkyGolay.jl")
 
 include("./building/anneal.jl")
 include("./building/hitAndStick.jl")
