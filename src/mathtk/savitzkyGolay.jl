@@ -8,9 +8,8 @@ function savGol(y, ws, order; deriv=0)
   length(y) > 1  || throw(ArgumentError("len(y) must be > 1"))
   deriv ≥ 0      || throw(ArgumentError("deriv must be ≥ 0"))
 
-
   #half window size
-  hws = div(windowSize, 2) 
+  hws = div(ws, 2) 
 
   #build z vector
   z = collect(-hws:hws)

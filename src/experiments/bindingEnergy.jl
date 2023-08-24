@@ -7,6 +7,7 @@ Example of Input Card
 
 [Settings]
 EoM = "COCO"
+mol = "/home/brian/COjl/xyzFiles/1.xyz"
 jldfile = "/home/brian/COjl/10K-MvH.jld2"
 cluster = "500co"
 sites = 250
@@ -41,12 +42,20 @@ function calcBEs(inpFile::String)
 
   #Get leftover vars
   jld = cnfg["jldfile"]
-  clu = cnfg["cluster"]
   N   = cnfg["sites"]
 
   # Load clusters
   jd = load(jld)
 
-  # Pick cluster
-  bdys = jd[clu]
+  #Read in and pre-optimise cluster and mol
+  mol = readXyz(cnfg["mol"]) |> (x -> opt(EoM, algo, x; kwargs...))
+  clu = jd[cnfg["cluster"]]  |> (x -> opt(EoM, algo, x; kwargs...))
+
+  # Get energies
+  molE = getPotEnergy(EoM, mol)
+  cluE = getPotEnergy(EoM, clu)
+
+  for i in 1:N
+
+  end
 end
