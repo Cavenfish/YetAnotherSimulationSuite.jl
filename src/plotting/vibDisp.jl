@@ -91,14 +91,14 @@ function pltIsotopes(jldFile::String)
   ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
 
   for iso in isos
-    x = iso[2].time ./ 1000 
-    y = Float64.(iso[2].molVib)
+    x = iso[2].time[102:end] ./ 1000 
+    y = Float64.(iso[2].molVib[102:end])
     l = iso[1]
 
     lines!(ax, x, y, label=l)
   end
 
-  axislegend(ax)
+  axislegend(ax, position=:lb)
 
   return fig
 end

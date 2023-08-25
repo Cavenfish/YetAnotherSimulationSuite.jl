@@ -27,6 +27,14 @@ const myLightTheme =  Theme(
     ygridstyle = :dash
   ),
 
+  Legend = (
+    labelsize = 18,
+  ),
+
+  Lines = (
+    linewidth = 2,
+  ),
+
   palette = (patchcolor=collect(myLightColors), color=myLightColors)
 )
 
