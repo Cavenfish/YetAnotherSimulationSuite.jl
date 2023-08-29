@@ -13,26 +13,30 @@ end
 
 function spaghetti(files)
 
+  set_theme!(myLightTheme)
+
   N   = length(files)
   c   = 255
   k   = 220 / N
   fig = Figure()
-  ax  = myAxis(fig[1,1])  
+  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
   dfs = [jldopen(file)["df"] for file in files]
 
   for df in dfs
 
-    x    = df.time ./ 1000
-    y    = Float64.(df.molVib)
+    x    = df.time[102:end] ./ 1000
+    y    = Float64.(df.molVib[102:end])
 
     lines!(ax, x, y, color=RGBf(c/255, 0, c/255))
     c -= k
   end
 
-  x = dfs[1].time ./ 1000
-  y = sum([df.molVib for df in dfs]) ./ length(dfs)
+  x = dfs[1].time[102:end] ./ 1000
+  y = sum([df.molVib[102:end] for df in dfs]) ./ length(dfs)
 
-  lines!(ax, x, y, color=:gold)
+  lines!(ax, x, y, color=:gold, label="Average")
+
+  axislegend(ax)
 
   return fig
 end
