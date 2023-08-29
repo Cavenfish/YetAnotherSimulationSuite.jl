@@ -27,6 +27,7 @@ struct Simplex
 end
 
 struct AlphaShape
+  pts::Vector
   perimeter::Vector
   simplexes::Vector
   area::Float64
@@ -183,6 +184,6 @@ function alphashape(pts; α=nothing)
     end
   end
 
-  A = AlphaShape(perimeter, simplexes, area)
+  A = AlphaShape(pts, perimeter, simplexes, area)
   return A
 end
