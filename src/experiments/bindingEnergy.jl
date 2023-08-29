@@ -63,6 +63,9 @@ function calcBEs(inpFile::String)
   #Get spots on surface of cluster
   spots = [CoM(clu[i:i+1]) for i in 1:2:length(clu)] |> alphashape |> getSpots
 
+  #Check N ≤ spots
+  N ≤ length(spots) || throw("Not enough spots found for $N sites")
+
   #Prep BE df
   ret = Float64[]
 
@@ -75,7 +78,6 @@ function calcBEs(inpFile::String)
     #Randomly rotate molecule (see hitAndStick for function code)
     randRotate!(new)
 
-    println(spot)
     #Spawn molecule and optimise 
     bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; kwargs...))
 
@@ -96,7 +98,7 @@ function getSpots(αShape)
   
   ret = unique([j for i in per for j in i]) |> (x -> pts[x])
 
-  [sum(tri) ./ 3 for tri in per] |> (x -> push!(ret, x))
+  [sum(pts[tri]) ./ 3 for tri in per] |> (x -> push!(ret, x...))
 
   return ret
 end
