@@ -60,26 +60,72 @@ function calcBEs(inpFile::String)
   molE = getPotEnergy(EoM, mol)
   cluE = getPotEnergy(EoM, clu)
 
-  #Get αShape of cluster
-  αShape = [CoM(bdys[i:i+1]) for i in 1:2:length(bdys)] |> alphashape
+  #Get spots on surface of cluster
+  spots = [CoM(clu[i:i+1]) for i in 1:2:length(clu)] |> alphashape |> getSpots
+
+  #Prep BE df
+  ret = Float64[]
 
   #Get BE for N number of sites
-  for spot in αShape[rand(1:length(αShape), N)]
+  for spot in sample(spots, N; replace=false)
+
+    #Copy mol to preserve original location
+    new = deepcopy(mol)
 
     #Randomly rotate molecule (see hitAndStick for function code)
-    randRotate!(mol)
+    randRotate!(new)
 
+    println(spot)
     #Spawn molecule and optimise 
-    opt = spawnMol(mol, clu, αShape, minD) |> (x -> opt(EoM, algo, x; kwargs...))
+    bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; kwargs...))
 
     #Get binding energy
-    be = getPotEnergy(EoM, opt) - (cluE + molE)
+    be = getPotEnergy(EoM, bdys) - (cluE + molE)
+
+    push!(ret, be)
+  end
+
+  jldsave(inp["Saving"]["df"]; ret)
+
+  return ret
+end
+
+function getSpots(αShape)
+  per = αShape.perimeter
+  pts = αShape.pts
+  
+  ret = unique([j for i in per for j in i]) |> (x -> pts[x])
+
+  [sum(tri) ./ 3 for tri in per] |> (x -> push!(ret, x))
+
+  return ret
+end
+
+function moveMol!(mol, v)
+  for bdy in mol
+    bdy.r .+= v
+  end 
+end
+
+function spawnMol(mol, clu, com, spot, minD)
+
+  vhat = (spot - com) ./ norm(spot - com)
+
+  v    = spot + minD * vhat
+
+  moveMol!(mol, v)
+  
+  d = [norm(j.r - i.r) for i in clu for j in mol] |> minimum
+
+  while d < minD
+
+    moveMol!(mol, vhat*0.1)
+
+    d = [norm(j.r - i.r) for i in clu for j in mol] |> minimum
 
   end
 
-end
-
-function spawnMol(mol, clu, spot, minD)
+  bdys = [clu; mol]
 
   return bdys
 end

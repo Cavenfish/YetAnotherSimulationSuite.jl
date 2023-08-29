@@ -56,6 +56,7 @@ include("./mathtk/savitzkyGolay.jl")
 include("./building/anneal.jl")
 include("./building/hitAndStick.jl")
 
+include("./experiments/bindingEnergy.jl")
 include("./experiments/energyDissipation.jl")
 
 include("./md/potentials/params/loadVars.jl")
