@@ -15,10 +15,14 @@ minD = 3.5
 
 [OPT]
 algo = "LBFGS"
-kwargs.x_tol = 1e-4
-kwargs.f_tol = 1e-12
-kwargs.g_tol = 1e-4
-kwargs.iterations = 100000
+pre.x_tol = 1e-5
+pre.f_tol = 1e-12
+pre.g_tol = 1e-6
+pre.iterations = 100000
+pst.x_tol = 1e-5
+pst.f_tol = 1e-12
+pst.g_tol = 1e-3
+pst.iterations = 100000
 
 [Saving]
 df = "beDF.jld2"
@@ -34,11 +38,18 @@ function calcBEs(inpFile::String)
   EoM  = mkvar(cnfg["EoM"])
   algo = mkvar(inp["OPT"]["algo"])()
 
-  #Build opt kwargs dict
-  kwargs = Dict()
-  for key in keys(inp["OPT"]["kwargs"])
-    value = inp["OPT"]["kwargs"][key]
-    kwargs[Symbol(key)] = value
+  #Build pre opt kwargs dict
+  pre = Dict()
+  for key in keys(inp["OPT"]["pre"])
+    value = inp["OPT"]["pre"][key]
+    pre[Symbol(key)] = value
+  end
+
+  #Build post opt kwargs dict
+  pst = Dict()
+  for key in keys(inp["OPT"]["pst"])
+    value = inp["OPT"]["pst"][key]
+    pst[Symbol(key)] = value
   end
 
   #Get leftover vars
@@ -50,8 +61,8 @@ function calcBEs(inpFile::String)
   jd = load(jld)
 
   #Read in and pre-optimise cluster and mol
-  mol = readXyz(cnfg["mol"]) |> (x -> opt(EoM, algo, x; kwargs...))
-  clu = jd[cnfg["cluster"]]  |> (x -> opt(EoM, algo, x; kwargs...))
+  mol = readXyz(cnfg["mol"]) |> (x -> opt(EoM, algo, x; pre...))
+  clu = jd[cnfg["cluster"]]  |> (x -> opt(EoM, algo, x; pre...))
 
   #Get cluster center of mass (for surface norms later)
   com = CoM(clu)
@@ -79,7 +90,7 @@ function calcBEs(inpFile::String)
     randRotate!(new)
 
     #Spawn molecule and optimise 
-    bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; kwargs...))
+    bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; pst...))
 
     #Get binding energy
     be = getPotEnergy(EoM, bdys) - (cluE + molE)
