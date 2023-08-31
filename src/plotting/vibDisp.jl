@@ -107,3 +107,11 @@ function pltIsotopes(jldFile::String)
   return fig
 end
 
+function pltGeneralDisp(db)
+
+  set_theme!(myLightTheme)
+
+  fig = Figure()
+  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
+
+end
