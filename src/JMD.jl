@@ -59,5 +59,7 @@ include("./building/hitAndStick.jl")
 include("./experiments/bindingEnergy.jl")
 include("./experiments/energyDissipation.jl")
 
+include("./organization/dataManagement.jl")
+
 include("./md/potentials/params/loadVars.jl")
 end # module

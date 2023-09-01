@@ -1,8 +1,19 @@
 
-function makeDataBase(file, p)
+struct DataBaseInfo
+  experiment::String
+  categories::String
+end
 
-  jldopen(file, "w") do f 
-    group = JLD2.Group(p[1])
+struct exptInfo
+  cluster::String
+  molecule::String
+  energy::Float64
+end
+
+function makeDataBase(file, p; kwargs...)
+
+  jldopen(file, "a+"; kwargs...) do f 
+    group = JLD2.Group(f, p[1])
     
     for item in p[2]
       k = split(item, "_")[end] |> (x -> replace(x, ".jld2" => ""))
