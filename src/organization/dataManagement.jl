@@ -13,7 +13,12 @@ end
 function makeDataBase(file, p; kwargs...)
 
   jldopen(file, "a+"; kwargs...) do f 
-    group = JLD2.Group(f, p[1])
+    
+    group = try 
+              f[p[1]] 
+            catch e 
+              JLD2.Group(f, p[1]) 
+            end 
     
     for item in p[2]
       k = split(item, "_")[end] |> (x -> replace(x, ".jld2" => ""))
@@ -30,3 +35,4 @@ function makeDataBase(file, p; kwargs...)
     end
   end
 end
+
