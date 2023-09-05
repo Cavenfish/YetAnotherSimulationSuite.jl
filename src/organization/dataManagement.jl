@@ -10,6 +10,15 @@ struct exptInfo
   energy::Float64
 end
 
+function walk(db, group)
+  ["$(group)/$(i)" for i in keys(db[group])]
+end
+
+function pull(db, group)
+  [db["$(group)/$(i)"] for i in keys(db[group])]
+end
+
+
 function makeDataBase(file, p; kwargs...)
 
   jldopen(file, "a+"; kwargs...) do f 
