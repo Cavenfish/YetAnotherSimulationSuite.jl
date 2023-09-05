@@ -107,11 +107,47 @@ function pltIsotopes(jldFile::String)
   return fig
 end
 
-function pltGeneralDisp(db)
+function pltGeneralDisp(toPlt)
 
   set_theme!(myLightTheme)
 
   fig = Figure()
   ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
 
+  for p in toPlt
+    
+    l  = p[1]
+    df = p[2]
+
+    lines!(ax, df.time ./ 1000, df.molVib, label=l)
+  end
+
+  fig
+end
+
+function pltDoubleDisp(toPlt)
+
+  set_theme!(myLightTheme)
+
+  fig = Figure(size=(1,4))
+  ax1 = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
+  ax2 = Axis(fig[1,2], xlabel="Time (ps)", ylabel="Energy (eV)")
+
+  for p in toPlt[1]
+    
+    l  = p[1]
+    df = p[2]
+
+    lines!(ax1, df.time ./ 1000, df.molVib, label=l)
+  end
+
+  for p in toPlt[2]
+    
+    l  = p[1]
+    df = p[2]
+
+    lines!(ax2, df.time ./ 1000, df.molVib, label=l)
+  end
+
+  fig
 end

@@ -32,6 +32,10 @@ function makeDataBase(file, p; kwargs...)
     for item in p[2]
       k = split(item, "_")[end] |> (x -> replace(x, ".jld2" => ""))
       
+      if k in keys(group)
+        continue
+      end
+
       if occursin("DF", p[1])
         df       = jldopen(item)["df"]
         group[k] = df
