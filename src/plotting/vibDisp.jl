@@ -1,6 +1,6 @@
 
 function avgDFs(arr)
-  ret = arr[1]
+  ret = deepcopy(arr[1])
 
   for df in arr[2:end]
     ret .+= df
@@ -129,7 +129,7 @@ function pltDoubleDisp(toPlt)
 
   set_theme!(myLightTheme)
 
-  fig = Figure(size=(1,4))
+  fig = Figure(resolution=(1200,400))
   ax1 = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
   ax2 = Axis(fig[1,2], xlabel="Time (ps)", ylabel="Energy (eV)")
 
