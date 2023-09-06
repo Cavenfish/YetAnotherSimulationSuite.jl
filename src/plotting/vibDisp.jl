@@ -8,7 +8,7 @@ function avgDFs(arr)
 
   ret ./= length(arr)
   
-  return ret
+  ret
 end
 
 function spaghetti(files)
@@ -38,7 +38,7 @@ function spaghetti(files)
 
   axislegend(ax)
 
-  return fig
+  fig
 end
 
 function mkIsoJld(fname, db)
@@ -83,7 +83,7 @@ function pltIsotopes(db)
 
   axislegend(ax)
 
-  return fig
+  fig
 end
 
 function pltIsotopes(jldFile::String)
@@ -104,7 +104,7 @@ function pltIsotopes(jldFile::String)
 
   axislegend(ax, position=:lb)
 
-  return fig
+  fig
 end
 
 function pltGeneralDisp(toPlt)
@@ -151,3 +151,4 @@ function pltDoubleDisp(toPlt)
 
   fig
 end
+
