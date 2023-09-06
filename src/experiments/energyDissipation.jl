@@ -7,6 +7,7 @@ Example of Input Card
 
 [expt]
 EoM = "COCO"
+vzpe = 0.001
 energy = 0.4
 time = 2000
 location = "bulk"
@@ -70,6 +71,17 @@ function vibDisp(inpFile::String)
 
   # Swap mass of CO
   swapIso!(bdys, mol, iso)
+
+  #Add VZPE to cluster
+  if  "vzpe" in keys(expt)
+    zpe = expt["vzpe"]
+    f,m = getHarmonicFreqs(EoM, bdys)
+    N   = div(length(bdys), 2)
+    m   = m[:, end-(N-1):end]
+    for i = 1:N
+      vibExcite!(bdys, m[:, i], zpe)
+    end
+  end
 
   # Run short NVE to equilibrate system
   equil = runNVE(EoM, (0, 10ps), fs, bdys)
