@@ -13,6 +13,7 @@ using TOML
 using JLD2
 using FFTW
 using Optim
+using LsqFit
 using MiniQhull
 using DataFrames
 using Statistics
@@ -46,6 +47,7 @@ include("./analysis/desorb.jl")
 include("./analysis/vibrations.jl")
 include("./analysis/optimizations.jl")
 include("./analysis/structral.jl")
+include("./analysis/decayRates.jl")
 
 include("./plotting/config.jl")
 include("./plotting/vibDisp.jl")
