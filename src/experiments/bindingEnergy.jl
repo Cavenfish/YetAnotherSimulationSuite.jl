@@ -98,9 +98,19 @@ function calcBEs(inpFile::String)
     push!(ret, be)
   end
 
-  jldsave(inp["Saving"]["df"]; ret)
+  df = mkBEdf(ret)
+  jldsave(inp["Saving"]["df"]; df)
 
-  return ret
+  df
+end
+
+function mkBEdf(arr)
+  eVtoK  = 11604.525
+  eVtocm = 8065.56
+
+  df = Dict("eV" => arr, "K" => arr*eVtoK, "cm-1" => arr*eVtocm) |> DataFrame
+
+  df
 end
 
 function getSpots(αShape)
