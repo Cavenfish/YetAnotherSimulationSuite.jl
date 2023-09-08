@@ -98,7 +98,7 @@ function calcBEs(inpFile::String)
     push!(ret, be)
   end
 
-  df = mkBEdf(ret)
+  df = mkBEdf(ret * -1)
   jldsave(inp["Saving"]["df"]; df)
 
   df
