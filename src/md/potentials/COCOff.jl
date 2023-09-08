@@ -390,3 +390,108 @@ function COCO(F, G, y0, p)
   end
 end
 
+function molPot!(F, x0, mol)
+  i,j   = mol
+  posi0 = x0[i]
+  posi1 = x0[j]
+  ri1i0 = diffDotSqrt(posi1, posi0)
+
+  #Calculate Morse
+  E,f   = calcMorse(ri1i0...)
+  F[i] -= f
+  F[j] += f
+
+  E
+end
+
+function pairPot!(F, x0, par)
+  i,j   = par[1]
+  k,m   = par[2]
+  posi0 = x0[i]
+  posi1 = x0[j]
+  ri1i0 = diffDotSqrt(posi1, posi0)
+
+  posj0 = x0[k]
+  posj1 = x0[m]
+
+  rj0i0 = diffDotSqrt(posj0, posi0)
+  rj1i1 = diffDotSqrt(posj1, posi1)
+  rj0i1 = diffDotSqrt(posj0, posi1)
+  rj1i0 = diffDotSqrt(posj1, posi0)
+
+  #Calculate Dispersion
+  E, Fcc, Foo, Fco, Foc = calcDisp(rj0i0, rj1i1, rj0i1, rj1i0)
+  F[i] -= (Fcc + Foc)
+  F[j] -= (Foo + Fco)
+  F[k] += (Fcc + Fco)
+  F[m] += (Foo + Foc)
+
+  #Calculate Exchange
+  e, Fcc, Foo, Fco, Foc = calcExch(rj0i0, rj1i1, rj0i1, rj1i0)
+  E    += e
+  F[i] -= (Fcc + Foc)
+  F[j] -= (Foo + Fco)
+  F[k] += (Fcc + Fco)
+  F[m] += (Foo + Foc)
+
+  #Calculate Coulomb
+  e, Fi0, Fi1, Fj0, Fj1 = calcCoul(posi0, posi1, posj0, posj1,
+                                    rj0i0, rj1i1, rj0i1, rj1i0,
+                                    ri1i0)
+  E    += e
+  F[i] += Fi0
+  F[j] += Fi1
+  F[k] += Fj0
+  F[m] += Fj1
+
+  E
+end
+
+function multiCOCO(F, G, y0, p)
+
+  #Get number of threads
+  nthred = Threads.nthreads()
+
+  x0     = Vector[]
+  forces = Vector[]
+  for i in 1:3:length(y0)
+    push!(x0, y0[i:i+2])
+    push!(forces, [0.0, 0.0, 0.0])
+  end
+
+  epsilon = 11.230139012256362
+  N       = length(x0)
+
+  #Allocate space for each thread to work
+  _E = zeros(nthred)
+  _F = [deepcopy(forces) for i=1:nthred] 
+
+  Threads.@threads for i in p.mols
+    id = Threads.threadid()
+
+    _E[id] += molPot!(_F[id], x0, i)
+  end
+
+  Threads.@threads for i in p.pars
+    id = Threads.threadid()
+
+    _E[id] += pairPot!(_F[id], x0, i)
+  end
+
+  # In order to normalize the minimal morse potential to zero,
+  # the following energy will be added to change the zero point
+  # of all intramolecular interactions.
+  energy = sum(_E) + epsilon * N / 2.0
+  forces .= sum(_F)
+
+  if G != nothing
+    tmp = [j for i in forces for j in i]
+    for i in 1:length(G)
+      G[i] = -tmp[i]
+    end
+  end
+
+  if F != nothing
+    return energy
+  end
+end
