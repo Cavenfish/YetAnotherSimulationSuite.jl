@@ -152,3 +152,17 @@ function pltDoubleDisp(toPlt)
   fig
 end
 
+function pltGeneralVDOS(toPlt)
+
+  set_theme!(myLightTheme)
+
+  fig = Figure()
+  ax  = Axis(fig[1,1], xlabel=L"Frequency (cm$^{-1]}$)",
+                       ylabel="Intensity (arb.)")
+
+  for p in toPlt
+    #plot thing
+  end
+
+  fig
+end
