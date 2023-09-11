@@ -59,7 +59,7 @@ function vibDisp(inpFile::String)
            jd[clu]
          else
            k = keys(jd)
-           jd[k[rand(1:length(k))]]
+           jd[rand(k)]
          end
   zeroVCoM!(bdys)
 
