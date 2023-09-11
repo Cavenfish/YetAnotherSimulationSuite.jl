@@ -48,14 +48,19 @@ function vibDisp(inpFile::String)
   loc    = expt["location"]
   iso    = expt["isotope"]
   jld    = expt["jldfile"]
-  clu    = expt["cluster"]
   splits = expt["splits"]
 
   # Load clusters
   jd = load(jld)
 
   # Pick cluster
-  bdys = jd[clu]
+  bdys = if "cluster" in keys(expt)
+           clu = expt["cluster"]       
+           jd[clu]
+         else
+           k = keys(jd)
+           jd[k[rand(1:length(k))]]
+         end
   zeroVCoM!(bdys)
 
   #Swap cluster isotope
