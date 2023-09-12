@@ -161,7 +161,11 @@ function pltGeneralVDOS(toPlt)
                        ylabel="Intensity (arb.)")
 
   for p in toPlt
-    #plot thing
+    
+    l  = p[1]
+    df = p[2]
+
+    lines!(ax, df.v, df."1", label=l)
   end
 
   fig

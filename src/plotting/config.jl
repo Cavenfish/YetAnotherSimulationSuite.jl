@@ -11,13 +11,13 @@ const myLightColors = [
 ]
 
 const myLightTheme =  Theme(
-  fontsize = 16,
+  fontsize = 18,
 
   fonts = (
-    regular     = "Verdana",
-    bold        = "Verdana Bold",
-    italic      = "Verdana Italic",
-    bold_italic = "Verdana Bold Italic"
+    regular     = Makie.texfont(),
+    bold        = Makie.texfont(:bold),
+    italic      = Makie.texfont(:italic),
+    bold_italic = Makie.texfont(:bolditalic)
   ),
 
   Axis = (
