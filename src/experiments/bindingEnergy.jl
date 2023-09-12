@@ -77,11 +77,14 @@ function calcBEs(inpFile::String)
   #Check N ≤ spots
   N ≤ length(spots) || throw("Not enough spots found for $N sites")
 
-  #Prep BE df
-  ret = Float64[]
+  #Prep BE array
+  ret = [Float64[] for i in 1:Threads.nthreads()]
 
   #Get BE for N number of sites
-  for spot in sample(spots, N; replace=false)
+  Threads.@threads for spot in sample(spots, N; replace=false)
+    
+    #Get thread ID
+    id = Threads.threadid()
 
     #Copy mol to preserve original location
     new = deepcopy(mol)
@@ -95,10 +98,11 @@ function calcBEs(inpFile::String)
     #Get binding energy
     be = getPotEnergy(EoM, bdys) - (cluE + molE)
 
-    push!(ret, be)
+    push!(ret[id], be)
   end
 
-  df = mkBEdf(ret * -1)
+  BE = vcat(ret...)
+  df = mkBEdf(BE * -1)
   jldsave(inp["Saving"]["df"]; df)
 
   df
