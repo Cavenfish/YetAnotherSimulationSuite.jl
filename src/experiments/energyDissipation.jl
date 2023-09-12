@@ -16,6 +16,7 @@ jldfile = "/home/brian/COjl/10K-MvH.jld2"
 cluster = "250co"
 splits = 100
 cluIso = [13.003, 17.999]
+KE = 10
 
 [vacf]
 inter = 10
@@ -78,7 +79,7 @@ function vibDisp(inpFile::String)
   swapIso!(bdys, mol, iso)
 
   #Add VZPE to cluster
-  if  "vzpe" in keys(expt)
+  if "vzpe" in keys(expt)
     zpe = expt["vzpe"]
     f,m = getHarmonicFreqs(EoM, bdys)
     N   = div(length(bdys), 2)
@@ -101,6 +102,12 @@ function vibDisp(inpFile::String)
   co  = bdys[mol]
   f,m = getHarmonicFreqs(EoM, co)
   vibExcite!(co, m[:,6], E)
+
+  #Translational excitation
+  if "KE" in keys(expt)
+    KE = expt["KE"]
+    transExcite!(co, KE)
+  end
 
   # Run in parts to avoid segfaults
   for i in 1:splits

@@ -113,6 +113,15 @@ function vibExcite!(mol, eignvec, E)
 
 end
 
+function transExcite!(mol, KE)
+  r  = randVector()
+  ke = KE * 8.6173e-5 #convert Kelvin to eV
+
+  for i in mol
+    i.v += sqrt(2ke / i.m) .* r
+  end
+end
+
 function getTransEnergy(mol)
   μ = reducedMass(mol)
   v = vCoM(mol)
