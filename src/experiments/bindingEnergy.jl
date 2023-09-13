@@ -8,8 +8,7 @@ Example of Input Card
 [Settings]
 EoM = "COCO"
 mol = "/home/brian/COjl/xyzFiles/1.xyz"
-jldfile = "/home/brian/COjl/10K-MvH.jld2"
-cluster = "500co"
+clu = "/home/brian/COjl/clu.xyz"
 sites = 250
 minD = 3.5
 
@@ -54,15 +53,13 @@ function calcBEs(inpFile::String)
 
   #Get leftover vars
   minD = cnfg["minD"]
-  jld  = cnfg["jldfile"]
   N    = cnfg["sites"]
-
-  # Load clusters
-  jd = load(jld)
 
   #Read in and pre-optimise cluster and mol
   mol = readXyz(cnfg["mol"]) |> (x -> opt(EoM, algo, x; pre...))
-  clu = jd[cnfg["cluster"]]  |> (x -> opt(EoM, algo, x; pre...))
+  clu = readXyz(cnfg["clu"])  |> (x -> opt(EoM, algo, x; pre...))
+
+  println("pre-opt done")
 
   #Get cluster center of mass (for surface norms later)
   com = CoM(clu)
