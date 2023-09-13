@@ -222,36 +222,35 @@ function getPotEnergy(EoM, bdys)
 end
 
 function getSurfaceMolecules(bdys; α=nothing)
-  pars, mols = getPairs(bdys)
+  _, mols = getPairs(bdys)
 
-  pts  = [CoM(bdys[i]) for i in mols]
+  pts  = [i.r for i in bdys]
 
   A    = alphashape(pts; α=α)
   
-  tmp  = unique([j for i in A.perimeter for j in i])
+  i = vcat(A.perimeter...) |> unique
+  j = findall.(e -> e in i, mols) |> (x -> findall(e -> !isempty(e), x))
 
-  surf = bdys[ [j for i in tmp for j in mols[i]] ]
+  surf = bdys[vcat(mols[j]...)]
 
-  return surf
+  surf
 end
 
 function pickRandomMol(bdys, loc)
-  pars, mols = getPairs(bdys)
 
-  pts  = [CoM(bdys[i]) for i in mols]
-
-  A    = alphashape(pts)
-  
-  surf = unique([j for i in A.perimeter for j in i])
-  bulk = [i for i in 1:length(pts) if !(i in surf)]
+  surf = getSurfaceMolecules(bdys)
+  bulk = [i for i in bdys if !(i in surf)]
 
   if loc == "surf"
-    tmp = surf[rand(1:end)]
+
+    _,mols = getPairs(surf)
+    return surf[rand(mols)]
+
   elseif loc == "bulk"
-    tmp = bulk[rand(1:end)]
+
+    _,mols = getPairs(bulk)
+    return bulk[rand(mols)]
+
   end
   
-  mol = mols[tmp]
-  
-  return mol
 end 
