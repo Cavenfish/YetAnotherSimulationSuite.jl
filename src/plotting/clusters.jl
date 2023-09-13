@@ -8,9 +8,10 @@ function pltAlphaShape(bdys)
   xyz   = Tuple.(pts)
   faces = hcat(A.perimeter...) |> transpose
 
-  fig = Figure()
+  # fig = Figure()
+  # ax  = Axis3D(fig, xlabel=L"\AA", ylabel=L"\AA", zlable=L"\AA")
 
-  mesh(xyz, faces, color=(:purple, 0.15))
+  fig = mesh(xyz, faces, color=(:purple, 0.15))
 
   fig
 end 
