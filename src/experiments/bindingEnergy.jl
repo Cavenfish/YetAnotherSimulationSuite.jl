@@ -69,7 +69,7 @@ function calcBEs(inpFile::String)
   cluE = getPotEnergy(EoM, clu)
 
   #Get spots on surface of cluster
-  spots = [CoM(clu[i:i+1]) for i in 1:2:length(clu)] |> alphashape |> getSpots
+  spots = [i.r for i in clu] |> alphashape |> getSpots
 
   #Check N ≤ spots
   N ≤ length(spots) || throw("Not enough spots found for $N sites")
