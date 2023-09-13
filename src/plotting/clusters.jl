@@ -13,5 +13,11 @@ function pltAlphaShape(bdys)
 
   fig = mesh(xyz, faces, color=(:purple, 0.15))
 
+
+  c = [Tuple(i.r) for i in bdys if i.s=='C']
+  o = [Tuple(i.r) for i in bdys if i.s=='O']
+  meshscatter!(c, color=:gray, markersize=0.3)
+  meshscatter!(c, color=:red,  markersize=0.3)
+
   fig
 end 
