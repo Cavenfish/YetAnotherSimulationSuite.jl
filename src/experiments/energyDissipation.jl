@@ -73,7 +73,7 @@ function vibDisp(inpFile::String)
   end
 
   # Randomly select molecule to excite
-  mol = pickRandomMol(bdys, loc)
+  mol = pickRandomMol(bdys, loc) |> (x -> findall(e -> e in x, bdys))
 
   # Swap mass of CO
   swapIso!(bdys, mol, iso)
