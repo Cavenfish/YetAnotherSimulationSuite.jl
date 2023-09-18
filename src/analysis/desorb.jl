@@ -18,12 +18,17 @@ function getDesorbEvents(files; dist=8.0)
 
       num = findall(e -> minimum(e) > dist, d)
 
-      push!.(des, num)
+      push!(des, num)
     end
 
-    des = unique(des)
+    fin = unique(vcat(des...))
 
     println("$file : ")
-    println("  Desorbed Molecules: $(length(des))")
+    println()
+    if length(fin) > 0
+      printstyled("  Desorbed Molecules: $(length(fin))"; bold=true, color=:green)
+    else
+      println("  Desorbed Molecules: $(length(fin))")
+    end
   end
 end

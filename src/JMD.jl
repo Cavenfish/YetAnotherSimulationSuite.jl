@@ -31,6 +31,8 @@ const ps   = 1000 * fs
 const ns   = 1000 * ps
 const kB   = 8.617333262e-5 # eV / K
 
+include("./types.jl")
+
 include("./io.jl")
 include("./macros.jl")
 include("./helpers.jl")

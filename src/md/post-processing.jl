@@ -1,5 +1,5 @@
 
-struct Traj
+struct Traj <: MyTraj
   t::Vector{Float64}
   E::Vector{Float64}
   T::Vector{Float64}
