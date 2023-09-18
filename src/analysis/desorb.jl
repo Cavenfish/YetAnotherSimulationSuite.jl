@@ -1,5 +1,5 @@
 
-function getDesorbEvents(files)
+function getDesorbEvents(files; dist=8.0)
 
   for file in files
     tj  = jldopen(file)["traj"]
@@ -16,7 +16,7 @@ function getDesorbEvents(files)
       tmp = findall.(e -> e < 2, d)
       deleteat!.(d, tmp)
 
-      num = findall(e -> minimum(e) > 8, d)
+      num = findall(e -> minimum(e) > dist, d)
 
       push!.(des, num)
     end
