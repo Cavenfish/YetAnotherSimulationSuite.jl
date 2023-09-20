@@ -62,9 +62,11 @@ function vacf!(inp, out; atms=nothing)
     end
   end
 
-  # out.D  = sum(c) / (D*N)
-  # out.D *= UNIT  CONVERSION
-  
+  #By default the diffusion coefficient is in units of
+  # Angstrom * sqrt(eV / amu)
+  out.D  = sum(out.c) / (D*N)
+  out.D *= 0.00982269475 # convert to cm^2/s
+
   if inp.norm
     out.C = out.c ./ out.c[1]
   else
