@@ -64,10 +64,10 @@ function pltDispAndTemp(toPlt)
   set_theme!(myLightTheme)
 
   fig = Figure(resolution=(800,700))
-  gl1 = GridLayout(fig[1, 1])
+  gl  = GridLayout(fig[1, 1])
 
-  ax1 = Axis(gl1[1:6, 1], xlabel="Time (ps)", ylabel="Energy (eV)")
-  ax2 = Axis(gl1[7:8, 1], xlabel="Time (ps)", ylabel="Temp. (K)")
+  ax1 = Axis(gl[1:6, 1], xlabel="Time (ps)", ylabel="Energy (eV)")
+  ax2 = Axis(gl[7:8, 1], xlabel="Time (ps)", ylabel="Temp. (K)")
 
   hidexdecorations!(ax1, grid=false)
 
@@ -81,16 +81,16 @@ function pltDispAndTemp(toPlt)
   end
 
   axislegend(ax1)
-  rowgap!(gl1, 5)
+  rowgap!(gl, 5)
 
-  (fig, gl1)
+  (fig, gl)
 end
 
 function pltDoubleDisp(toPlt)
 
   set_theme!(myLightTheme)
 
-  fig = Figure(resolution=(1200,400))
+  fig = Figure(resolution=(1600,600))
   ax1 = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
   ax2 = Axis(fig[1,2], xlabel="Time (ps)", ylabel="Energy (eV)")
 
