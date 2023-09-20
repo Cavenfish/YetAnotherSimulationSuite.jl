@@ -1,4 +1,6 @@
 
+#CairoMakie Default Resolution = (800, 600)
+
 const myLightColors = [
   colorant"#FF74D4",
   colorant"#5386E4",

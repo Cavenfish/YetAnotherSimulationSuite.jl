@@ -41,72 +41,6 @@ function spaghetti(files)
   fig
 end
 
-function mkIsoJld(fname, db)
-
-  function f(x)
-    dfs = [jldopen(file)["df"] for file in x[2]]
-
-    ret = x[1] => avgDFs(dfs)
-    
-    return ret
-  end
-
-  isos = map(f, collect(db))
-
-  jldsave(fname; isos)
-end
-
-function pltIsotopes(db)
-
-  function f(x)
-    dfs = [jldopen(file)["df"] for file in x[2]]
-
-    ret = x[1] => avgDFs(dfs)
-    
-    return ret
-  end
-
-  isos = map(f, collect(db))
-  
-  set_theme!(myLightTheme)
-
-  fig = Figure()
-  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
-
-  for iso in isos
-    x = iso[2].time ./ 1000 
-    y = Float64.(iso[2].molVib)
-    l = iso[1]
-
-    lines!(ax, x, y, label=l)
-  end
-
-  axislegend(ax)
-
-  fig
-end
-
-function pltIsotopes(jldFile::String)
-  isos = jldopen(jldFile)["isos"]
-
-  set_theme!(myLightTheme)
-
-  fig = Figure()
-  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
-
-  for iso in isos
-    x = iso[2].time[102:end] ./ 1000 
-    y = Float64.(iso[2].molVib[102:end])
-    l = iso[1]
-
-    lines!(ax, x, y, label=l)
-  end
-
-  axislegend(ax, position=:lb)
-
-  fig
-end
-
 function pltGeneralDisp(toPlt)
 
   set_theme!(myLightTheme)
@@ -123,6 +57,33 @@ function pltGeneralDisp(toPlt)
   end
 
   fig
+end
+
+function pltDispAndTemp(toPlt)
+
+  set_theme!(myLightTheme)
+
+  fig = Figure(resolution=(800,700))
+  gl1 = GridLayout(fig[1, 1])
+
+  ax1 = Axis(gl1[1:6, 1], xlabel="Time (ps)", ylabel="Energy (eV)")
+  ax2 = Axis(gl1[7:8, 1], xlabel="Time (ps)", ylabel="Temp. (K)")
+
+  hidexdecorations!(ax1, grid=false)
+
+  for p in toPlt
+    
+    l  = p[1]
+    df = p[2]
+
+    lines!(ax1, df.time ./ 1e3, df.molVib, label=l)
+    lines!(ax2, df.time ./ 1e3, df.temp)
+  end
+
+  axislegend(ax1)
+  rowgap!(gl1, 5)
+
+  (fig, gl1)
 end
 
 function pltDoubleDisp(toPlt)
