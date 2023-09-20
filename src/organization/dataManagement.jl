@@ -49,3 +49,37 @@ function makeDataBase(file, p; kwargs...)
   end
 end
 
+#"isotopes/13co-amCO/DFs" => glob("./gfs/isotopes/13co-amCO*DF*")
+
+function makeDataBase(dbName::String, files::Vector{String}; kwargs...)
+
+  jldopen(dbName, "a+"; kwargs...) do f 
+
+    for file in files
+
+      if "TJ" in file
+        continue
+      end
+
+      headGroup = split(file, '/')[end-1]
+      tailGroup = "DF" in file ? "DFs" : "VDs"
+      k         = split(file, "_")[end] |> (x -> replace(x, ".jld2" => ""))
+
+      if headGroup == "isotopes"
+
+        midGroup = split(file, '/')[end] |> (x -> split(x, '_')[1])
+
+        if midGroup == "surf"
+        end #surf
+
+        key = "$(headGroup)/$(midGroup)/$(tailGroup)/$(k)"
+        tmp = "DF" in file ? "df" : "vd"
+
+        f[key] = jldopen(file)[tmp]
+
+      end #isotopes
+
+    end # for file in files
+
+  end #close JLD2 file
+end
