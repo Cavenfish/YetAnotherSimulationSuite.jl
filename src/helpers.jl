@@ -11,6 +11,15 @@ function mkvar(x)
   return X
 end
 
+function getFrame(tj::MyTraj, i::Int64)
+  m = tj.m
+  s = map(x -> x > 15 ? 'O' : 'C', tj.m)
+  r = tj.r[i]
+  v = tj.v[i]
+
+  [Atom(r[j], v[j], m[j], s[j]) for j in 1:length(m)]
+end
+
 function getLastFrame(solu)
   n = length(solu.prob.p.bdys)
   
