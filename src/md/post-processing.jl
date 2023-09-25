@@ -160,7 +160,7 @@ function trackEnergyDissipation(traj, pot, mol)
   return df
 end
 
-function trackRadialEnergy(tj; pot=nothing)
+function trackAllVibEnergy(tj; pot=nothing)
 
   N   = length(tj.r[1])
 
@@ -214,4 +214,12 @@ function trackRadialEnergy(tj; pot=nothing)
   end
 
   return dis, vib
+end
+
+function trackRadialEnergy(tj; pot=nothing)
+
+  #TODO: Make this function collect vib, tra, and rot energy at radial slices
+
+  
+  
 end

@@ -140,18 +140,29 @@ function pltStackedVDOS(toPlt)
   gl  = GridLayout(fig[1, 1])
 
   for i in 1:length(toPlt)
-    p  = toPlt[i]
-    ax = Axis(gl[i, 1], xlabel=L"Frequency (cm$^{-1}$)", ylabel="VDOS (arb.)")
+    p   = toPlt[i]
+    ax1 = Axis(gl[i, 1], xlabel=L"Frequency (cm$^{-1}$)", ylabel="VDOS (arb.)")
+    ax2 = Axis(gl[i, 2], xlabel=L"Frequency (cm$^{-1}$)", ylabel="VDOS (arb.)")
 
     l  = p[1]
     df = p[2]
     y  = df."1" ./ maximum(df."1") .* 100
 
-    lines!(ax, df.v, y)
-    xlims!(ax, -5, 2500)
+    lines!(ax1, df.v, y)
+    xlims!(ax1, -5, 150)
+    ylims!(ax1, -5, 100)
+
+    lines!(ax2, df.v, y)
+    xlims!(ax2, 2100, 2250)
+    ylims!(ax2, -5, 100)
+
+
     # text!( ax, 1000, 50, text=l)
 
-    i < length(toPlt) && hidexdecorations!(ax, grid=false)
+    hideydecorations!(ax2, grid=false)
+
+    i < length(toPlt) && hidexdecorations!(ax1, grid=false)
+    i < length(toPlt) && hidexdecorations!(ax2, grid=false)
   end
 
   rowgap!(gl, 0)
