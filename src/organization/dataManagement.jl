@@ -18,6 +18,11 @@ function pull(db, group)
   [db["$(group)/$(i)"] for i in keys(db[group])]
 end
 
+function getMissing(db, group)
+  i = keys(db[str]) |> (x -> parse.(Int64, x))
+  j = collect(1:100)
+  findall(e -> !(e in i), j)
+ end
 
 function makeDataBase(file, p; kwargs...)
 

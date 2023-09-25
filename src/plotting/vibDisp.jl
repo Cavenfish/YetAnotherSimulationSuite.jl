@@ -131,3 +131,31 @@ function pltGeneralVDOS(toPlt)
 
   fig
 end
+
+function pltStackedVDOS(toPlt)
+
+  set_theme!(myLightTheme)
+
+  fig = Figure(resolution=(800, 200*length(toPlt)))
+  gl  = GridLayout(fig[1, 1])
+
+  for i in 1:length(toPlt)
+    p  = toPlt[i]
+    ax = Axis(gl[i, 1], xlabel=L"Frequency (cm$^{-1}$)", ylabel="VDOS (arb.)")
+
+    l  = p[1]
+    df = p[2]
+    y  = df."1" ./ maximum(df."1") .* 100
+
+    lines!(ax, df.v, y)
+    xlims!(ax, -5, 2500)
+    # text!( ax, 1000, 50, text=l)
+
+    i < length(toPlt) && hidexdecorations!(ax, grid=false)
+  end
+
+  rowgap!(gl, 0)
+
+  (fig, gl)
+end
+
