@@ -170,3 +170,30 @@ function pltStackedVDOS(toPlt)
   (fig, gl)
 end
 
+function pltStackedRDF(toPlt)
+
+  set_theme!(myLightTheme)
+
+  fig = Figure(resolution=(600, 200*length(toPlt)))
+  gl  = GridLayout(fig[1, 1])
+
+  for i in 1:length(toPlt)
+    p  = toPlt[i]
+    ax = Axis(gl[i, 1], xlabel=L"Distance ($\AA$)", ylabel="g(r) (arb.)")
+
+    l    = p[1]
+    r, g = p[2]
+    y    = g ./ maximum(g)
+
+    lines!(ax, r, y)
+    text!( ax, 20, 0.5, text=l, bold=true)
+    xlims!(ax, 0, 30)
+    ylims!(ax, -0.1, 1.1)
+
+    i < length(toPlt) && hidexdecorations!(ax, grid=false)
+  end
+
+  rowgap!(gl, 0)
+
+  (fig, gl)
+end

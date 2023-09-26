@@ -19,7 +19,7 @@ function pull(db, group)
 end
 
 function getMissing(db, group)
-  i = keys(db[str]) |> (x -> parse.(Int64, x))
+  i = keys(db[group]) |> (x -> parse.(Int64, x))
   j = collect(1:100)
   findall(e -> !(e in i), j)
  end

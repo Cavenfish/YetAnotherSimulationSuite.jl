@@ -1,6 +1,6 @@
 
 #Two channel exponential decay
-twoChannel(t, p) = p[1] * (exp.(- t / p[2]) + exp.(-t / p[3]))
+twoChannel(t, p) = p[1] * (exp.(- t / p[2]) + exp.(-t / p[3])) .+ abs(p[4])
 
 #Exponential decay
 expDecay(t, p) = p[1] * exp.(-t / p[2]) .+ abs(p[3])
@@ -9,12 +9,12 @@ expDecay(t, p) = p[1] * exp.(-t / p[2]) .+ abs(p[3])
 expSinDecay(t, p) = p[1] * exp.(-t / p[2]) .+ (p[3] * sin.(p[4] * t))
 
 #Fit self dissipative cases
-function selfDisp(df)
+function selfDisp(df; thresh=0.055)
 
   t = df.time[102:end] ./ 1000 .- 10
   y = df.molVib[102:end]
-  i = findall(e -> e > 0.055, y)
-  j = findall(e -> e < 0.055, y)
+  i = findall(e -> e > thresh, y)
+  j = findall(e -> e < thresh, y)
 
   ifit = curve_fit(expDecay, t[i], y[i], [0.4, 500, 0.0])
   jfit = curve_fit(expDecay, t[j], y[j], [0.1, 50, 0.01])

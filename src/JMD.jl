@@ -14,6 +14,7 @@ using JLD2
 using FFTW
 using Optim
 using LsqFit
+using CodecZlib
 using MiniQhull
 using DataFrames
 using Statistics
