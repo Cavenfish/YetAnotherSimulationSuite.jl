@@ -22,7 +22,16 @@ function getMissing(db, group)
   i = keys(db[group]) |> (x -> parse.(Int64, x))
   j = collect(1:100)
   findall(e -> !(e in i), j)
- end
+end
+
+function addAvgToDB!(db, group)
+  avg = pull(db, group) |> avgDFs
+  tmp = group[1:end-3]
+  
+  occursin("DF", group) ? key = tmp * "avgDF" : key = tmp * "avgVD"
+
+  db[key] = avg
+end
 
 function makeDataBase(file, p; kwargs...)
 
