@@ -216,10 +216,91 @@ function trackAllVibEnergy(tj; pot=nothing)
   return dis, vib
 end
 
-function trackRadialEnergy(tj; pot=nothing)
+function trackRadialEnergy(tj; pot=nothing, Rs=[[3,5],[5,9],[9,30]])
 
-  #TODO: Make this function collect vib, tra, and rot energy at radial slices
+  function getMolsDistMatrix(t)
+    r = tj.r[t]
+    m = tj.m
 
+    com  =  CoM(r[ind], m[ind])
+    coms = [CoM(r[mol], m[mol]) for mol in mols]
+
+    [norm(i - com) for i in coms]
+  end
+
+  #I'm working in let-end blocks to local scope some
+  # variables so they don't get double referenced
   
-  
-end
+  #Find indicies of excited molecule
+  ind = let
+    v = tj.v[102]
+
+    i = findfirst(e -> e == maximum(v), v)
+
+    isodd(i) ? [i, i+1] : [i-1, i]
+  end 
+
+  #Get all molecules (only works for CO)
+  mols = let
+    r  = tj.r[1]
+    d  = [[norm(j - i) for j in r] for i in r]
+    
+    findall.(e -> e < 2, d) |> unique
+  end
+
+  #Remove excited molecule from mols list
+  findfirst(e -> e == ind, mols) |> (x -> popat!(mols, x))
+
+  #Pre-define mass since it is constant in time
+  m = tj.m
+
+  #Pre-allocate the buffers with max possible space to be safe
+  traBuff = zeros(Float64, length(mols))
+  rotBuff = zeros(Float64, length(mols))
+  vibBuff = zeros(Float64, length(mols))
+
+  #Pre-build DataFrame
+  df = DataFrame()
+
+  df[!, "time"] = tj.t
+  for i in 1:length(Rs)
+    df[!, "traR$i"] = zero(tj.t)
+    df[!, "rotR$i"] = zero(tj.t)
+    df[!, "vibR$i"] = zero(tj.t)
+  end
+
+  #Very complicated nested loop
+  for t in 1:length(tj.t)
+    d = getMolsDistMatrix(t)
+    r = tj.r[t]
+    v = tj.v[t]
+
+    for k in 1:length(Rs)
+      low, hi = Rs[k]
+
+      #zero out buffers
+      traBuff .*= 0.0
+      rotBuff .*= 0.0
+      vibBuff .*= 0.0
+
+      #get indicies of mols in radial slice
+      l = findall(e -> low < e < hi, d)
+
+      for i in 1:length(l)
+        j = mols[l[i]]
+
+        traBuff[i] += getTransEnergy(r[j], v[j], m[j])
+        rotBuff[i] += getRotEnergy(  r[j], v[j], m[j])
+        vibBuff[i] += getCOVibEnergy(r[j], v[j], m[j]; pot=pot)
+
+      end#mols within low-hi loop
+
+      df[t, "traR$k"] += sum(traBuff) / length(l)
+      df[t, "rotR$k"] += sum(rotBuff) / length(l)
+      df[t, "vibR$k"] += sum(vibBuff) / length(l)
+
+    end#radial slices loop
+  end#time loop
+
+  df
+end#function
