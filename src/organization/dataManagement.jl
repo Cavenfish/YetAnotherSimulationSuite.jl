@@ -56,6 +56,9 @@ function makeDataBase(file, p; kwargs...)
       elseif occursin("VD", p[1])
         vd       = jldopen(item)["vd"]
         group[k] = vd
+      elseif occursin("RE", p[1])
+        re       = jldopen(item)["re"]
+        group[k] = re
       else
         error("Not VD or DF, so idk what to do")
       end
