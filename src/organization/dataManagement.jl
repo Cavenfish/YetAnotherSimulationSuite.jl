@@ -33,6 +33,16 @@ function addAvgToDB!(db, group)
   db[key] = avg
 end
 
+function makeAvgDB(file, db, p; kwargs...)
+  
+  jldopen(file, "a+"; kwargs...) do f
+
+    avg = pull(db, p[1]) |> avgDFs
+
+    f[p[2]] = avg
+  end
+end
+
 function makeDataBase(file, p; kwargs...)
 
   jldopen(file, "a+"; kwargs...) do f 
