@@ -10,7 +10,7 @@ expSinDecay(t, p) = p[1] * exp.(-t / p[2]) .+ (p[3] * sin.(p[4] * t))
 
 #My custom decay-rate with frequency gap law included
 function myDecay(t,p)
-  τ =  p[1] * exp.(-t * p[2])
+  τ =  p[1] * exp.(t / p[2])
   p[3] * exp.(-t ./ τ) .+ p[4]
  end
 
