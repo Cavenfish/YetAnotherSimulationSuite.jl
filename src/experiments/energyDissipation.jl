@@ -22,10 +22,14 @@ KE = 10
 inter = 10
 safe = 15000
 
+[track]
+Rs = [[3,5],[5,9],[9,30]]
+
 [saving]
 df = "co-am13C18O_MvH_DF_1.jld2"
 tj = "co-am13C18O_MvH_TJ_1.jld2"
 vd = "co-am13C18O_MvH_VD_1.jld2"
+re = "co-am13C18O_MvH_RE_1.jld2"
 """
 
 function vibDisp(inpFile::String)
@@ -147,6 +151,15 @@ function vibDisp(inpFile::String)
     vd  = trackVACF(tmp, safe)
 
     jldsave(vdName; vd)
+  end
+
+  if "track" in keys(inp)
+    reName = savi["re"]
+    Rs     = inp["track"]["Rs"]
+
+    re = trackRadialEnergy(tj; pot=EoM, Rs=Rs)
+
+    jldsave(reName; re)
   end
 
 end

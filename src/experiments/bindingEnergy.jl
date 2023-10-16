@@ -10,6 +10,7 @@ EoM = "COCO"
 mol = "/home/brian/COjl/xyzFiles/1.xyz"
 clu = "/home/brian/COjl/clu.xyz"
 sites = 250
+saveat = 10
 minD = 3.5
 
 [OPT]
@@ -54,6 +55,7 @@ function calcBEs(inpFile::String)
   #Get leftover vars
   minD = cnfg["minD"]
   N    = cnfg["sites"]
+  savN = cnfg["saveat"]
 
   #Read in and pre-optimise cluster and mol
   mol = readXyz(cnfg["mol"]) |> (x -> opt(EoM, algo, x; pre...))
@@ -69,36 +71,70 @@ function calcBEs(inpFile::String)
   cluE = getPotEnergy(EoM, clu)
 
   #Get spots on surface of cluster
-  spots = [i.r for i in clu] |> alphashape |> getSpots
+  spots = [i.r for i in clu] |> alphashape |> getSpots |> (x -> sample(x, N; replace=false))
+
+  #Get rough count of iterations per thread
+  tmp = div(savN, Threads.nthreads()) + 1
 
   #Check N ≤ spots
   N ≤ length(spots) || throw("Not enough spots found for $N sites")
+  tmp ≤ 1 || @warn "SaveAt is less than nthreads.\n This is not efficient!"
 
   #Prep BE array
-  ret = [Float64[] for i in 1:Threads.nthreads()]
+  ret = [[0.0 for j in 1:tmp] for i in 1:Threads.nthreads()]
+  BE  = [0.0 for i in 1:N]
 
-  #Get BE for N number of sites
-  Threads.@threads for spot in sample(spots, N; replace=false)
-    
-    #Get thread ID
-    id = Threads.threadid()
+  while length(BE) < N
+    i = length(BE)
 
-    #Copy mol to preserve original location
-    new = deepcopy(mol)
+    Threads.@threads for spot in spots[i:i+savN]
+      #Get thread ID
+      id = Threads.threadid()
 
-    #Randomly rotate molecule (see hitAndStick for function code)
-    randRotate!(new)
+      #Copy mol to preserve original location
+      new = deepcopy(mol)
 
-    #Spawn molecule and optimise 
-    bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; pst...))
+      #Randomly rotate molecule (see hitAndStick for function code)
+      randRotate!(new)
 
-    #Get binding energy
-    be = getPotEnergy(EoM, bdys) - (cluE + molE)
+      #Spawn molecule and optimise 
+      bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; pst...))
 
-    push!(ret[id], be)
+      #Get binding energy
+      be = getPotEnergy(EoM, bdys) - (cluE + molE)
+
+      #Save BE
+      j = findfirst(e -> e == 0.0, ret[id])
+      ret[id][j] += be
+    end
+
+
+    j = findfirst(e -> e== 0.0, BE)
+    BE[j:j+savN] .+= vcat(ret...)
   end
 
-  BE = vcat(ret...)
+  # #Get BE for N number of sites
+  # Threads.@threads for spot in sample(spots, N; replace=false)
+    
+  #   #Get thread ID
+  #   id = Threads.threadid()
+
+  #   #Copy mol to preserve original location
+  #   new = deepcopy(mol)
+
+  #   #Randomly rotate molecule (see hitAndStick for function code)
+  #   randRotate!(new)
+
+  #   #Spawn molecule and optimise 
+  #   bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; pst...))
+
+  #   #Get binding energy
+  #   be = getPotEnergy(EoM, bdys) - (cluE + molE)
+
+  #   push!(ret[id], be)
+  # end
+
+  # BE = vcat(ret...)
   df = mkBEdf(BE * -1)
   jldsave(inp["Saving"]["df"]; df)
 
