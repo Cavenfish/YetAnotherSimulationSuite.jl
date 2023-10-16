@@ -76,9 +76,8 @@ function calcBEs(inpFile::String)
   #Get rough count of iterations per thread
   tmp = div(savN, Threads.nthreads()) + 1
 
-  #Check N ≤ spots
-  N ≤ length(spots) || throw("Not enough spots found for $N sites")
-  tmp ≤ 1 || @warn "SaveAt is less than nthreads.\n This is not efficient!"
+  #Check for threading efficiency
+  savN < Threads.nthreads() || @warn "SaveAt is less than nthreads.\n This is not efficient!"
 
   #Prep BE array
   ret = [[0.0 for j in 1:tmp] for i in 1:Threads.nthreads()]
