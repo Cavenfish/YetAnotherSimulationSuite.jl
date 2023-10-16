@@ -83,11 +83,11 @@ function calcBEs(inpFile::String)
   #Prep BE array
   ret = [[0.0 for j in 1:tmp] for i in 1:Threads.nthreads()]
   BE  = [0.0 for i in 1:N]
+  i   = 1
 
-  while length(BE) < N
-    i = length(BE)
+  while i < N
 
-    Threads.@threads for spot in spots[i:i+savN]
+    Threads.@threads for spot in spots[i:i+savN-1]
       #Get thread ID
       id = Threads.threadid()
 
@@ -108,9 +108,8 @@ function calcBEs(inpFile::String)
       ret[id][j] += be
     end
 
-
-    j = findfirst(e -> e== 0.0, BE)
-    BE[j:j+savN] .+= vcat(ret...)
+    BE[i:i+savN-1] .+= vcat(ret...)
+    i += savN
   end
 
   # #Get BE for N number of sites
