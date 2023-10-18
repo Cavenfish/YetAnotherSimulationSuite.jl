@@ -58,6 +58,7 @@ include("./plotting/clusters.jl")
 
 include("./mathtk/alphashape.jl")
 include("./mathtk/savitzkyGolay.jl")
+include("./mathtk/peakFinding.jl")
 
 include("./building/anneal.jl")
 include("./building/hitAndStick.jl")
