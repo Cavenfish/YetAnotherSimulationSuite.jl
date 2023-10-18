@@ -108,6 +108,8 @@ function calcBEs(inpFile::String)
     end
 
     BE[i:i+savN-1] .+= vcat(ret...)
+    df = mkBEdf(BE * -1)
+    jldsave(inp["Saving"]["df"]; df)
     i += savN
   end
 
@@ -133,8 +135,8 @@ function calcBEs(inpFile::String)
   # end
 
   # BE = vcat(ret...)
-  df = mkBEdf(BE * -1)
-  jldsave(inp["Saving"]["df"]; df)
+  # df = mkBEdf(BE * -1)
+  # jldsave(inp["Saving"]["df"]; df)
 
   df
 end
