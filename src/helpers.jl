@@ -11,7 +11,7 @@ function mkvar(x)
   return X
 end
 
-function getFrame(tj::MyTraj, i::Int64)
+function getFrame(tj, i::Int64)
   m = tj.m
   s = map(x -> x > 15 ? 'O' : 'C', tj.m)
   r = tj.r[i]

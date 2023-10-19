@@ -51,6 +51,7 @@ include("./analysis/vibrations.jl")
 include("./analysis/optimizations.jl")
 include("./analysis/structral.jl")
 include("./analysis/decayRates.jl")
+include("./analysis/freqShifts.jl")
 
 include("./plotting/config.jl")
 include("./plotting/vibDisp.jl")
