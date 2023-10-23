@@ -53,9 +53,10 @@ function calcBEs(inpFile::String)
   end
 
   #Get leftover vars
-  minD = cnfg["minD"]
-  N    = cnfg["sites"]
-  savN = cnfg["saveat"]
+  minD  = cnfg["minD"]
+  N     = cnfg["sites"]
+  savN  = cnfg["saveat"]
+  nthrd = Threads.nthreads()
 
   #Read in and pre-optimise cluster and mol
   mol = readXyz(cnfg["mol"]) |> (x -> opt(EoM, algo, x; pre...))
@@ -74,19 +75,22 @@ function calcBEs(inpFile::String)
   spots = [i.r for i in clu] |> alphashape |> getSpots |> (x -> sample(x, N; replace=false))
 
   #Get rough count of iterations per thread
-  tmp = div(savN, Threads.nthreads()) + 1
+  tmp = div(savN, nthrd) + 1
 
   #Check for threading efficiency
-  savN <= Threads.nthreads() || @warn "SaveAt is less than nthreads.\n This is not efficient!"
+  savN <= nthrd || @warn "SaveAt is less than nthreads.\n This is not efficient!"
 
   #Prep BE array
-  ret = [[0.0 for j in 1:tmp] for i in 1:Threads.nthreads()]
+  ret = zeros(nthrd, tmp)
   BE  = [0.0 for i in 1:N]
   i   = 1
 
   while i < N
 
     Threads.@threads for spot in spots[i:i+savN-1]
+      #Rezero ret array
+      ret .*= 0.0
+
       #Get thread ID
       id = Threads.threadid()
 
@@ -104,7 +108,7 @@ function calcBEs(inpFile::String)
 
       #Save BE
       j = findfirst(e -> e == 0.0, ret[id])
-      ret[id][j] += be
+      ret[id, j] += be
     end
 
     BE[i:i+savN-1] .+= vcat(ret...) |> dropZeros!
