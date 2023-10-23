@@ -157,7 +157,7 @@ function vibDisp(inpFile::String)
     reName = savi["re"]
     Rs     = inp["track"]["Rs"]
 
-    re = trackRadialEnergy(tj; pot=EoM, Rs=Rs)
+    re = trackRadialEnergy(traj; pot=EoM, Rs=Rs)
 
     jldsave(reName; re)
   end
