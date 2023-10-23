@@ -77,7 +77,7 @@ function calcBEs(inpFile::String)
   tmp = div(savN, Threads.nthreads()) + 1
 
   #Check for threading efficiency
-  savN < Threads.nthreads() || @warn "SaveAt is less than nthreads.\n This is not efficient!"
+  savN <= Threads.nthreads() || @warn "SaveAt is less than nthreads.\n This is not efficient!"
 
   #Prep BE array
   ret = [[0.0 for j in 1:tmp] for i in 1:Threads.nthreads()]
@@ -107,38 +107,18 @@ function calcBEs(inpFile::String)
       ret[id][j] += be
     end
 
-    BE[i:i+savN-1] .+= vcat(ret...)
+    BE[i:i+savN-1] .+= vcat(ret...) |> dropZeros!
     df = mkBEdf(BE * -1)
     jldsave(inp["Saving"]["df"]; df)
     i += savN
   end
 
-  # #Get BE for N number of sites
-  # Threads.@threads for spot in sample(spots, N; replace=false)
-    
-  #   #Get thread ID
-  #   id = Threads.threadid()
-
-  #   #Copy mol to preserve original location
-  #   new = deepcopy(mol)
-
-  #   #Randomly rotate molecule (see hitAndStick for function code)
-  #   randRotate!(new)
-
-  #   #Spawn molecule and optimise 
-  #   bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; pst...))
-
-  #   #Get binding energy
-  #   be = getPotEnergy(EoM, bdys) - (cluE + molE)
-
-  #   push!(ret[id], be)
-  # end
-
-  # BE = vcat(ret...)
-  # df = mkBEdf(BE * -1)
-  # jldsave(inp["Saving"]["df"]; df)
-
   df
+end
+
+function dropZeros!(x)
+  i = findall(e -> e == 0.0, x)
+  deleteat!(x, i)
 end
 
 function mkBEdf(arr)
