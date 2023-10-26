@@ -14,10 +14,21 @@ function pltAlphaShape(bdys)
   fig = mesh(xyz, faces, color=(:purple, 0.15))
 
 
-  c = [Tuple(i.r) for i in bdys if i.s=='C']
-  o = [Tuple(i.r) for i in bdys if i.s=='O']
-  meshscatter!(c, color=:gray, markersize=0.3)
-  meshscatter!(o, color=:red,  markersize=0.3)
+  # c = [Tuple(i.r) for i in bdys if i.s=='C']
+  # o = [Tuple(i.r) for i in bdys if i.s=='O']
+  # meshscatter!(c, color=:gray, markersize=0.3)
+  # meshscatter!(o, color=:red,  markersize=0.3)
 
   fig
 end 
+
+function pltCluster(bdys)
+  # fig = Figure()
+  # ax  = Axis3D(fig[1,1])
+  c = [Tuple(i.r) for i in bdys if i.s=='C']
+  o = [Tuple(i.r) for i in bdys if i.s=='O']
+  fig = meshscatter(c, color=:gray, markersize=0.5)
+  meshscatter!(o, color=:red,  markersize=0.5)
+
+  fig
+end

@@ -88,8 +88,6 @@ function calcBEs(inpFile::String)
   while i < N
 
     Threads.@threads for spot in spots[i:i+savN-1]
-      #Rezero ret array
-      ret .*= 0.0
 
       #Get thread ID
       id = Threads.threadid()
@@ -114,7 +112,12 @@ function calcBEs(inpFile::String)
     BE[i:i+savN-1] .+= vcat(ret...) |> dropZeros!
     df = mkBEdf(BE * -1)
     jldsave(inp["Saving"]["df"]; df)
-    i += savN
+    
+    #increment i or change savN
+    i + savN - 1 > N ? savN = N - i + 1 : i += savN
+
+    #Rezero ret array
+    ret .*= 0.0
   end
 
   df

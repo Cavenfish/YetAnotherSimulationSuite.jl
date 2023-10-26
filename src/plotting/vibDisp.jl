@@ -197,3 +197,24 @@ function pltStackedRDF(toPlt)
 
   (fig, gl)
 end
+
+function pltAvgEng(toPlt)
+
+  set_theme!(myLightTheme)
+
+  fig = Figure()
+  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Translation Energy per Molecule (K)")
+
+  for i in 1:length(toPlt)
+    p = toPlt[i]
+
+    l  = p[1]
+    df = p[2]
+    # tm = savGol(df.avgTra .- df.avgTra[1], 101, 5)
+    x  = df.time[102:end] ./ 1000
+    y  = (df.avgTra[102:end] .- df.avgTra[1]) .* 11600 .* 2 
+    lines!(ax, x, y, label=l)
+  end
+
+  fig
+end
