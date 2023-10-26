@@ -74,8 +74,8 @@ function calcBEs(inpFile::String)
   #Get spots on surface of cluster
   spots = [i.r for i in clu] |> alphashape |> getSpots |> (x -> sample(x, N; replace=false))
 
-  #Get rough count of iterations per thread
-  tmp = div(savN, nthrd) + 1
+  #Get rough count of iterations per thread with padding for faster threads
+  tmp = div(savN, nthrd) + 5
 
   #Check for threading efficiency
   savN <= nthrd || @warn "SaveAt is less than nthreads.\n This is not efficient!"
