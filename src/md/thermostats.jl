@@ -60,6 +60,26 @@ struct BDP
   tau::Float64
 end
 
+struct BDPnT
+  T::Vector
+  mols::Vector
+  kB::Float64
+  tau::Float64
+end
+
+function BDPnT!(T, a, v, m, inp)
+  for i in 1:length(inp.T)
+    try 
+      T[i] 
+    catch err
+      push!(T, [])
+    end
+    j   = inp.mols[i]
+    tmp = BDP(inp.T[i], inp.kB, inp.tau)
+    @views BDP!(T[i], a[j], v[j], m[j], tmp)
+  end
+end
+
 function BDP!(T, a, v, m, inp)
   N    = length(m)
   Tsim = getTemp(m, v, inp.kB, N)
