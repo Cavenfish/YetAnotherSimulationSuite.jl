@@ -119,8 +119,7 @@ function calcBEs(inpFile::String)
     #Rezero ret array
     ret .*= 0.0
   end
-
-  df
+  
 end
 
 function dropZeros!(x)
