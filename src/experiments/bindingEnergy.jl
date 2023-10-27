@@ -75,7 +75,7 @@ function calcBEs(inpFile::String)
   spots = [i.r for i in clu] |> alphashape |> getSpots |> (x -> sample(x, N; replace=false))
 
   #Get rough count of iterations per thread with padding for faster threads
-  tmp = div(savN, nthrd) + 5
+  tmp = div(savN, nthrd) + 2
 
   #Check for threading efficiency
   savN <= nthrd || @warn "SaveAt is less than nthreads.\n This is not efficient!"
@@ -105,7 +105,7 @@ function calcBEs(inpFile::String)
       be = getPotEnergy(EoM, bdys) - (cluE + molE)
 
       #Save BE
-      j = findfirst(e -> e == 0.0, ret[id])
+      j = findfirst(e -> e == 0.0, ret[id, :])
       ret[id, j] += be
     end
 
