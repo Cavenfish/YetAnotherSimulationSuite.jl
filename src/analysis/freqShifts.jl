@@ -7,16 +7,12 @@ struct MolFreq
 end
 
 function _getWave(bl)
-  aTol = bl[1] / 1e6
-  tmp  = findall(e -> isapprox(e, bl[1]; atol=aTol), bl[10:end])
+  tmpi = findall(e -> isapprox(e, maximum(bl); atol=1e-5), bl)
+  tmpj = findall(e -> 100 < e - tmpi[1] < 200, tmpi)
 
-  while length(tmp) < 2
-    println(aTol)
-    aTol *= 1.2
-    tmp   = findall(e -> isapprox(e, bl[1]; atol=aTol), bl[10:end])
-  end
-  
-  wave = bl[1:tmp[2]+9] .- mean(bl[1:tmp[2]+9]) |> (x -> repeat(x, 500))
+  i    = tmpi[1]
+  j    = tmpi[tmpj[div(length(tmpj), 2)]]
+  wave = bl[i:j] .- mean(bl[i:j]) |> (x -> repeat(x, 500))
 
   wave
 end
@@ -37,16 +33,19 @@ function getMolFreq(EoM, tj, dt)
     bdys = getFrame(tj, i)
     Evib = getCOVibEnergy(bdys[ind]; pot=EoM)
 
-    nve  = runNVE(EoM, (0, 50fs), 0.1fs, bdys) |> (x -> processDynamics(x; dt=0.1fs))
+    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys) |> (x -> processDynamics(x; dt=0.01fs))
     r    = [j[ind] for j in nve.r]
     bl   = [norm(j[2]-j[1]) for j in r]
 
-    wave = _getWave(bl)
-    return wave
+    wave = try
+      _getWave(bl)
+    catch err
+      continue
+    end
 
     n = div(length(wave), 2)
     I = abs.(fft(wave))
-    v = fftfreq(length(I), 1e16) ./ 29979245800.0
+    v = fftfreq(length(I), 1e17) ./ 29979245800.0
 
     pks = findPeaks(I[1:n]; min=1e1)
 
