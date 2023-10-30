@@ -8,7 +8,7 @@ end
 
 function _getWave(bl)
   tmpi = findall(e -> isapprox(e, maximum(bl); atol=1e-5), bl)
-  tmpj = findall(e -> 100 < e - tmpi[1] < 200, tmpi)
+  tmpj = findall(e -> 1000 < e - tmpi[1] < 2000, tmpi)
 
   i    = tmpi[1]
   j    = tmpi[tmpj[div(length(tmpj), 2)]]
