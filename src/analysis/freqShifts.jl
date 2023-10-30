@@ -6,6 +6,17 @@ struct MolFreq
   r::Float64
 end
 
+struct oneFreq
+  Evib::Float64
+  freq::Float64
+  r::Float64
+end
+
+struct AllFreq
+  time::Float64
+  freqs::Vector
+end
+
 function _getWave(bl)
   tmpi = findall(e -> isapprox(e, maximum(bl); atol=5e-5), bl)
   tmpj = findall(e -> 1000 < e - tmpi[1] < 2000, tmpi)
@@ -57,4 +68,53 @@ function getMolFreq(EoM, tj, dt)
   end
 
   freqs
+end
+
+function getAllFreqs(EoM, tj, dt)
+
+  ind = let
+    v = tj.v[102]
+
+    i = findfirst(e -> e == maximum(v), v)
+
+    isodd(i) ? [i, i+1] : [i-1, i]
+  end 
+
+  allFreqs = AllFreq[] 
+  for i in 1:dt:length(tj.t)
+
+    bdys = getFrame(tj, i)
+    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys) |> processDynamics
+    mols = getMols(bdys)
+    main = CoM(bdys[ind])
+
+    freqs = oneFreq[]
+    for mol in mols
+      Evib = getCOVibEnergy(bdys[mol]; pot=EoM)
+      r    = [j[mol] for j in nve.r]
+      bl   = [norm(j[2]-j[1]) for j in r]
+
+      wave = try
+        _getWave(bl)
+      catch err
+        @warn "Skipping timestep: $(tj.t[i])"
+        continue
+      end
+
+      n = div(length(wave), 2)
+      I = abs.(fft(wave))
+      v = fftfreq(length(I), 1e17) ./ 29979245800.0
+
+      pks = findPeaks(I[1:n]; min=1e1)
+
+      length(pks) > 0 || continue
+
+      sub = CoM(bdys[mol])
+      d   = norm(main - sub)
+      push!(freqs, oneFreq(Evib, v[pks[1]], tj.t[i], d))
+    end
+    push!(allFreqs, AllFreq(tj.t[i], freqs))
+  end
+
+  allFreqs
 end

@@ -14,6 +14,19 @@ struct Molecule{N}
   name::String
 end
 
+function getMols(bdys)
+  # Get distance matrix 
+  d = [[norm(j.r - i.r) for j in bdys] for i in bdys]
+
+  # Get molecules (only works for CO)
+  mols = findall.(e -> e < 2, d)
+
+  # Drop duplicates
+  mols = unique(mols)
+
+  mols
+end
+
 function getPairs(bdys)
 
   #distance from vector 
