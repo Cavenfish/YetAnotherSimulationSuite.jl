@@ -80,7 +80,8 @@ function getAllFreqs(EoM, tj, dt)
     isodd(i) ? [i, i+1] : [i-1, i]
   end 
 
-  allFreqs = AllFreq[] 
+  allFreqs = MolFreq[]
+  # allFreqs = AllFreq[]
   for i in 1:dt:length(tj.t)
 
     bdys = getFrame(tj, i)
@@ -88,7 +89,7 @@ function getAllFreqs(EoM, tj, dt)
     mols = getMols(bdys)
     main = CoM(bdys[ind])
 
-    freqs = oneFreq[]
+    # freqs = oneFreq[]
     for mol in mols
       Evib = getCOVibEnergy(bdys[mol]; pot=EoM)
       r    = [j[mol] for j in nve.r]
@@ -111,9 +112,10 @@ function getAllFreqs(EoM, tj, dt)
 
       sub = CoM(bdys[mol])
       d   = norm(main - sub)
-      push!(freqs, oneFreq(Evib, v[pks[1]], tj.t[i], d))
+      push!(allFreqs, MolFreq(Evib, v[pks[1]], tj.t[i], d))
+      # push!(freqs, oneFreq(Evib, v[pks[1]], tj.t[i], d))
     end
-    push!(allFreqs, AllFreq(tj.t[i], freqs))
+    # push!(allFreqs, AllFreq(tj.t[i], freqs))
   end
 
   allFreqs
