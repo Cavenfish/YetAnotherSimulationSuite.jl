@@ -7,7 +7,7 @@ struct MolFreq
 end
 
 function _getWave(bl)
-  tmpi = findall(e -> isapprox(e, maximum(bl); atol=1e-5), bl)
+  tmpi = findall(e -> isapprox(e, maximum(bl); atol=5e-5), bl)
   tmpj = findall(e -> 1000 < e - tmpi[1] < 2000, tmpi)
 
   i    = tmpi[1]
@@ -33,13 +33,14 @@ function getMolFreq(EoM, tj, dt)
     bdys = getFrame(tj, i)
     Evib = getCOVibEnergy(bdys[ind]; pot=EoM)
 
-    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys) |> (x -> processDynamics(x; dt=0.01fs))
+    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys) |> processDynamics
     r    = [j[ind] for j in nve.r]
     bl   = [norm(j[2]-j[1]) for j in r]
 
     wave = try
       _getWave(bl)
     catch err
+      @warn "Skipping timestep: $(tj.t[i])"
       continue
     end
 
