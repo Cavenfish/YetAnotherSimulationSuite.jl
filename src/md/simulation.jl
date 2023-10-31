@@ -5,6 +5,7 @@ struct NVEsimu
   mols::Vector
   energy::Vector
   forces::Vector
+  save::String
   m::Vector
 end
 
@@ -15,18 +16,19 @@ struct NVTsimu
   energy::Vector
   forces::Vector
   temp::Vector
+  save::String
   m::Vector
   thermostat!::Function
   thermoInps
 end
 
-function runNVE(EoM, tspan, dt, bdys; kwargs...)
+function runNVE(EoM, tspan, dt, bdys; save="full", kwargs...)
   pos   = [SVector{3}(i.r) for i in bdys]
   vel   = [SVector{3}(i.v) for i in bdys]
   mas   = [i.m for i in bdys]   
 
   pars, mols = getPairs(bdys)
-  simu       = NVEsimu(bdys, pars, mols, [], [], mas)
+  simu       = NVEsimu(bdys, pars, mols, [], [], save, mas)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
@@ -34,14 +36,14 @@ function runNVE(EoM, tspan, dt, bdys; kwargs...)
   return solu
 end
 
-function runNVE(EoM, t1, t2, dt, bdys; kwargs...)
+function runNVE(EoM, t1, t2, dt, bdys; save="full", kwargs...)
   pos   = [SVector{3}(i.r) for i in bdys]
   vel   = [SVector{3}(i.v) for i in bdys]
   mas   = [i.m for i in bdys]   
   tspan = (t1,t2)
 
   pars, mols = getPairs(bdys)
-  simu       = NVEsimu(bdys, pars, mols, [], [], mas)
+  simu       = NVEsimu(bdys, pars, mols, [], [], save, mas)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false, save_start=false)
@@ -49,13 +51,13 @@ function runNVE(EoM, t1, t2, dt, bdys; kwargs...)
   return solu
 end
 
-function runNVT(EoM, tspan, dt, bdys, thermostat, thermoInps; kwargs...)
+function runNVT(EoM, tspan, dt, bdys, thermostat, thermoInps; save="full", kwargs...)
   pos   = [SVector{3}(i.r) for i in bdys]
   vel   = [SVector{3}(i.v) for i in bdys]
   mas   = [i.m for i in bdys]
 
   pars, mols = getPairs(bdys)
-  simu       = NVTsimu(bdys, pars, mols, [], [], [], mas, thermostat, thermoInps)
+  simu       = NVTsimu(bdys, pars, mols, [], [], [], save, mas, thermostat, thermoInps)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)

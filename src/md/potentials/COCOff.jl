@@ -307,8 +307,13 @@ function COCO(dv, v, u, p, t)
     p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
   end
 
-  push!(p.energy, (totalE, MorseE, ExchE, DispE, CoulE))
-  push!(p.forces, (totalF, MorseF, ExchF, DispF, CoulF))
+  if p.save == "full"
+    push!(p.energy, (totalE, MorseE, ExchE, DispE, CoulE))
+    push!(p.forces, (totalF, MorseF, ExchF, DispF, CoulF))
+  elseif p.save == "sparse"
+    push!(p.energy, totalE)
+    push!(p.forces, totalF)
+  end
 
 end
 
