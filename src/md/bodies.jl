@@ -29,9 +29,6 @@ end
 
 function getPairs(bdys)
 
-  #distance from vector 
-  norm(v) = sqrt(v'v)
-
   # Get distance matrix 
   d = [[norm(j.r - i.r) for j in bdys] for i in bdys]
 
