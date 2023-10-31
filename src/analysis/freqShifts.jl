@@ -33,7 +33,7 @@ function getMolFreq(EoM, tj, dt)
     bdys = getFrame(tj, i)
     Evib = getCOVibEnergy(bdys[ind]; pot=EoM)
 
-    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys) |> processDynamics
+    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys; save="sparse") |> processDynamics
     r    = [j[ind] for j in nve.r]
     bl   = [norm(j[2]-j[1]) for j in r]
 
@@ -72,7 +72,7 @@ function getAllFreqs(EoM, tj, dt)
   for i in 1:dt:length(tj.t)
 
     bdys = getFrame(tj, i)
-    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys) |> processDynamics
+    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys; save="sparse") |> processDynamics
     mols = getMols(bdys)
     main = CoM(bdys[ind])
 
