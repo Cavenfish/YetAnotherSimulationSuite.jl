@@ -64,6 +64,7 @@ include("./mathtk/peakFinding.jl")
 include("./building/anneal.jl")
 include("./building/hitAndStick.jl")
 
+include("./experiments/localHeating.jl")
 include("./experiments/bindingEnergy.jl")
 include("./experiments/energyDissipation.jl")
 
