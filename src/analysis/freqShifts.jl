@@ -92,7 +92,7 @@ function getAllFreqs(EoM, tj, dt)
       I = abs.(fft(wave))
       v = fftfreq(length(I), 1e17) ./ 29979245800.0
 
-      pks = findPeaks(I[1:n]; min=1e1)
+      pks = findPeaks(I[1:n]; min=1e3)
 
       length(pks) > 0 || continue
 
