@@ -218,3 +218,16 @@ function pltAvgEng(toPlt)
 
   fig
 end
+
+function pltFreqShift(k)
+
+  set_theme!(myLightTheme)
+
+  fig = Figure()
+  ax  = Axis(fig[1,1], xlabel="Energy (eV)", ylabel=L"Frequency (cm$^{-1}$)")
+
+  contourf!(k.x, k.y, k.density, colormap=:acton)
+
+  fig
+end
+

@@ -7,11 +7,9 @@ struct MolFreq
 end
 
 function _getWave(bl)
-  tmpi = findall(e -> isapprox(e, maximum(bl); atol=5e-5), bl)
-  tmpj = findall(e -> 1000 < e - tmpi[1] < 2000, tmpi)
-
-  i    = tmpi[1]
-  j    = tmpi[tmpj[div(length(tmpj), 2)]]
+  pks  = findPeaks(bl)
+  i    = pks[1]
+  j    = pks[2]
   wave = bl[i:j] .- mean(bl[i:j]) |> (x -> repeat(x, 500))
 
   wave
@@ -103,4 +101,34 @@ function getAllFreqs(EoM, tj, dt)
   end
 
   allFreqs
+end
+
+function getFvE(EoM, bdys, Erange)
+
+  v,m = getHarmonicFreqs(EoM, bdys)
+
+  freqs = []
+  for E in Erange
+
+    for bdy in bdys
+      bdy.v .*= 0.0
+    end
+
+    vibExcite!(bdys, m[:,6], E)
+
+    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys; save="sparse") |> processDynamics
+    # r    = [j[mol] for j in nve.r]
+    bl   = [norm(j[2]-j[1]) for j in nve.r]
+    wave = _getWave(bl)
+
+    n = div(length(wave), 2)
+    I = abs.(fft(wave))
+    v = fftfreq(length(I), 1e17) ./ 29979245800.0
+
+    pks = findPeaks(I[1:n]; min=1e3)
+    
+    push!(freqs, v[pks[1]])
+  end
+
+  freqs
 end
