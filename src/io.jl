@@ -6,7 +6,7 @@ function readASExyz(xyz)
   hed = sys[2]
   sys = split.(sys[3:end], " ")
   sys = deleteat!.(sys, findall.(e -> e == "", sys))
-  amu = Dict("C" => 12.011, "O" => 15.999)
+  amu = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
   set = Atom[]
 
   for i in range(1,N)
@@ -31,7 +31,7 @@ end #read_ase_xyz
 
 function readXyz(xyz)
   stream = readlines(xyz)
-  amu    = Dict("C" => 12.011, "O" => 15.999)
+  amu    = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
   set    = Atom[]
 
   #Skip header lines then parse file
