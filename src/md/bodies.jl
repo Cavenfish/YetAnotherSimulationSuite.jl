@@ -14,6 +14,16 @@ struct Molecule{N}
   name::String
 end
 
+function getMols(bdys, rmin)
+  r   = [i.r for i in bdys]
+
+  pts = mapreduce(permutedims, vcat, r)
+
+  ret = dbscan(pts, rmin)
+
+  [i.core_indices for i in ret.clusters]
+end
+
 function getMols(bdys)
   # Get distance matrix 
   d = [[norm(j.r - i.r) for j in bdys] for i in bdys]

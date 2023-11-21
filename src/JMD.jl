@@ -19,6 +19,7 @@ using MiniQhull
 using DataFrames
 using Statistics
 using CairoMakie
+using Clustering
 using StaticArrays
 using Serialization
 using LinearAlgebra
