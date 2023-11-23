@@ -21,6 +21,21 @@ function prep4fit(df)
   (t,y)
 end
 
+function trackTau(df; N=100)
+  t,y = prep4fit(df)
+
+  X   = Iterators.partition(t, N) |> collect
+  Y   = Iterators.partition(y, N) |> collect
+
+  τ   = []
+  for i in 1:length(X)
+    fit = curve_fit(expDecay, X[i], Y[i], [0.4, 500.0, 0.0])
+    push!(τ, fit.param[2])
+  end
+
+  τ
+end
+
 #Fit self dissipative cases
 function selfDisp(df; thresh=0.055)
 
