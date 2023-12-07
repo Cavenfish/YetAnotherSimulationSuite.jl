@@ -10,7 +10,7 @@ function _getWave(bl)
   pks  = findPeaks(bl)
   i    = pks[1]
   j    = pks[2]
-  wave = bl[i:j] .- mean(bl[i:j]) |> (x -> repeat(x, 500))
+  wave = bl[i:j] .- mean(bl[i:j]) |> (x -> repeat(x, 1000))
 
   wave
 end
@@ -46,7 +46,7 @@ function getMolFreq(EoM, tj, dt)
     I = abs.(fft(wave))
     v = fftfreq(length(I), 1e17) ./ 29979245800.0
 
-    pks = findPeaks(I[1:n]; min=1e1)
+    pks = findPeaks(I[1:n]; min=5e1)
 
     length(pks) > 0 || continue
 
@@ -60,6 +60,7 @@ function getAllFreqs(EoM, tj, dt)
 
   ind = let
     v = tj.v[102]
+    v = [abs.(i) for i in v]
 
     i = findfirst(e -> e == maximum(v), v)
 
@@ -90,7 +91,7 @@ function getAllFreqs(EoM, tj, dt)
       I = abs.(fft(wave))
       v = fftfreq(length(I), 1e17) ./ 29979245800.0
 
-      pks = findPeaks(I[1:n]; min=1e3)
+      pks = findPeaks(I[1:n]; min=5e1)
 
       length(pks) > 0 || continue
 
@@ -98,6 +99,49 @@ function getAllFreqs(EoM, tj, dt)
       d   = norm(main - sub)
       push!(allFreqs, MolFreq(Evib, v[pks[1]], tj.t[i], d))
     end
+  end
+
+  allFreqs
+end
+
+function getAllFreqs(EoM, bdys)
+
+  ind = let
+    v = [abs.(i.v) for i in bdys]
+
+    i = findfirst(e -> e == maximum(v), v)
+
+    isodd(i) ? [i, i+1] : [i-1, i]
+  end 
+
+  allFreqs = MolFreq[]
+  nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys; save="sparse") |> processDynamics
+  mols = getMols(bdys)
+  main = CoM(bdys[ind])
+
+  for mol in mols
+    Evib = getCOVibEnergy(bdys[mol]; pot=EoM)
+    r    = [j[mol] for j in nve.r]
+    bl   = [norm(j[2]-j[1]) for j in r]
+
+    wave = try
+      _getWave(bl)
+    catch err
+      @warn "Skipping timestep: $(tj.t[i])"
+      continue
+    end
+
+    n = div(length(wave), 2)
+    I = abs.(fft(wave))
+    v = fftfreq(length(I), 1e17) ./ 29979245800.0
+
+    pks = findPeaks(I[1:n]; min=5e1)
+
+    length(pks) > 0 || continue
+
+    sub = CoM(bdys[mol])
+    d   = norm(main - sub)
+    push!(allFreqs, MolFreq(Evib, v[pks[1]], 0.0, d))
   end
 
   allFreqs
