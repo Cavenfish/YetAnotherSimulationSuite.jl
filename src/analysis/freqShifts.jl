@@ -4,6 +4,7 @@ struct MolFreq
   freq::Float64
   time::Float64
   r::Float64
+  θ::Float64
 end
 
 function _getWave(bl)
@@ -50,7 +51,7 @@ function getMolFreq(EoM, tj, dt)
 
     length(pks) > 0 || continue
 
-    push!(freqs, MolFreq(Evib, v[pks[1]], tj.t[i], 0.0))
+    push!(freqs, MolFreq(Evib, v[pks[1]], tj.t[i], 0.0, 0.0))
   end
 
   freqs
@@ -97,22 +98,15 @@ function getAllFreqs(EoM, tj, dt)
 
       sub = CoM(bdys[mol])
       d   = norm(main - sub)
-      push!(allFreqs, MolFreq(Evib, v[pks[1]], tj.t[i], d))
+      θ   = getAngleCO(bdys[ind], bdys[mol])
+      push!(allFreqs, MolFreq(Evib, v[pks[1]], tj.t[i], d, θ))
     end
   end
 
   allFreqs
 end
 
-function getAllFreqs(EoM, bdys)
-
-  ind = let
-    v = [abs.(i.v) for i in bdys]
-
-    i = findfirst(e -> e == maximum(v), v)
-
-    isodd(i) ? [i, i+1] : [i-1, i]
-  end 
+function getAllFreqs(EoM, bdys; ind=[0,1])
 
   allFreqs = MolFreq[]
   nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys; save="sparse") |> processDynamics
@@ -141,7 +135,8 @@ function getAllFreqs(EoM, bdys)
 
     sub = CoM(bdys[mol])
     d   = norm(main - sub)
-    push!(allFreqs, MolFreq(Evib, v[pks[1]], 0.0, d))
+    θ   = getAngleCO(bdys[ind], bdys[mol])
+    push!(allFreqs, MolFreq(Evib, v[pks[1]], 0.0, d, θ))
   end
 
   allFreqs
@@ -176,3 +171,24 @@ function getFvE(EoM, bdys, Erange)
 
   freqs
 end
+
+function getFreqCoupling(EoM, bdysIn, E)
+  bdys = deepcopy(bdysIn)
+
+  ind  = pickRandomMol(bdys, "bulk") |> (x -> findall(e -> e in x, bdys))
+  v,m  = getHarmonicFreqs(EoM, bdys[ind])
+
+  b4   = getAllFreqs(EoM, bdys, ind=ind)
+  r    = [i.r for i in b4]
+  ϕ    = [i.θ for i in b4] .* 180/pi
+  v    = [i.freq for i in b4]
+
+  vibExcite!(bdys[ind], m[:,6], E)
+
+  b5   = getAllFreqs(EoM, bdys, ind=ind)
+  v2   = [i.freq for i in b5]
+  dv   = v2 .- v
+
+  (r, ϕ, dv)
+end
+
