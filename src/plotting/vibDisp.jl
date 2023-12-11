@@ -231,3 +231,23 @@ function pltFreqShift(k)
   fig
 end
 
+function pltTauVsDeltaNu(df; N=300, τ=nothing)
+
+  set_theme!(myLightTheme)
+
+  if τ == nothing
+    τ   = trackTau(df, N)
+  end
+
+  fig = Figure(size=(800,700))
+  gl  = GridLayout(fig[1,1])
+ 
+  ax1 = Axis(gl[1:2,1])
+  ax2 = Axis(gl[3:8,1])
+
+  lines!(ax1, df.time[102:end] ./ 1e3, df.molVib[102:end])
+  lines!(ax2, df.time[102:end - N] ./ 1e3, τ)
+
+  (fig, gl)
+end
+
