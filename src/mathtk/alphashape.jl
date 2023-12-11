@@ -126,14 +126,16 @@ function getAlpha(pts)
     V = sum([i.V for i in A.simplexes])
     p = [j for i in A.simplexes for j in i.pts]
     
-    isempty(setdiff(pts,p)) ? r = A.area : r = Inf
-    isempty(A.perimeter) ? r = Inf : r += V
-    return r
+    l = setdiff(pts, p) |> length
+    m = length(A.perimeter)
+    r = (A.area / V) + (l / m)*1e25
+    
+    r
   end
 
   res = optimize(f, 0.0, 1.0)
   
-  return res.minimizer[1]
+  res.minimizer[1]
 end
 
 function alphashape(pts; α=nothing)
