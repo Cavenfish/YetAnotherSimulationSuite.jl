@@ -11,6 +11,12 @@ function mkvar(x)
   return X
 end
 
+function translateBdys!(bdys, v)
+  for i in bdys
+    i.r .+= v
+  end
+end
+
 function getAngle(r1, r2)
   x  = (dot(r1, r2)) / (norm(r1) * norm(r2))
   x  = round(x, digits=15)
