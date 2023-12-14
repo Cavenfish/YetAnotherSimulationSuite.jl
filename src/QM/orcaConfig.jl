@@ -12,9 +12,9 @@ function parseOutput(file)
 
   out    = readlines(file)
   
-  i = findfirst(e -> occursin(engStr, e), out)
-  j = findfirst(e -> occursin(μStr  , e), out)
-  k = findfirst(e -> occursin(MStr  , e), out)
+  i = findlast(e -> occursin(engStr, e), out)
+  j = findlast(e -> occursin(μStr  , e), out)
+  k = findlast(e -> occursin(MStr  , e), out)
 
   E = split(out[i])[end] |> (x -> parse(Float64, x))
   μ = split(out[j], ':')[end] |> split |> (x -> parse.(Float64, x))
