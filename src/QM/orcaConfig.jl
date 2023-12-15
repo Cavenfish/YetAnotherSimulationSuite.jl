@@ -1,8 +1,23 @@
 
+mutable struct OrcaInput
+
+end
+
 struct OrcaOutput
   E::Float64
   μ::Vector{Float64}
   M::Float64
+end
+
+function runOrca(inp, out)
+  orca = read(`which orca`, String) |> (x -> strip(x, '\n'))
+
+  pipeline(`$(orca) $(inp)`, out) |> run
+end
+
+function writeInput(file, inp)
+  open(file, "w") do io
+  end
 end
 
 function parseOutput(file)
