@@ -231,23 +231,41 @@ function pltFreqShift(k)
   fig
 end
 
-function pltTauVsDeltaNu(df; N=300, τ=nothing)
+struct TauVsDeltaNu
+  label::String
+  τ::Vector{Float64}
+  τe::Vector{Float64}
+  dv::Vector{Float64}
+end
+
+function getTauVsDeltaNu(df, vd, label; N=300)
+ 
+  E     = df.molVib[102:end]
+  τ, τe = trackTau(df, N)
+
+  dv  = let
+    v   = findPeaks(vd."1", min=50)  |> (x -> vd.v[x[end]])
+    vs  = findPeaks(vd."1", min=750) |> (x -> vd.v[x[1]])
+    v0  = vs / sqrt((11.23-E[1]) / 11.23)
+    vp  = freqShiftMorse.([v0], [11.23], E)
+    
+    vp .- v
+  end
+
+  TauVsDeltaNu(label, τ, τe, dv[1:length(τ)])
+end
+
+function pltTauVsDeltaNu(toPlt)
 
   set_theme!(myLightTheme)
 
-  if τ == nothing
-    τ   = trackTau(df, N)
+  fig = Figure(size=(800,600))
+  ax  = Axis(fig[1,1], xlabel=L"$\Delta \nu$ (cm$^{-1}$)", ylabel=L"$\tau$ (ps)")
+
+  for obj in toPlt
+    scatter!(ax, obj.dv, obj.τ, err=obj.τe, label=obj.label)
   end
 
-  fig = Figure(size=(800,700))
-  gl  = GridLayout(fig[1,1])
- 
-  ax1 = Axis(gl[1:2,1])
-  ax2 = Axis(gl[3:8,1])
-
-  lines!(ax1, df.time[102:end] ./ 1e3, df.molVib[102:end])
-  lines!(ax2, df.time[102:end - N] ./ 1e3, τ)
-
-  (fig, gl)
+  fig
 end
 

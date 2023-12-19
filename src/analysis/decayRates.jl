@@ -25,11 +25,19 @@ function trackTau(df, N)
   t,y = prep4fit(df)
 
   τ   = Float64[]
+  τe  = Float64[]
   for i in 0:length(t)- N - 1
     fit = curve_fit(expDecay, t[1+i:N+i], y[1+i:N+i], [0.4, 500.0])
-    push!(τ, fit.param[2])
+    err = standard_errors(fit)
+
+    if err[2] / fit.param[2] > 0.05
+      return τ, τe
+    end
+
+    push!(τ , fit.param[2])
+    push!(τe, err[2])
   end
 
-  τ
+  τ, τe
 end
 
