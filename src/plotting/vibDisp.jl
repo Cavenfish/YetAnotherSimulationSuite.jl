@@ -244,8 +244,8 @@ function getTauVsDeltaNu(df, vd, label; N=300)
   τ, τe = trackTau(df, N)
 
   dv  = let
-    v   = findPeaks(vd."1", min=50)  |> (x -> vd.v[x[end]])
-    vs  = findPeaks(vd."1", min=750) |> (x -> vd.v[x[1]])
+    v   = findPeaks(vd."1", min=50, max=500)  |> (x -> vd.v[x[end]])
+    vs  = findPeaks(vd."1", min=500) |> (x -> vd.v[x[1]])
     v0  = vs / sqrt((11.23-E[1]) / 11.23)
     vp  = freqShiftMorse.([v0], [11.23], E)
     
@@ -263,8 +263,11 @@ function pltTauVsDeltaNu(toPlt)
   ax  = Axis(fig[1,1], xlabel=L"$\Delta \nu$ (cm$^{-1}$)", ylabel=L"$\tau$ (ps)")
 
   for obj in toPlt
-    scatter!(ax, obj.dv, obj.τ, err=obj.τe, label=obj.label)
+    l = convert(typeof(L""), obj.label)
+    scatter!(ax, obj.dv, obj.τ, label=l)
   end
+
+  # axislegend(ax)
 
   fig
 end
