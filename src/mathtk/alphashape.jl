@@ -127,8 +127,9 @@ function getAlpha(pts)
     p = [j for i in A.simplexes for j in i.pts]
     
     l = setdiff(pts, p) |> length
-    m = length(A.perimeter)
-    r = (A.area / V) + (l / m)*1e25
+    n = length(A.perimeter)
+    m = vcat(A.perimeter...) |> unique |> length
+    r = (A.area / V)*(n/m) + (l / m) * 1e65
     
     r
   end
