@@ -267,7 +267,44 @@ function pltTauVsDeltaNu(toPlt)
     scatter!(ax, obj.dv, obj.τ, label=l)
   end
 
-  # axislegend(ax)
+  fig
+end
+
+function pltTauVsDeltaNu(left, right)
+
+  set_theme!(myLightTheme)
+
+  fig = Figure(size=(1650,700))
+
+  ax1 = Axis(fig[1,1], 
+    xlabel=L"$\Delta \nu$ (cm$^{-1}$)", 
+    ylabel=L"$\tau$ (ps)",
+    xlabelsize=30, ylabelsize=30)
+
+  ax2 = Axis(fig[1,2], 
+    xlabel=L"$\Delta \nu$ (cm$^{-1}$)", 
+    xlabelsize=30)
+
+  for obj in left
+    l = convert(typeof(L""), obj.label)
+    scatter!(ax1, obj.dv, obj.τ, label=l)
+  end
+
+  for obj in right
+    l = convert(typeof(L""), obj.label)
+    scatter!(ax2, obj.dv, obj.τ, label=l)
+  end
+
+  fig[2, 1:2] = Legend(fig, ax1, orientation=:horizontal)
+
+  hideydecorations!(ax2, grid=false)
+
+  xlims!(ax1, -110, 110)
+  ylims!(ax1, 0, 3000)
+
+  xlims!(ax2, -110, 110)
+  ylims!(ax2, 0, 3000)
+  
 
   fig
 end
