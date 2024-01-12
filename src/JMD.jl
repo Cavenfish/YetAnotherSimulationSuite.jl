@@ -53,6 +53,7 @@ include("./analysis/optimizations.jl")
 include("./analysis/structral.jl")
 include("./analysis/decayRates.jl")
 include("./analysis/freqShifts.jl")
+include("./analysis/participationRatio.jl")
 
 include("./plotting/config.jl")
 include("./plotting/vibDisp.jl")
