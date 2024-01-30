@@ -80,4 +80,23 @@ function getModePES(EoM!, bdys, mode)
   return x, y
 end
 
+function getModeInteractionPES(EoM!, bdys, mode)
+
+  x0, vars = prep4pot(bdys)
+  molVar   = optVars(vars.mols, [])
+
+  x, y = [], []
+
+  for i in -1:0.001:2
+    
+    j = @. x0 + i * mode 
+
+    E = EoM!(true, nothing, j, vars) - EoM!(true, nothing, j, molVar)
+
+    push!(x, i)
+    push!(y, E)
+
+  end
+  return x, y
+end
     
