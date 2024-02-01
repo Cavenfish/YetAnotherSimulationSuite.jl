@@ -7,7 +7,6 @@ Example of Input Card
 
 [expt]
 EoM = "COCO"
-vzpe = 0.001
 energy = 0.4
 time = 2000
 location = "bulk"
@@ -17,6 +16,8 @@ cluster = "250co"
 splits = 100
 cluIso = [13.003, 17.999]
 KE = 10
+vzpe.energy = 0.001
+vzpe.modes = [1,2,3]
 
 [vacf]
 inter = 10
@@ -84,11 +85,11 @@ function vibDisp(inpFile::String)
 
   #Add VZPE to cluster
   if "vzpe" in keys(expt)
-    zpe = expt["vzpe"]
+    zpe = expt["vzpe"]["energy"]
     f,m = getHarmonicFreqs(EoM, bdys)
     N   = div(length(bdys), 2)
     m   = m[:, end-(N-1):end]
-    for i = 1:N
+    for i = expt["vzpe"]["modes"]
       vibExcite!(bdys, m[:, i], zpe)
     end
   end
