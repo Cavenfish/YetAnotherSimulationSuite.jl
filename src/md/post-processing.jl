@@ -112,7 +112,7 @@ function trackVACF(files, safe)
   return df
 end
 
-function trackEnergyDissipation(traj, pot, mol)
+function trackEnergyDissipation(traj, pot, mol; eignvec=nothing)
 
   m = traj.m
   N = length(traj.t)
@@ -122,6 +122,8 @@ function trackEnergyDissipation(traj, pot, mol)
   avgVib, avgRot, avgTra = Float64[], Float64[], Float64[]
 
   others = [[i,i+1] for i in 1:2:n if !(i in mol)]
+
+  zpe = zeros(N)
 
   for i in 1:N
     r = traj.r[i]
@@ -142,20 +144,28 @@ function trackEnergyDissipation(traj, pot, mol)
       atra += getTransEnergy(r[j], v[j], m[j])
     end
 
+    if eignvec != nothing
+      bdys = getFrame(traj, i)
+      
+      for e in eignvec
+        zpe[i] += getVibEnergy(bdys, e)
+      end
+    end
 
     push!(avgVib, avib/n)
     push!(avgRot, arot/n)
     push!(avgTra, atra/n)
   end
 
-  df = DataFrame(  time=traj.t,
-                   temp=traj.T,
-                 molVib=molVib,
-                 molRot=molRot,
-                 molTra=molTra,
-                 avgVib=avgVib,
-                 avgRot=avgRot,
-                 avgTra=avgTra)
+  df = DataFrame(  time = traj.t,
+                   temp = traj.T,
+                 molVib = molVib,
+                 molRot = molRot,
+                 molTra = molTra,
+                 avgVib = avgVib,
+                 avgRot = avgRot,
+                 avgTra = avgTra,
+                   vzpe = zpe)
 
   return df
 end

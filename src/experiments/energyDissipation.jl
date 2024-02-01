@@ -92,6 +92,7 @@ function vibDisp(inpFile::String)
     for i = expt["vzpe"]["modes"]
       vibExcite!(bdys, m[:, i], zpe)
     end
+    expt["vzpe"]["modes"] = m[:, expt["vzpe"]["modes"]]
   end
 
   # Run short NVE to equilibrate system
@@ -132,7 +133,11 @@ function vibDisp(inpFile::String)
   # Post-process
   tmp  = ["$i.tmp" for i in 0:splits]
   traj = processTmpFiles(tmp; step=100)
-  df   = trackEnergyDissipation(traj, EoM, mol)
+  df   = if "vzpe" in keys(expt)
+    trackEnergyDissipation(traj, EoM, mol, eignvec=expt["vzpe"]["modes"])
+  else
+    trackEnergyDissipation(traj, EoM, mol)
+  end
 
   # Load saving vars for easy usage
   dfName = savi["df"] 
