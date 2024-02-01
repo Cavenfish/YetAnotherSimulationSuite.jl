@@ -15,8 +15,7 @@ function getIPR(modes; N=2)
       b += dot(v, v)
     end
     
-    b^2
-    ipr[i] += a / b
+    ipr[i] += a / (b^2)
   end
   
   ipr
