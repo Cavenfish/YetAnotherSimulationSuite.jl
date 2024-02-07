@@ -92,7 +92,7 @@ function vibDisp(inpFile::String)
     for i = expt["vzpe"]["modes"]
       vibExcite!(bdys, m[:, i], zpe)
     end
-    expt["vzpe"]["modes"] = m[:, expt["vzpe"]["modes"]]
+    expt["vzpe"]["modes"] = [m[:, i] for i in expt["vzpe"]["modes"]]
   end
 
   # Run short NVE to equilibrate system
