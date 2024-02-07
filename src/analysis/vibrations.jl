@@ -63,13 +63,13 @@ function animateMode(bdys, mode, fileName)
   close(f)
 end
 
-function getModePES(EoM!, bdys, mode)
+function getModePES(EoM!, bdys, mode; range=collect(-1:0.001:2))
 
   x0, vars = prep4pot(bdys)
 
   x, y = [], []
 
-  for i in -1:0.001:2
+  for i in range
     
     j = @. x0 + i * mode 
 
@@ -80,14 +80,14 @@ function getModePES(EoM!, bdys, mode)
   return x, y
 end
 
-function getModeInteractionPES(EoM!, bdys, mode)
+function getModeInteractionPES(EoM!, bdys, mode; range=collect(-1:0.001:2))
 
   x0, vars = prep4pot(bdys)
   molVar   = optVars(vars.mols, [])
 
   x, y = [], []
 
-  for i in -1:0.001:2
+  for i in range
     
     j = @. x0 + i * mode 
 

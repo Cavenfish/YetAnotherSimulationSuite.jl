@@ -49,10 +49,20 @@ function rdf(bdys, A, B; kwargs...)
 end
 
 
-function adf()
-
+function adf(bdys; kwargs...)
+  N = length(bdys)
+  o = CoM(bdys)
+  r = maximum([norm(i.r-o) for i in bdys])
+  V = 4/3 * pi * r^3
+  ρ = N / V
+  m = getMols(bdys)
+  n = length(m)
+  θ = [getAngleCO(bdys[m[i]], bdys[m[j]]) for i = 1:n for j = i+1:n] .* (360/2pi)
+  k = kde_lscv(θ; kwargs...)
+  x = collect(k.x)
+  y = k.density
+  return x,y
 end
-
 
 function density(bdys, rRange)
 
