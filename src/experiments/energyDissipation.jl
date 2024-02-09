@@ -44,6 +44,9 @@ function vibDisp(inpFile::String)
   expt = inp["expt"]
   savi = inp["saving"]
 
+  # Load timestep
+  "dt" in keys(expt) ? dt = expt["dt"]*fs : dt = fs
+
   # Load up EoM 
   fn  = Symbol(expt["EoM"])
   EoM = @eval $fn
@@ -96,7 +99,7 @@ function vibDisp(inpFile::String)
   end
 
   # Run short NVE to equilibrate system
-  equil = runNVE(EoM, (0, 10ps), fs, bdys, save="sparse")
+  equil = runNVE(EoM, (0, 10ps), dt, bdys, save="sparse")
   getLastFrame!(bdys, equil)
 
   # Save equil data
@@ -119,7 +122,7 @@ function vibDisp(inpFile::String)
   for i in 1:splits
     t1  = ((i-1)/splits) * time + 10ps
     t2  = (i/splits) * time + 10ps
-    nve = runNVE(EoM, t1, t2, fs, bdys, save="sparse")
+    nve = runNVE(EoM, t1, t2, dt, bdys, save="sparse")
     getLastFrame!(bdys, nve)
     
     open("$i.tmp", "w") do f
