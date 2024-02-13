@@ -9,6 +9,7 @@ Example of Input Card
 EoM = "COCO"
 energy = 0.4
 time = 2000
+dt = 1
 location = "bulk"
 isotope = [12.011, 15.999]
 jldfile = "/home/brian/COjl/10K-MvH.jld2"
