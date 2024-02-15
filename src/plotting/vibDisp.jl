@@ -46,14 +46,14 @@ function pltGeneralDisp(toPlt)
   set_theme!(myLightTheme)
 
   fig = Figure()
-  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
+  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Vibrational Energy (eV)")
 
   for p in toPlt
     
     l  = p[1]
     df = p[2]
 
-    lines!(ax, df.time ./ 1000, df.molVib, label=l)
+    lines!(ax, df.time[102:end] ./ 1000, df.molVib[102:end], label=l)
   end
 
   fig
