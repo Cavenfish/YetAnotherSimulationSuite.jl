@@ -1,12 +1,16 @@
 
 
-function findPeaks(arr; min=0.0, max=1e30)
+function findPeaks(arr; min=0.0, max=1e30, width=0)
   pks = Int32[]
 
   for i in 2:length(arr)-1
-    if arr[i-1] < arr[i] > arr[i+1] && arr[i] > min && arr[i] < max
-      push!(pks, i)
-    end
+
+    arr[i-1] < arr[i] > arr[i+1] || continue
+    arr[i] > min || continue
+    arr[i] < max || continue
+    arr[i-width] < arr[i] > arr[i+width] || continue
+
+    push!(pks, i)
   end 
 
   pks
