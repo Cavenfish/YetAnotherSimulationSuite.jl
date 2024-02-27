@@ -1,6 +1,6 @@
 
 
-function findPeaks(arr; min=0.0, max=1e30, width=0)
+function findPeaks(arr; min=0.0, max=1e30, width=1)
   pks = Int32[]
 
   for i in 2:length(arr)-1
