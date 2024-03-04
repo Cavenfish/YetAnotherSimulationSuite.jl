@@ -230,12 +230,6 @@ function calcCoul(rC1, rO1, rC2, rO2, rj0i0, rj1i1, rj0i1, rj1i0, ri1i0)
   return energy, Fi0, Fi1, Fj0, Fj1
 end
 
-function diffDotSqrt(v2, v1)
-  diff = v2 - v1
-  r    = sqrt(dot(diff, diff))
-  return (r, diff)
-end
-
 function COCO(dv, v, u, p, t)
   epsilon = 11.230139012256362
   N       = length(u)
