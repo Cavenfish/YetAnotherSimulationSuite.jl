@@ -7,7 +7,9 @@ function TIP4P(dv, v, u, p, t)
   a   =
   req =
   K   =
-  θeq = 
+  θeq =
+  ϵoo =
+  σoo =
   
 
   # initialize things
@@ -16,14 +18,26 @@ function TIP4P(dv, v, u, p, t)
 
 
   for mol in p.mols
-    h1, h2, o     = u[mol]
+    h1, h2, o     = mol
 
-    E += _Morse(F, u, o, h1, D, a, req)
-    E += _Morse(F, u, o, h2, D, a, req)
-
-    e3, F1, F2, Fo = _harmonicBondAngle()
+    E += _Morse!(F, u, o, h1, D, a, req)
+    E += _Morse!(F, u, o, h2, D, a, req)
+    E += _harmonicBondAngle!(F, u, h1, o, h2, K, θeq)
   end
 
+  for par in p.pars
+    h1, h2, o1 = par[1]
+    h3, h4, o2 = par[2]
+
+    E += _vdw!(F, u, o1, o2, ϵoo, σoo)
+
+    for i in [h1, h2, m1]
+      for j in [h3, h4, m2]
+        E += _Coulomb!(F, u, i, j, Qi, Qj)
+      end
+    end
+
+  end
 
 
   dv .= F ./ p.m
