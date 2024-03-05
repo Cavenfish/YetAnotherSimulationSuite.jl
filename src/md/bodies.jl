@@ -14,12 +14,12 @@ struct Molecule{N}
   name::String
 end
 
-function getMols(bdys, rmin)
+function getMols(bdys, rmin; D=3)
   r   = [i.r for i in bdys]
 
-  pts = mapreduce(permutedims, vcat, r)
+  pts = hcat(r...)
 
-  ret = dbscan(pts, rmin)
+  ret = dbscan(pts[1:D, :], rmin)
 
   [i.core_indices for i in ret.clusters]
 end
@@ -47,6 +47,23 @@ function getPairs(bdys)
 
   # Drop duplicates
   mols = unique(mols)
+  N    = size(mols)[1]
+
+  # Make all pairs
+  pars = Pair[]
+  for i in 1:N
+    for j in i+1:N
+      push!(pars, Pair(mols[i],mols[j]))
+    end
+  end
+
+  return pars, mols
+end
+
+function getPairs(bdys, rmin; kwargs...)
+
+  # Get mols and N
+  mols = getMols(bdys, rmin; kwargs...)
   N    = size(mols)[1]
 
   # Make all pairs

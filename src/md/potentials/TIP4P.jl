@@ -3,13 +3,16 @@ TIP4P/2005f
 """
 
 function TIP4P(dv, v, u, p, t)
-  D   =
-  a   =
-  req =
-  K   =
-  θeq =
-  ϵoo =
-  σoo =
+  D   = 4.48339    # eV
+  a   = 2.287      # \AA
+  req = 0.9419     # \AA
+  K   = 3.537308e-7# eV rad^-2  1.16123e-3 * (2pi/360)^2
+  θeq = 1.87448    # rad        107.4  * (2pi/360)
+  ϵoo = 8.03e-3    # eV
+  σoo = 3.1644     # \AA
+  dm  = 0.13194    # \AA
+  Qh  = 2.1113635  # 
+  Qm  = - 2Qh      #
   
 
   # initialize things
@@ -44,5 +47,8 @@ function TIP4P(dv, v, u, p, t)
   if typeof(p) == NVTsimu
     p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
   end
+
+  push!(p.energy, E)
+  push!(p.forces, F)
 
 end

@@ -39,8 +39,10 @@ function _harmonicBondAngle!(F, u, i, o, j, K, θeq)
   θ     = dot(ri, rj) / (norm(ri) * norm(rj)) |> acos
   E     = 0.5 * K * (θ - θeq)^2
   pre   = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * norm(ri) * norm(rj))
-  F[i] += pre * (rj - (ri * (dot(ri, rj) / dot(ri,ri))))
-  F[j] += pre * (ri - (rj * (dot(ri, rj) / dot(rj,rj))))
+  Fi    = pre * (rj - (ri * (dot(ri, rj) / dot(ri,ri))))
+  Fj    = pre * (ri - (rj * (dot(ri, rj) / dot(rj,rj))))
+  F[i] += Fi
+  F[j] += Fj
   F[o] -= (Fi + Fj)
 
   E
