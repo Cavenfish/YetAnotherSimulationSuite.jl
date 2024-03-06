@@ -11,11 +11,11 @@ end
 function _vdw!(F, u, i, j, ϵij, σij)
   rvec  = u[j] - u[i]
   r     = norm(rvec)
-  a     = σ / r
+  a     = σij / r
   E     = 4ϵij * ((a)^12 - (a)^6)
   f     = 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rvec
-  F[i] -= f
-  F[j] += f
+  F[i] += f
+  F[j] -= f
 
   E
 end
