@@ -56,16 +56,16 @@ function TIP4P(dv, v, u, p, t)
 end
 
 function TIP4P(F, G, y0, p)
-  D   = 4.48339    # eV
-  a   = 2.287      # \AA
-  req = 0.9419     # \AA
-  K   = 3.81209321 # eV rad^-2  1.16123e-3 * (360/2pi)^2
-  θeq = 1.87448    # rad        107.4  * (2pi/360)
-  ϵoo = 8.03e-3    # eV
-  σoo = 3.1644     # \AA
-  dm  = 0.13194    # \AA
-  Qh  = 2.1113635  # 
-  Qm  = - 2Qh      #
+  D    = 4.48339    # eV
+  a    = 2.287      # \AA
+  req  = 0.9419     # \AA
+  K    = 3.81209321 # eV rad^-2  1.16123e-3 * (360/2pi)^2
+  θeq  = 1.87448    # rad        107.4  * (2pi/360)
+  ϵoo  = 8.03e-3    # eV
+  σoo  = 3.1644     # \AA
+  drel = 0.13194    # 
+  Qh   = 2.1143     # 
+  Qm   = - 2Qh      #
   
   # initialize things
   E      = 0.0
@@ -96,7 +96,7 @@ function TIP4P(F, G, y0, p)
       end
     end
 
-    E += _getMforces!(forces, u, par[1], par[2], dm, Qh, Qm)
+    E += _getMforces!(forces, u, par[1], par[2], drel, Qh, Qm)
 
   end
 
@@ -111,30 +111,48 @@ function TIP4P(F, G, y0, p)
   end
 
   if F != nothing
-    return E
+    return forces
   end
 
 end
 
-function _getMforces!(F, u, w1, w2, dm, Qh, Qm)
+function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
   h1, h2, o1 = w1
   h3, h4, o2 = w2
 
-  # Get Norms 
-  d11 = norm(u[h1] - u[o1])
-  d21 = norm(u[h2] - u[o1])
-  d32 = norm(u[h3] - u[o2])
-  d42 = norm(u[h4] - u[o2])
+  # Get Angle
+  θ1  = getAngle(u[h1] - u[o1], u[h2] - u[o1])
+  θ2  = getAngle(u[h3] - u[o2], u[h4] - u[o2])
+
+  # Get r vectors
+  r1o  = u[h1] - u[o1]
+  r2o  = u[h2] - u[o1]
+  r3o  = u[h3] - u[o2]
+  r4o  = u[h4] - u[o2]
+
+  # Get Norms
+  d1o  = norm(r1o)
+  d2o  = norm(r2o)
+  d3o  = norm(r3o)
+  d4o  = norm(r4o)
+
+  # Get dm
+  dm1 = drel * (d1o*cos(θ1/2) + d2o*cos(θ1/2))
+  dm2 = drel * (d3o*cos(θ2/2) + d4o*cos(θ2/2))
+
+  # Get bisectors
+  rbi1 = r1o/d1o + r2o/d2o
+  rbi2 = r3o/d3o + r4o/d4o
 
   # Get weights
-  wh1 = dm * 0.5 * (1 + d21/d11)
-  wh2 = dm * 0.5 * (1 + d11/d21)
-  wh3 = dm * 0.5 * (1 + d42/d32)
-  wh4 = dm * 0.5 * (1 + d32/d42)
+  wh1 = dm1 / d1o / norm(rbi1)
+  wh2 = dm1 / d2o / norm(rbi1)
+  wh3 = dm2 / d3o / norm(rbi2)
+  wh4 = dm2 / d4o / norm(rbi2)
 
-  # Get M positions
-  m1 = u[o1] + wh1*(u[h1] - u[o1]) + wh2*(u[h2] - u[o1])
-  m2 = u[o2] + wh3*(u[h3] - u[o2]) + wh4*(u[h4] - u[o2])
+  # Get m site vectors
+  m1 = u[o1] + wh1*r1o + wh2*r2o
+  m2 = u[o2] + wh3*r3o + wh4*r4o
 
   # H1 -- M2
   E,f    = _Coulomb(u[h1], m2, Qh, Qm)
