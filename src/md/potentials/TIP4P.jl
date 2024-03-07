@@ -111,7 +111,7 @@ function TIP4P(F, G, y0, p)
   end
 
   if F != nothing
-    return forces
+    return E
   end
 
 end
