@@ -64,7 +64,7 @@ function TIP4P(F, G, y0, p)
   ϵoo  = 8.03e-3    # eV
   σoo  = 3.1644     # \AA
   drel = 0.13194    # 
-  Qh   = 2.1143     # 
+  Qh   = 2.1113635  # 
   Qm   = - 2Qh      #
   
   # initialize things
