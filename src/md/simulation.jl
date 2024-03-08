@@ -27,7 +27,7 @@ function runNVE(EoM, tspan, dt, bdys; save="full", kwargs...)
   vel   = [SVector{3}(i.v) for i in bdys]
   mas   = [i.m for i in bdys]   
 
-  pars, mols = getPairs(bdys, 1.5; D=2)
+  pars, mols = getPairs(bdys)
   simu       = NVEsimu(bdys, pars, mols, [], [], save, mas)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)

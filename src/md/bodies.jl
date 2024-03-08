@@ -24,46 +24,14 @@ function getMols(bdys, rmin; D=3)
   [i.core_indices for i in ret.clusters]
 end
 
-function getMols(bdys)
-  # Get distance matrix 
-  d = [[norm(j.r - i.r) for j in bdys] for i in bdys]
-
-  # Get molecules (only works for CO)
-  mols = findall.(e -> e < 2, d)
-
-  # Drop duplicates
-  mols = unique(mols)
-
-  mols
-end
-
 function getPairs(bdys)
 
-  # Get distance matrix 
-  d = [[norm(j.r - i.r) for j in bdys] for i in bdys]
-
-  # Get molecules (only works for CO)
-  mols = findall.(e -> e < 2, d)
-
-  # Drop duplicates
-  mols = unique(mols)
-  N    = size(mols)[1]
-
-  # Make all pairs
-  pars = Pair[]
-  for i in 1:N
-    for j in i+1:N
-      push!(pars, Pair(mols[i],mols[j]))
-    end
-  end
-
-  return pars, mols
-end
-
-function getPairs(bdys, rmin; kwargs...)
-
   # Get mols and N
-  mols = getMols(bdys, rmin; kwargs...)
+  mols = if length(bdys) < 3
+    getMols(bdys, 1.5, D=length(bdys)-1) 
+  else
+    getMols(bdys, 1.5)
+  end
   N    = size(mols)[1]
 
   # Make all pairs
