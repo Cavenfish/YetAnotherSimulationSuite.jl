@@ -49,6 +49,7 @@ include("./md/thermostats.jl")
 include("./md/post-processing.jl")
 include("./md/potentials/funcs/intra.jl")
 include("./md/potentials/funcs/inter.jl")
+include("./md/potentials/funcs/damping.jl")
 
 include("./analysis/vacf.jl")
 include("./analysis/desorb.jl")

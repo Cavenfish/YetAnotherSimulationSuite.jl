@@ -6,11 +6,22 @@ https://doi.org/10.1021/acs.jpcb.0c08728
 
 
 function CH4(dv, v, u, p, t)
-  D   = 4.0017 # eV
-  a   = 2.0415 # \AA^-1
-  req = 1.0887 # \AA
-  K   = 3.3349 # eV rad^-1
-  θeq = 1.8741 # rad 107.379 * (2pi/360)
+  D   = 4.0017  # eV
+  a   = 2.0415  # \AA^-1
+  req = 1.0887  # \AA
+  K   = 3.3349  # eV rad^-1
+  θeq = 1.8741  # rad 107.379 * (2pi/360)
+  Acc = 1852.25 #
+  Ach = 141.317 #
+  Ahh = 112.503 #
+  Bcc = 3.37925 # \AA^-1
+  Bch = 3.25885 # \AA^-1
+  Bhh = 4.05972 # \AA^-1
+  Ccc = 13.15   #
+  Cch = 4.51455 #
+  Chh = 1.59497 #
+  Qh  = 0.51163 #
+  Qc  = - 4Qh   #
 
   # initialize things
   E = 0.0
@@ -18,22 +29,47 @@ function CH4(dv, v, u, p, t)
 
 
   for mol in p.mols
-    h1, h2, h3, h4, c = mol
+    c, hs = mol[1], mol[2:5]
 
-    for i in [h1, h2, h3, h4]
-      E += _Morse!(F, u, c, i, D, a, req)
+    for i in hs
+      E += _Morse!(F, u, c, i, D, a, req) - D
     end
 
-    for i in [h1, h2, h3, h4]
-      for j in [h1, h2, h3, h4]
-        i == j && continue 
-        E += _harmonicBondAngle!(F, u, i, c, j, K, θeq)
+    for i in 1:4
+      for j in i+1:4
+        E += _harmonicBondAngle!(F, u, hs[i], c, hs[j], K, θeq) - K
       end
     end
     
   end
 
   for par in p.pars
+    c1, hs1 = par[1][1], par[1][2:5]
+    c2, hs2 = par[2][1], par[2][2:5] 
+
+    E += _Coulomb!(F, u, c1, c2, Qc, Qc)
+    E += _shortDisp!(F, u, c1, c2, Acc, Bcc)
+    E += _longDisp!(F, u, c1, c2, Ccc; damp=tangToennies, p=Bcc)
+
+    k = true
+    for i in hs1
+      E += _Coulomb!(F, u, i, c2, Qh, Qc)
+      E += _shortDisp!(F, u, i, c2, Ach, Bch)
+      E += _longDisp!(F, u, i, c2, Cch; damp=tangToennies, p=Bch)
+      for j in hs2
+        E += _Coulomb!(F, u, i, j, Qh, Qh)
+        E += _shortDisp!(F, u, i, j, Ahh, Bhh)
+        E += _longDisp!(F, u, i, j, Chh; damp=tangToennies, p=Bhh)
+        
+        if k
+          E += _Coulomb!(F, u, j, c1, Qh, Qc)
+          E += _shortDisp!(F, u, j, c1, Ach, Bch)
+          E += _longDisp!(F, u, j, c1, Cch; damp=tangToennies, p=Bch)
+        end
+
+      end
+      k = false
+    end
   end
   
 
@@ -48,11 +84,22 @@ function CH4(dv, v, u, p, t)
 end
 
 function CH4(F, G, y0, p)
-  D   = 4.0017 # eV
-  a   = 2.0415 # \AA^-1
-  req = 1.0887 # \AA
-  K   = 3.3349 # eV rad^-1
-  θeq = 1.8741 # rad 107.379 * (2pi/360)
+  D   = 4.0017  # eV
+  a   = 2.0415  # \AA^-1
+  req = 1.0887  # \AA
+  K   = 3.3349  # eV rad^-1
+  θeq = 1.8741  # rad 107.379 * (2pi/360)
+  Acc = 1852.25 #
+  Ach = 141.317 #
+  Ahh = 112.503 #
+  Bcc = 3.37925 # \AA^-1
+  Bch = 3.25885 # \AA^-1
+  Bhh = 4.05972 # \AA^-1
+  Ccc = 13.15   #
+  Cch = 4.51455 #
+  Chh = 1.59497 #
+  Qh  = 0.51163 #
+  Qc  = - 4Qh   #
 
   # initialize things
   E      = 0.0
@@ -64,8 +111,7 @@ function CH4(F, G, y0, p)
   end
 
   for mol in p.mols
-    c  = mol[1]
-    hs = mol[2:5]
+    c, hs = mol[1], mol[2:5]
 
     for i in hs
       E += _Morse!(forces, u, c, i, D, a, req) - D
@@ -80,6 +126,32 @@ function CH4(F, G, y0, p)
   end
 
   for par in p.pars
+    c1, hs1 = par[1][1], par[1][2:5]
+    c2, hs2 = par[2][1], par[2][2:5] 
+
+    E += _Coulomb!(forces, u, c1, c2, Qc, Qc)
+    E += _shortDisp!(forces, u, c1, c2, Acc, Bcc)
+    E += _longDisp!(forces, u, c1, c2, Ccc; damp=tangToennies, p=Bcc)
+
+    k = true
+    for i in hs1
+      E += _Coulomb!(forces, u, i, c2, Qh, Qc)
+      E += _shortDisp!(forces, u, i, c2, Ach, Bch)
+      E += _longDisp!(forces, u, i, c2, Cch; damp=tangToennies, p=Bch)
+      for j in hs2
+        E += _Coulomb!(forces, u, i, j, Qh, Qh)
+        E += _shortDisp!(forces, u, i, j, Ahh, Bhh)
+        E += _longDisp!(forces, u, i, j, Chh; damp=tangToennies, p=Bhh)
+        
+        if k
+          E += _Coulomb!(forces, u, j, c1, Qh, Qc)
+          E += _shortDisp!(forces, u, j, c1, Ach, Bch)
+          E += _longDisp!(forces, u, j, c1, Cch; damp=tangToennies, p=Bch)
+        end
+
+      end
+      k = false
+    end
   end
 
   if G != nothing
