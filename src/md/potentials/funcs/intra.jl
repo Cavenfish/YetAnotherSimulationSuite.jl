@@ -1,3 +1,6 @@
+"""
+Intramolecular Potential Functions
+"""
 
 
 function _Morse(r, rvec, D, a, req)
