@@ -12,5 +12,5 @@ function tangToennies(r, D)
   dr = D * r
   s  = [dr^i/factorial(i) for i = 0:6] |> sum
   
-  1 - (exp(dr) * s)
+  1 - (exp(-dr) * s)
 end
