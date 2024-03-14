@@ -100,9 +100,6 @@ function TIP4P(F, G, y0, p)
 
   end
 
-  E += D * length(p.mols) * 2
-  E += K * length(p.mols)
-
   if G != nothing
     tmp = [j for i in forces for j in i]
     for i in 1:length(G)
