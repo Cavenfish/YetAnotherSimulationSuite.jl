@@ -27,7 +27,7 @@ end
 function getPairs(bdys)
 
   # Get mols and N
-  mols = if length(bdys) < 3
+  mols = if length(bdys) <= 3
     getMols(bdys, 1.5, D=length(bdys)-1) 
   else
     getMols(bdys, 1.5)
