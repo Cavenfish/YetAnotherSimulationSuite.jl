@@ -32,12 +32,12 @@ function CH4(dv, v, u, p, t)
     c, hs = mol[1], mol[2:5]
 
     for i in hs
-      E += _Morse!(F, u, c, i, D, a, req) - D
+      E += _Morse!(F, u, c, i, D, a, req)
     end
 
     for i in 1:4
       for j in i+1:4
-        E += _harmonicBondAngle!(F, u, hs[i], c, hs[j], K, θeq) - K
+        E += _harmonicBondAngle!(F, u, hs[i], c, hs[j], K, θeq)
       end
     end
     
@@ -100,6 +100,8 @@ function CH4(F, G, y0, p)
   Chh = 1.59497 #
   Qh  = 0.51163 #
   Qc  = - 4Qh   #
+  αh  = 0.38978 #
+  αc  = 1.39327 #
 
   # initialize things
   E      = 0.0
@@ -114,12 +116,12 @@ function CH4(F, G, y0, p)
     c, hs = mol[1], mol[2:5]
 
     for i in hs
-      E += _Morse!(forces, u, c, i, D, a, req) - D
+      E += _Morse!(forces, u, c, i, D, a, req)
     end
 
     for i in 1:4
       for j in i+1:4
-        E += _harmonicBondAngle!(forces, u, hs[i], c, hs[j], K, θeq) - K
+        E += _harmonicBondAngle!(forces, u, hs[i], c, hs[j], K, θeq)
       end
     end
     
@@ -128,6 +130,11 @@ function CH4(F, G, y0, p)
   for par in p.pars
     c1, hs1 = par[1][1], par[1][2:5]
     c2, hs2 = par[2][1], par[2][2:5] 
+
+    μ1 = _getDipole(par[1], u, p.m, [Qc, Qh, Qh, Qh, Qh])
+    μ2 = _getDipole(par[2], u, p.m, [Qc, Qh, Qh, Qh, Qh])
+
+    # e,f = _Vpol4Fdd(μ1, μ2, )
 
     E += _Coulomb!(forces, u, c1, c2, Qc, Qc)
     E += _shortDisp!(forces, u, c1, c2, Acc, Bcc)
@@ -166,3 +173,17 @@ function CH4(F, G, y0, p)
   end
 
 end
+
+function _getDipole(mol, u, m, q)
+  o = CoM(u[mol], m[mol])
+  μ = zeros(3)
+  
+  for i in 1:length(mol)
+    j  = mol[i]
+    r  = u[j] - o
+    μ += q[i] * r
+  end
+
+  μ
+end
+
