@@ -6,14 +6,13 @@ function TIP4P(dv, v, u, p, t)
   D    = 4.48339    # eV
   a    = 2.287      # \AA
   req  = 0.9419     # \AA
-  K    = 3.537308e-7# eV rad^-2  1.16123e-3 * (2pi/360)^2
+  K    = 3.81209321 # eV rad^-2  1.16123e-3 * (2pi/360)^2
   θeq  = 1.87448    # rad        107.4  * (2pi/360)
   ϵoo  = 8.03e-3    # eV
   σoo  = 3.1644     # \AA
   drel = 0.13194    # \AA
   Qh   = 2.1113635  # 
   Qm   = - 2Qh      #
-  
 
   # initialize things
   E = 0.0
@@ -43,7 +42,6 @@ function TIP4P(dv, v, u, p, t)
     E += _getMforces!(F, u, par[1], par[2], drel, Qh, Qm)
 
   end
-
 
   dv .= F ./ p.m
   if typeof(p) == NVTsimu
@@ -99,9 +97,6 @@ function TIP4P(F, G, y0, p)
     E += _getMforces!(forces, u, par[1], par[2], drel, Qh, Qm)
 
   end
-
-  E += D * length(p.mols) * 2
-  E += K * length(p.mols)
 
   if G != nothing
     tmp = [j for i in forces for j in i]
