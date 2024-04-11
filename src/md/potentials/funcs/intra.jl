@@ -1,20 +1,18 @@
 
 
 function _Morse(r, rvec, D, a, req)
-  preF = 2 * D * a / req
-  expf = exp(a * (1 - r / req))
-  E    = D * expf * (expf - 2)
-  F    = preF * expf * (expf - 1) * rvec / r
+  c = exp(-a*(r-req))
+  E = D * (1 - c)^2
+  F = -2D * a * c * (1 - c) * rvec / r
 
   E, F
 end
 
 function _Morse!(F, u, i, j, D, a, req)
   r, rvec = diffDotSqrt(u[j], u[i])
-  preF    = 2 * D * a / req
-  expf    = exp(a * (1 - r / req))
-  E       = D * expf * (expf - 2)
-  f       = preF * expf * (expf - 1) * rvec / r
+  c       = exp(-a*(r-req))
+  E       = D * (1 - c)^2
+  f       = -2D * a * c * (1 - c) * rvec / r
 
   F[i] -= f
   F[j] += f
