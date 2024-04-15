@@ -92,6 +92,39 @@ function _longDisp!(F, u, i, j, Cij; damp=nothing, p=nothing)
   E
 end
 
+function _Vpol4Fcc(ri, rj, Qi, Qj, A)
+  rvec = rj - ri
+  r    = norm(rvec)
+  a    = 0.4
+
+  c    = a * (r/A)^4
+  s0   = 1 - exp(-c) + (a^0.25 * r / A) * gamma(0.75, c)
+  s1   = 1 - exp(-c)
+
+  Eqq  = s0 * Qi * Qj / r
+  Fqq  = s1 * Qi * Qj / r^3 * rvec
+
+  Eqq, Fqq
+end
+
+function _Vpol4Fcc!(F, u, i, j, Qi, Qj, A)
+  rvec  = u[j] - u[i]
+  r     = norm(rvec)
+  a     = 0.4
+
+  c     = a * (r/A)^4
+  s0    = 1 - exp(-c) + (a^0.25 * r / A) * gamma(0.75, c)
+  s1    = 1 - exp(-c)
+
+  Eqq   = s0 * Qi * Qj / r
+  Fqq   = s1 * Qi * Qj / r^3 * rvec
+
+  F[i] -= Fqq
+  F[j] += Fqq
+
+  Eqq
+end
+
 function _Vpol4Fcd(ri, rj, Qi, Qj, μi, μj, A)
   rvec = rj - ri
   r    = norm(rvec)
@@ -108,6 +141,27 @@ function _Vpol4Fcd(ri, rj, Qi, Qj, μi, μj, A)
   Fqu  = (s2 * 3 / r^5) * (Qi * rμj - Qj * rμi) * rvec .+ (s1 / r^3) * (Qj * μi .- Qi * μj)
 
   Equ, Fqu
+end
+
+function _Vpol4Fcd!(F, u, i, j, Qi, Qj, μi, μj, A)
+  rvec  = u[j] - u[i]
+  r     = norm(rvec)
+  a     = 0.4
+
+  c     = exp(-a*(r/A)^4)
+  s1    =  1 - c
+  s2    = s1 - (4a/3) * (r/A)^4 * c
+  s3    = s2 - (4a/15) * (r/A)^4 * (4a * (r/4)^4 - 1) * c
+
+  rμi   = dot(rvec, μi)
+  rμj   = dot(rvec, μj)
+  Equ   = (s1 / r^3) * (Qi * rμj - rμi * Qj)
+  Fqu   = (s2 * 3 / r^5) * (Qi * rμj - Qj * rμi) * rvec .+ (s1 / r^3) * (Qj * μi .- Qi * μj)
+
+  F[i] -= Fqu
+  F[j] += Fqu
+
+  Equ
 end
 
 function _Vpol4Fdd(ri, rj, Qi, Qj, μi, μj, A)

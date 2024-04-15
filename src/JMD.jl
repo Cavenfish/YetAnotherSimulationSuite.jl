@@ -26,6 +26,7 @@ using LinearAlgebra
 using Distributions
 using KernelDensity
 using OrdinaryDiffEq
+using SpecialFunctions
 using FiniteDifferences
 
 const fs   = 0.09822694788464063 # 1fs in ASE time
