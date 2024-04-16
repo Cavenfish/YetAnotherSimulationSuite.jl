@@ -7,6 +7,7 @@ struct NVEsimu
   forces::Vector
   save::String
   m::Vector
+  μ::Vector
 end
 
 struct NVTsimu
@@ -25,7 +26,7 @@ end
 function runNVE(EoM, tspan, dt, bdys; save="full", kwargs...)
   pos   = [SVector{3}(i.r) for i in bdys]
   vel   = [SVector{3}(i.v) for i in bdys]
-  mas   = [i.m for i in bdys]   
+  mas   = [i.m for i in bdys]
 
   pars, mols = getPairs(bdys)
   simu       = NVEsimu(bdys, pars, mols, [], [], save, mas)

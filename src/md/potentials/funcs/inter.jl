@@ -183,3 +183,26 @@ function _Vpol4Fdd(ri, rj, Qi, Qj, μi, μj, A)
 
   Euu, Fuu
 end
+
+function _Vpol4Fdd!(F, u, i, j, Qi, Qj, μi, μj, A)
+  rvec = u[j] - u[i]
+  r    = norm(rvec)
+  a    = 0.055*0.626
+
+  c    = exp(-a*(r/A)^4)
+  s1   =  1 - c
+  s2   = s1 - (4a/3) * (r/A)^4 * c
+  s3   = s2 - (4a/15) * (r/A)^4 * (4a * (r/4)^4 - 1) * c
+
+  rμi  = dot(rvec, μi)
+  rμj  = dot(rvec, μj)
+  μij  = dot(μi, μj)
+
+  Euu  = (s1 / r^3 * μij) - (s2 * 3 / r^5 * rμi * rμj)
+  Fuu  = (-s3 * 15 / r^7 * rμi * rμj) * rvec .+ (s2 * 3 / r^5) * (μij * rvec .+ rμi * μj .+ rμj * μi)
+
+  F[i] -= Fuu
+  F[j] += Fuu
+
+  Euu
+end

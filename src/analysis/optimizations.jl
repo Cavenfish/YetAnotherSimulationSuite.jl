@@ -3,6 +3,7 @@ struct optVars
   mols::Vector
   pars::Vector
   m::Vector
+  μ::Vector
 end
 
 
@@ -14,9 +15,10 @@ end
 
 function prep4pot(bdys)
   m          = [i.m for i in bdys]
+  μ          = [zeros(3) for i in bdys]
   x0         = prepX0(bdys)
   pars, mols = getPairs(bdys)
-  vars       = optVars(mols, pars, m)
+  vars       = optVars(mols, pars, m, μ)
   return x0, vars
 end
 
@@ -41,9 +43,10 @@ end
 function opt(EoM, algo, bdys; kwargs...)
 
   m          = [i.m for i in bdys]
+  μ          = [zeros(3) for i in bdys]
   x0         = prepX0(bdys)
   pars, mols = getPairs(bdys)
-  vars       = optVars(mols, pars, m)
+  vars       = optVars(mols, pars, m, μ)
   optFunc    = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
   convCrit   = Optim.Options(; kwargs...)
   res        = optimize(optFunc, x0, algo, convCrit)
