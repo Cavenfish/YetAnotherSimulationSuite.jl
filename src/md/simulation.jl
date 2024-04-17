@@ -19,6 +19,7 @@ struct NVTsimu
   temp::Vector
   save::String
   m::Vector
+  μ::Vector
   thermostat!::Function
   thermoInps
 end
@@ -41,11 +42,12 @@ end
 function runNVE(EoM, t1, t2, dt, bdys; save="full", kwargs...)
   pos   = [SVector{3}(i.r) for i in bdys]
   vel   = [SVector{3}(i.v) for i in bdys]
-  mas   = [i.m for i in bdys]   
+  mas   = [i.m for i in bdys]
+  μ     = [zeros(3) for i in bdys]
   tspan = (t1,t2)
 
   pars, mols = getPairs(bdys)
-  simu       = NVEsimu(bdys, pars, mols, [], [], save, mas)
+  simu       = NVEsimu(bdys, pars, mols, [], [], save, mas, μ)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false, save_start=false)
@@ -57,9 +59,10 @@ function runNVT(EoM, tspan, dt, bdys, thermostat, thermoInps; save="full", kwarg
   pos   = [SVector{3}(i.r) for i in bdys]
   vel   = [SVector{3}(i.v) for i in bdys]
   mas   = [i.m for i in bdys]
+  μ     = [zeros(3) for i in bdys]
 
   pars, mols = getPairs(bdys)
-  simu       = NVTsimu(bdys, pars, mols, [], [], [], save, mas, thermostat, thermoInps)
+  simu       = NVTsimu(bdys, pars, mols, [], [], [], save, mas, μ, thermostat, thermoInps)
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
