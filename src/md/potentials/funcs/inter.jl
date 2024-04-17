@@ -71,7 +71,7 @@ function _longDisp(ri, rj, Cij; damp=nothing, p=nothing)
   # Get damping value if wanted
   damp != nothing ? d = damp(r, p) : d = 1 
 
-  E = Cij / r^6 * d
+  E = -Cij / r^6 * d
   F = 6 * E * rvec / r^2
 
   E,F
@@ -82,9 +82,9 @@ function _longDisp!(F, u, i, j, Cij; damp=nothing, p=nothing)
   r     = norm(rvec)
 
   # Get damping value if wanted
-  damp != nothing ? d = damp(r, p) : d = 1 
-
-  E     = Cij / r^6 * d
+  damp != nothing ? d = damp(r, p) : d = 1
+  
+  E     = -Cij / r^6 * d
   f     = 6 * E * rvec / r^2
   F[i] -= f
   F[j] += f
@@ -120,7 +120,7 @@ function _Vpol4Fcc!(F, u, i, j, Qi, Qj, A)
   Fqq   = s1 * Qi * Qj / r^3 * rvec
 
   F[i] -= Fqq
-  F[j] += Fqq
+  # F[j] += Fqq
 
   Eqq
 end
@@ -159,7 +159,7 @@ function _Vpol4Fcd!(F, u, i, j, Qi, Qj, μi, μj, A)
   Fqu   = (s2 * 3 / r^5) * (Qi * rμj - Qj * rμi) * rvec .+ (s1 / r^3) * (Qj * μi .- Qi * μj)
 
   F[i] -= Fqu
-  F[j] += Fqu
+  # F[j] += Fqu
 
   Equ
 end
@@ -202,7 +202,7 @@ function _Vpol4Fdd!(F, u, i, j, Qi, Qj, μi, μj, A)
   Fuu  = (-s3 * 15 / r^7 * rμi * rμj) * rvec .+ (s2 * 3 / r^5) * (μij * rvec .+ rμi * μj .+ rμj * μi)
 
   F[i] -= Fuu
-  F[j] += Fuu
+  # F[j] += Fuu
 
   Euu
 end

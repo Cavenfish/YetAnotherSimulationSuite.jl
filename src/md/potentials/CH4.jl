@@ -6,29 +6,35 @@ https://doi.org/10.1021/acs.jpcb.0c08728
 
 
 function CH4(dv, v, u, p, t)
-  D   = 4.0017  # eV
-  a   = 2.0415  # \AA^-1
-  req = 1.0887  # \AA
-  K   = 3.3349  # eV rad^-1
-  θeq = 1.8741  # rad 107.379 * (2pi/360)
-  Acc = 1852.25 #
-  Ach = 141.317 #
-  Ahh = 112.503 #
-  Bcc = 3.37925 # \AA^-1
-  Bch = 3.25885 # \AA^-1
-  Bhh = 4.05972 # \AA^-1
-  Ccc = 13.15   #
-  Cch = 4.51455 #
-  Chh = 1.59497 #
-  Qh  = 0.51163 #
-  Qc  = - 4Qh   #
-  αh  = 0.38978 # \AA^3
-  αc  = 1.39327 # \AA^3
+  D    = 4.0017  # eV
+  a    = 2.0415  # \AA^-1
+  req  = 1.0887  # \AA
+  K    = 3.33487 # eV rad^-1   76.9061 * 0.043363
+  θeq  = 1.87411 # rad 107.379 * (2pi/360)
+  Acc  = 1852.25 #
+  Ach  = 141.317 #
+  Ahh  = 112.503 #
+  Bcc  = 3.37925 # \AA^-1
+  Bch  = 3.25885 # \AA^-1
+  Bhh  = 4.05972 # \AA^-1
+  Ccc  = 13.15   #
+  Cch  = 4.51455 #
+  Chh  = 1.59497 #
+  Qh   = 0.51163 #
+  Qc   = - 4Qh   #
+  αh   = 0.38978 # \AA^3
+  αc   = 1.39327 # \AA^3
+  A6cc = αc^(2/6)
+  A6ch = (αc*αh)^(1/6)
+  A6hh = αh^(2/6)
 
   # initialize things
   E = 0.0
   F = zero(u)
+  α = repeat([αc, αh, αh, αh, αh], length(p.mols))
+  Q = repeat([Qc, Qh, Qh, Qh, Qh], length(p.mols))
 
+  _getDipoles4TTM!(p.μ, u, Q, α, p.mols)
 
   for mol in p.mols
     c, hs = mol[1], mol[2:5]
@@ -49,24 +55,27 @@ function CH4(dv, v, u, p, t)
     c1, hs1 = par[1][1], par[1][2:5]
     c2, hs2 = par[2][1], par[2][2:5] 
 
-    E += _Coulomb!(F, u, c1, c2, Qc, Qc)
-    E += _shortDisp!(F, u, c1, c2, Acc, Bcc)
-    E += _longDisp!(F, u, c1, c2, Ccc; damp=tangToennies, p=Bcc)
+    E += _interTTM!(
+      F, u, p.μ, c1, c2, Qc, Qc, 
+      Acc, Bcc, Ccc, A6cc; damp=tangToennies, p=Bcc
+    )
 
     k = true
     for i in hs1
-      E += _Coulomb!(F, u, i, c2, Qh, Qc)
-      E += _shortDisp!(F, u, i, c2, Ach, Bch)
-      E += _longDisp!(F, u, i, c2, Cch; damp=tangToennies, p=Bch)
+      E += _interTTM!(
+        F, u, p.μ, i, c2, Qh, Qc, 
+        Ach, Bch, Cch, A6ch; damp=tangToennies, p=Bch
+      )
       for j in hs2
-        E += _Coulomb!(F, u, i, j, Qh, Qh)
-        E += _shortDisp!(F, u, i, j, Ahh, Bhh)
-        E += _longDisp!(F, u, i, j, Chh; damp=tangToennies, p=Bhh)
-        
+        E += _interTTM!(
+          F, u, p.μ, i, j, Qh, Qh, 
+          Ahh, Bhh, Chh, A6hh; damp=tangToennies, p=Bhh
+        )
         if k
-          E += _Coulomb!(F, u, j, c1, Qh, Qc)
-          E += _shortDisp!(F, u, j, c1, Ach, Bch)
-          E += _longDisp!(F, u, j, c1, Cch; damp=tangToennies, p=Bch)
+          E += _interTTM!(
+            F, u, p.μ, j, c1, Qh, Qc, 
+            Ach, Bch, Cch, A6ch; damp=tangToennies, p=Bch
+          )
         end
 
       end

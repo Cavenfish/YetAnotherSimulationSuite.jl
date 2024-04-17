@@ -6,12 +6,16 @@
 function _interTTM!(F, u, μ, i, j, Qi, Qj, Aij, Bij, Cij, A6ij; kwargs...)
 
   E  = 0.0
-  # E  += _Coulomb!(  F, u, i, j, Qi, Qj)
+  E += _Coulomb!(  F, u, i, j, Qi, Qj)
   E += _shortDisp!(F, u, i, j, Aij, Bij)
   E += _longDisp!( F, u, i, j, Cij; kwargs...)
   E += _Vpol4Fcc!( F, u, i, j, Qi, Qj, A6ij)
   E += _Vpol4Fcd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
   E += _Vpol4Fdd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
+
+  E += _Vpol4Fcc!( F, u, j, i, Qj, Qi, A6ij)
+  E += _Vpol4Fcd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
+  E += _Vpol4Fdd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
 
   E
 end
@@ -19,9 +23,9 @@ end
 function _getDipoles4TTM!(μ, u, Q, α, mols; μtol=1e-6, Etol=1e-6)
   μConv = false
   EConv = false
-  E     = zero.(u)
-  μOld  = zero.(u)
-  EOld  = zero.(u)
+  E     = zero.(μ)
+  μOld  = zero.(μ)
+  EOld  = zero.(μ)
 
   while !μConv || !EConv
 
