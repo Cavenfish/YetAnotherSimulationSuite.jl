@@ -27,15 +27,18 @@ function _getDipoles4TTM!(μ, u, Q, α, mols; μtol=1e-6, Etol=1e-6)
   μOld  = zero.(μ)
   EOld  = zero.(μ)
 
+  iter = 1
   while !μConv || !EConv
 
     for n = 1:length(mols)
 
-      for m = n+1:length(mols)
+      for m = 1:length(mols)
+
+        n == m && continue
 
         for i in mols[n]
-          #This needs to be to inplace change elements rather than
-          #make pointers, or re-allocate memory
+          #This needs to be here to have inplace change elements
+          #rather than make pointers, or re-allocate memory
           μOld[i] .= μ[i]
           EOld[i] .= E[i]
     
@@ -63,7 +66,10 @@ function _getDipoles4TTM!(μ, u, Q, α, mols; μtol=1e-6, Etol=1e-6)
 
     μConv = isapprox(μOld, μ, atol=μtol) |> (x -> sum(x) == length(x))
     EConv = isapprox(EOld, E, atol=Etol) |> (x -> sum(x) == length(x))
-
+    # println("Iteration $iter")
+    iter +=1
   end
+
+  println("Total Iterations $iter")
 
 end
