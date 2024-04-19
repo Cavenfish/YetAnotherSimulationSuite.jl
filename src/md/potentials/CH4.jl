@@ -128,8 +128,8 @@ function CH4(F, G, y0, p)
     push!(forces, [0.0, 0.0, 0.0])
   end
 
-  # _getDipoles4TTM_Iterative!(p.μ, u, Q, α, p.mols)
-  μ = _getDipoles4TTM_MatrixInversion(u, Q, α)
+  _getDipoles4TTM_Iterative!(p.μ, u, Q, α, p.mols)
+  # μ = _getDipoles4TTM_MatrixInversion(u, Q, α)
 
   for mol in p.mols
     c, hs = mol[1], mol[2:5]
@@ -151,24 +151,24 @@ function CH4(F, G, y0, p)
     c2, hs2 = par[2][1], par[2][2:5] 
 
     E += _interTTM!(
-      forces, u, μ, c1, c2, Qc, Qc, 
+      forces, u, p.μ, c1, c2, Qc, Qc, 
       Acc, Bcc, Ccc, A6cc; damp=tangToennies, p=Bcc
     )
 
     k = true
     for i in hs1
       E += _interTTM!(
-        forces, u, μ, i, c2, Qh, Qc, 
+        forces, u, p.μ, i, c2, Qh, Qc, 
         Ach, Bch, Cch, A6ch; damp=tangToennies, p=Bch
       )
       for j in hs2
         E += _interTTM!(
-          forces, u, μ, i, j, Qh, Qh, 
+          forces, u, p.μ, i, j, Qh, Qh, 
           Ahh, Bhh, Chh, A6hh; damp=tangToennies, p=Bhh
         )
         if k
           E += _interTTM!(
-            forces, u, μ, j, c1, Qh, Qc, 
+            forces, u, p.μ, j, c1, Qh, Qc, 
             Ach, Bch, Cch, A6ch; damp=tangToennies, p=Bch
           )
         end

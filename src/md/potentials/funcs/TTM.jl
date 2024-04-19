@@ -68,11 +68,11 @@ end
 
 #TODO:
   # Make iterative dipole function have a cutoff
-  # Take permanent electric field calculations out of loop
 
   function _getDipoles4TTM_Iterative!(μ, u, Q, α, mols; μtol=1e-2, Etol=1e-6)
     μConv = false
     EConv = false
+    Eq    = _getPermanentEfield(u, Q, α)
     E     = zero.(μ)
     μOld  = zero.(μ)
     EOld  = zero.(μ)
@@ -108,10 +108,9 @@ end
               s1  = 1 - c
               s2  = s1 - (4*0.572/3) * (r/A)^4 * c
       
-              Eq = -s1 * rij * Q[j] / r^3
               Eμ = s2 * (3/r^5) * dot(rij, μOld[j]) * rij .- s1 * μOld[j] / r^3
       
-              E[i] .+= Eq + Eμ
+              E[i] .+= Eq[i] + Eμ
               μ[i] .+= α[i] * E[i]
   
             end
