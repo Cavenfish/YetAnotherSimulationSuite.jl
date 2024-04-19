@@ -1,8 +1,4 @@
 
-#TODO:
-  # Make iterative dipole function have a cutoff
-  # Take permanent electric field calculations out of loop
-
 
 function _interTTM!(F, u, μ, i, j, Qi, Qj, Aij, Bij, Cij, A6ij; kwargs...)
 
@@ -21,76 +17,34 @@ function _interTTM!(F, u, μ, i, j, Qi, Qj, Aij, Bij, Cij, A6ij; kwargs...)
   E
 end
 
-function _getDipoles4TTM_Iterative!(μ, u, Q, α, mols; μtol=1e-2, Etol=1e-6)
-  μConv = false
-  EConv = false
-  E     = zero.(μ)
-  μOld  = zero.(μ)
-  EOld  = zero.(μ)
+function _getPermanentEfield(u, Q, α)
+  E = zero.(u)
 
-  iter = 1
-  while !μConv || !EConv
+  for i = 1:length(u)
+    for j = 1:length(u)
 
-    for i = 1:length(μ)
-      #This needs to be here to have inplace change elements
-      #rather than make pointers, or re-allocate memory
-      μOld[i] .= μ[i]
-      EOld[i] .= E[i]
+      i == j && continue
 
-      μ[i] .= 0.0
-      E[i] .= 0.0
+      rij = u[i] - u[j]
+      r   = norm(rij)
+      A   = (α[i] * α[j])^(1/6)
+      c   = exp(-0.4 * (r/A)^4)
+      s1  = 1 - c
+
+      E[i] .+= -s1 * rij * Q[j] / r^3
     end
-
-    # iter > 5 && break
-
-    for n = 1:length(mols)
-
-      for m = 1:length(mols)
-
-        n == m && continue
-
-        for i in mols[n]
-          for j in mols[m]
-
-            rij = u[i] - u[j]
-            r   = norm(rij)
-            A   = (α[i] * α[j])^(1/6)
-            c   = exp(-0.572 * (r/A)^4)
-            s1  = 1 - c
-            s2  = s1 - (4*0.572/3) * (r/A)^4 * c
-    
-            Eq = -s1 * rij * Q[j] / r^3
-            Eμ = s2 * (3/r^5) * dot(rij, μOld[j]) * rij .- s1 * μOld[j] / r^3
-    
-            E[i] .+= Eq + Eμ
-            μ[i] .+= α[i] * E[i]
-
-          end
-        end
-      end
-    end
-
-    # println(μOld[1])
-    # println(μ[1])
-    # println(μOld[11] - μ[11])
-    # (μOld .- μ) |> maximum |> println
-    # (μOld .- μ) |> (x -> findfirst(e -> e == maximum(x), x)) |> println
-
-    μConv = isapprox(μOld, μ, atol=μtol) |> (x -> sum(x) == length(x))
-    EConv = isapprox(EOld, E, atol=Etol) |> (x -> sum(x) == length(x))
-    iter +=1
   end
 
-  println("Total Iterations $iter")
-
+  E
 end
 
-function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α)
+function _getDipoles4TTM_MatrixInversion(u, Q, α)
 
-  Tij(r, A) = 1 - exp(-0.4*(r/A)^4) + (0.4^(1/4) * r / A) * gamma(3/4, a * (r/A)^4)
+  Tij(r, A, a) = (1 - exp(-a*(r/A)^4) + (a^(1/4) * r / A) * gamma(3/4, a * (r/A)^4)) / r
 
-  n = length(α)
-  M = zeros(3n,3n)
+  n  = length(α)
+  M  = zeros(n,n)
+  Eq = _getPermanentEfield(u, Q, α)
 
   for i = 1:n
     for j = 1:n
@@ -100,10 +54,81 @@ function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α)
       else
         r      = u[i] - u[j] |> norm
         A      = (α[i]*α[j])^(1/6)
-        M[i,j] = - Tij(r, A)
+        M[i,j] = - Tij(r, A, 0.4)
       end
 
     end
   end
 
+  μ = inv(M) * Eq
+
+  μ
 end
+
+
+#TODO:
+  # Make iterative dipole function have a cutoff
+  # Take permanent electric field calculations out of loop
+
+  function _getDipoles4TTM_Iterative!(μ, u, Q, α, mols; μtol=1e-2, Etol=1e-6)
+    μConv = false
+    EConv = false
+    E     = zero.(μ)
+    μOld  = zero.(μ)
+    EOld  = zero.(μ)
+  
+    iter = 1
+    while !μConv || !EConv
+  
+      for i = 1:length(μ)
+        #This needs to be here to have inplace change elements
+        #rather than make pointers, or re-allocate memory
+        μOld[i] .= μ[i]
+        EOld[i] .= E[i]
+  
+        μ[i] .= 0.0
+        E[i] .= 0.0
+      end
+  
+      # iter > 5 && break
+  
+      for n = 1:length(mols)
+  
+        for m = 1:length(mols)
+  
+          n == m && continue
+  
+          for i in mols[n]
+            for j in mols[m]
+  
+              rij = u[i] - u[j]
+              r   = norm(rij)
+              A   = (α[i] * α[j])^(1/6)
+              c   = exp(-0.572 * (r/A)^4)
+              s1  = 1 - c
+              s2  = s1 - (4*0.572/3) * (r/A)^4 * c
+      
+              Eq = -s1 * rij * Q[j] / r^3
+              Eμ = s2 * (3/r^5) * dot(rij, μOld[j]) * rij .- s1 * μOld[j] / r^3
+      
+              E[i] .+= Eq + Eμ
+              μ[i] .+= α[i] * E[i]
+  
+            end
+          end
+        end
+      end
+  
+      # println(μOld[1])
+      # println(μ[1])
+      # (μOld .- μ) |> maximum |> println
+      # (μOld .- μ) |> (x -> findfirst(e -> e == maximum(x), x)) |> println
+  
+      μConv = isapprox(μOld, μ, atol=μtol) |> (x -> sum(x) == length(x))
+      EConv = isapprox(EOld, E, atol=Etol) |> (x -> sum(x) == length(x))
+      iter +=1
+    end
+  
+    println("Total Iterations $iter")
+  
+  end
