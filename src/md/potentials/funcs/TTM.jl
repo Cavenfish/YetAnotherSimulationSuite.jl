@@ -10,10 +10,18 @@ function _interTTM!(F, u, μ, i, j, Qi, Qj, Aij, Bij, Cij, A6ij; kwargs...)
   E += _Vpol4Fcd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
   E += _Vpol4Fdd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
 
-  E += _Vpol4Fcc!( F, u, j, i, Qj, Qi, A6ij)
+  # E += _Vpol4Fcc!( F, u, j, i, Qj, Qi, A6ij)
   E += _Vpol4Fcd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
   E += _Vpol4Fdd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
 
+  E
+end
+
+function _getDipolePolarizationEnergy(μ, α)
+  E = 0.0
+  for i = 1:length(α)
+    E += dot(μ[i], μ[i]) / (2 * α[i])
+  end
   E
 end
 
@@ -38,7 +46,7 @@ function _getPermanentEfield(u, Q, α)
   E
 end
 
-function _getDipoles4TTM_MatrixInversion(u, Q, α)
+function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α)
 
   Tij(r, A, a) = (1 - exp(-a*(r/A)^4) + (a^(1/4) * r / A) * gamma(3/4, a * (r/A)^4)) / r
 
@@ -60,9 +68,13 @@ function _getDipoles4TTM_MatrixInversion(u, Q, α)
     end
   end
 
-  μ = inv(M) * Eq
+  tmp = inv(M) * Eq
 
-  μ
+  #Inplace swap mu values
+  for i = 1:length(tmp)
+    μ[i] .= tmp[i]
+  end
+
 end
 
 

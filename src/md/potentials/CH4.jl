@@ -128,8 +128,10 @@ function CH4(F, G, y0, p)
     push!(forces, [0.0, 0.0, 0.0])
   end
 
-  _getDipoles4TTM_Iterative!(p.μ, u, Q, α, p.mols)
-  # μ = _getDipoles4TTM_MatrixInversion(u, Q, α)
+  # _getDipoles4TTM_Iterative!(p.μ, u, Q, α, p.mols)
+  _getDipoles4TTM_MatrixInversion!(p.μ, u, Q, α)
+
+  E += _getDipolePolarizationEnergy(p.μ, α)
 
   for mol in p.mols
     c, hs = mol[1], mol[2:5]
