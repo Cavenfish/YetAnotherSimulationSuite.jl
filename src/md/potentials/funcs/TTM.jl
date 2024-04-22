@@ -26,7 +26,7 @@ function _getDipolePolarizationEnergy(μ, α)
 end
 
 function _getPermanentEfield(u, Q, α)
-  E = zero.(u)
+  E = [zeros(3) for i = 1:length(α)]
 
   for i = 1:length(u)
     for j = 1:length(u)

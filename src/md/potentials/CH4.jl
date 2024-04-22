@@ -34,7 +34,9 @@ function CH4(dv, v, u, p, t)
   α = repeat([αc, αh, αh, αh, αh], length(p.mols))
   Q = repeat([Qc, Qh, Qh, Qh, Qh], length(p.mols))
 
-  _getDipoles4TTM!(p.μ, u, Q, α, p.mols)
+  _getDipoles4TTM_MatrixInversion!(p.μ, u, Q, α)
+
+  E += _getDipolePolarizationEnergy(p.μ, α)
 
   for mol in p.mols
     c, hs = mol[1], mol[2:5]
