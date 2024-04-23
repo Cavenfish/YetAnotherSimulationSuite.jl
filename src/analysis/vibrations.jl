@@ -12,9 +12,10 @@ function getHarmonicFreqs(EoM!, bdys; kwargs...)
 
   #This code block is borrowed from opt 
   #Refer to optimizations.jl 
+  m          = [i.m for i in bdys]
   x0         = prepX0(bdys)
   pars, mols = getPairs(bdys)
-  vars       = optVars(mols, pars)
+  vars       = optVars(mols, pars, m)
   im         = [i.m ^ -0.5 for i in bdys for j in 1:3]
   m          = im * im' #inverse mass scaling matrix
 

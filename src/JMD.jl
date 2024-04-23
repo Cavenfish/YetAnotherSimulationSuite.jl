@@ -26,6 +26,7 @@ using LinearAlgebra
 using Distributions
 using KernelDensity
 using OrdinaryDiffEq
+using SpecialFunctions
 using FiniteDifferences
 
 const fs   = 0.09822694788464063 # 1fs in ASE time
@@ -43,11 +44,14 @@ include("./md/bodies.jl")
 include("./md/potentials/COCOff.jl")
 include("./md/potentials/HGNN.jl")
 include("./md/potentials/TIP4P.jl")
+include("./md/potentials/CH4.jl")
 include("./md/simulation.jl")
 include("./md/thermostats.jl")
 include("./md/post-processing.jl")
 include("./md/potentials/funcs/intra.jl")
 include("./md/potentials/funcs/inter.jl")
+include("./md/potentials/funcs/damping.jl")
+include("./md/potentials/funcs/TTM.jl")
 
 include("./analysis/vacf.jl")
 include("./analysis/desorb.jl")
