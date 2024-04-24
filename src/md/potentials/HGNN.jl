@@ -29,6 +29,21 @@ Essentially:
      ^      ^       ^
   matrix  column   row
           vector  vector 
+
+Switching to PotVars struct has changed allocations in two ways
+  1) Significantly increased allocations during for calls
+     to the potential. This comes from loading the molVars
+     and pairVars during the call rather than at module load.
+  2) Significantly decreased allocations associated with the
+     following vars: A, P, dPdr, rhats. This comes from them
+     acting like a cache now rather than being reallocated at
+     each new call.
+
+The overall result is that for quick uses of the potential
+(ie. single point energy) this method is slower and allocates
+more than the previous method. However, for longer uses of the
+potential (ie. md simulations) this significantly speeds up the
+code by reducing allocations.
 """
 
 struct _HGNN_PotVars <: PotVars
