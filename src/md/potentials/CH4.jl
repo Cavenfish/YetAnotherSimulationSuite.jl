@@ -63,7 +63,9 @@ function CH4(bdys::Vector{Atom})
     αc^(2/6),
     (αc*αh)^(1/6),
     αh^(2/6),
-    μ
+    μ,
+    α,
+    Q
   )
 end
 
