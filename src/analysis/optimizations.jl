@@ -1,25 +1,27 @@
 
 struct optVars
+  potVars::PotVars
   mols::Vector
   pars::Vector
   m::Vector
-  μ::Vector
 end
 
 
 function prepX0(bdys)
   r  = [i.r for i in bdys]
   x0 = [j for i in r for j in i]
-  return x0
+  
+  x0
 end
 
-function prep4pot(bdys)
+function prep4pot(EoM, bdys)
   m          = [i.m for i in bdys]
-  μ          = [zeros(3) for i in bdys]
   x0         = prepX0(bdys)
+  potVars    = EoM(bdys)
   pars, mols = getPairs(bdys)
-  vars       = optVars(mols, pars, m, μ)
-  return x0, vars
+  vars       = optVars(potVars, mols, pars, m)
+  
+  x0, vars
 end
 
 function getNewBdys(bdys, res)
@@ -37,20 +39,16 @@ function getNewBdys(bdys, res)
     push!(new, Atom(r,v,m,s))
   end
 
-  return new
+  new
 end
 
 function opt(EoM, algo, bdys; kwargs...)
 
-  m          = [i.m for i in bdys]
-  μ          = [zeros(3) for i in bdys]
-  x0         = prepX0(bdys)
-  pars, mols = getPairs(bdys)
-  vars       = optVars(mols, pars, m, μ)
-  optFunc    = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
-  convCrit   = Optim.Options(; kwargs...)
-  res        = optimize(optFunc, x0, algo, convCrit)
-  optBdys    = getNewBdys(bdys, res)
+  x0, vars = prep4pot(EoM, bdys)
+  optFunc  = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
+  convCrit = Optim.Options(; kwargs...)
+  res      = optimize(optFunc, x0, algo, convCrit)
+  optBdys  = getNewBdys(bdys, res)
 
-  return optBdys
+  optBdys
 end

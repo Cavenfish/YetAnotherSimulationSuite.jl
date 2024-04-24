@@ -7,7 +7,7 @@ struct NVEsimu
   forces::Vector
   save::String
   m::Vector
-  μ::Vector
+  potVars::PotVars
 end
 
 struct NVTsimu
@@ -19,7 +19,7 @@ struct NVTsimu
   temp::Vector
   save::String
   m::Vector
-  μ::Vector
+  potVars::PotVars
   thermostat!::Function
   thermoInps
 end

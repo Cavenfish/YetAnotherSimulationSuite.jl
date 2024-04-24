@@ -4,6 +4,15 @@ from Riera et al. 2020
 https://doi.org/10.1021/acs.jpcb.0c08728
 """
 
+struct _CH4_PotVars <: PotVars
+  μ::Vector
+end
+
+function CH4(bdys::Vector{Atom})
+  μ = [zeros(3) for i in bdys]
+
+  _CH4_PotVars(μ)
+end
 
 function CH4(dv, v, u, p, t)
   D    = 4.0017  # eV

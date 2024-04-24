@@ -2,44 +2,62 @@
 TIP4P/2005f 
 """
 
+struct _TIP4P_PotVars{F<:Float64} <: PotVars
+  D::F
+  a::F
+  req::F
+  K::F
+  θeq::F
+  ϵoo::F
+  σoo::F
+  drel::F
+  Qh::F
+  Qm::F
+end
+
+#PotVar building function 
+TIP4P(bdys::Vector{Atom}) = _TIP4P_PotVars(
+  4.48339,    # eV
+  2.287,      # \AA
+  0.9419,     # \AA
+  3.81209321, # eV rad^-2  1.16123e-3 * (2pi/360)^2
+  1.87448,    # rad        107.4  * (2pi/360)
+  8.03e-3,    # eV
+  3.1644,     # \AA
+  0.13194,    # \AA
+  2.1113635,  # 
+  -2 * 2.1113635
+)
+
 function TIP4P(dv, v, u, p, t)
-  D    = 4.48339    # eV
-  a    = 2.287      # \AA
-  req  = 0.9419     # \AA
-  K    = 3.81209321 # eV rad^-2  1.16123e-3 * (2pi/360)^2
-  θeq  = 1.87448    # rad        107.4  * (2pi/360)
-  ϵoo  = 8.03e-3    # eV
-  σoo  = 3.1644     # \AA
-  drel = 0.13194    # \AA
-  Qh   = 2.1113635  # 
-  Qm   = - 2Qh      #
 
   # initialize things
   E = 0.0
   F = zero(u)
+  P = p.potVars
 
 
   for mol in p.mols
     h1, h2, o     = mol
 
-    E += _Morse!(F, u, o, h1, D, a, req)
-    E += _Morse!(F, u, o, h2, D, a, req)
-    E += _harmonicBondAngle!(F, u, h1, o, h2, K, θeq)
+    E += _Morse!(F, u, o, h1, P.D, P.a, P.req)
+    E += _Morse!(F, u, o, h2, P.D, P.a, P.req)
+    E += _harmonicBondAngle!(F, u, h1, o, h2, P.K, P.θeq)
   end
 
   for par in p.pars
     h1, h2, o1 = par[1]
     h3, h4, o2 = par[2]
 
-    E += _vdw!(F, u, o1, o2, ϵoo, σoo)
+    E += _vdw!(F, u, o1, o2, P.ϵoo, P.σoo)
 
     for i in [h1, h2]
       for j in [h3, h4]
-        E += _Coulomb!(F, u, i, j, Qh, Qh)
+        E += _Coulomb!(F, u, i, j, P.Qh, P.Qh)
       end
     end
 
-    E += _getMforces!(F, u, par[1], par[2], drel, Qh, Qm)
+    E += _getMforces!(F, u, par[1], par[2], P.drel, P.Qh, P.Qm)
 
   end
 
@@ -54,20 +72,11 @@ function TIP4P(dv, v, u, p, t)
 end
 
 function TIP4P(F, G, y0, p)
-  D    = 4.48339    # eV
-  a    = 2.287      # \AA
-  req  = 0.9419     # \AA
-  K    = 3.81209321 # eV rad^-2  1.16123e-3 * (360/2pi)^2
-  θeq  = 1.87448    # rad        107.4  * (2pi/360)
-  ϵoo  = 8.03e-3    # eV
-  σoo  = 3.1644     # \AA
-  drel = 0.13194    # 
-  Qh   = 2.1113635  # 
-  Qm   = - 2Qh      #
   
   # initialize things
   E      = 0.0
   u      = Vector[]
+  P      = p.potVars
   forces = Vector[]
   for i in 1:3:length(y0)
     push!(u, y0[i:i+2])
@@ -77,24 +86,24 @@ function TIP4P(F, G, y0, p)
   for mol in p.mols
     h1, h2, o     = mol
 
-    E += _Morse!(forces, u, o, h1, D, a, req)
-    E += _Morse!(forces, u, o, h2, D, a, req)
-    E += _harmonicBondAngle!(forces, u, h1, o, h2, K, θeq)
+    E += _Morse!(forces, u, o, h1, P.D, P.a, P.req)
+    E += _Morse!(forces, u, o, h2, P.D, P.a, P.req)
+    E += _harmonicBondAngle!(forces, u, h1, o, h2, P.K, P.θeq)
   end
 
   for par in p.pars
     h1, h2, o1 = par[1]
     h3, h4, o2 = par[2]
 
-    E += _vdw!(forces, u, o1, o2, ϵoo, σoo)
+    E += _vdw!(forces, u, o1, o2, P.ϵoo, P.σoo)
 
     for i in [h1, h2]
       for j in [h3, h4]
-        E += _Coulomb!(forces, u, i, j, Qh, Qh)
+        E += _Coulomb!(forces, u, i, j, P.Qh, P.Qh)
       end
     end
 
-    E += _getMforces!(forces, u, par[1], par[2], drel, Qh, Qm)
+    E += _getMforces!(forces, u, par[1], par[2], P.drel, P.Qh, P.Qm)
 
   end
 

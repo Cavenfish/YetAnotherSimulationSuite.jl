@@ -254,7 +254,7 @@ function getCOVibEnergy(pos,vel,mas; pot=nothing)
 end
 
 function getPotEnergy(EoM, bdys)
-  x0, vars = prep4pot(bdys)
+  x0, vars = prep4pot(EoM, bdys)
   energy   = EoM(true, nothing, x0, vars)
   return energy
 end

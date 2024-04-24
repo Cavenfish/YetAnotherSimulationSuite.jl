@@ -1,17 +1,12 @@
 
+
 #Atoms in simulation
-mutable struct Atom
+#Needs mutable to swap masses on the fly
+mutable struct Atom 
   r::Vector{Float64}
   v::Vector{Float64}
   m::Float64
   s::Char
-end
-
-struct Molecule{N}
-  r::SMatrix{N,3,Float64}
-  v::SMatrix{N,3,Float64}
-  m::SVector{N,Float64}
-  name::String
 end
 
 function getMols(bdys, rmin; D=3)
