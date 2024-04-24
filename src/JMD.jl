@@ -81,6 +81,4 @@ include("./experiments/energyDissipation.jl")
 include("./QM/orcaConfig.jl")
 
 include("./organization/dataManagement.jl")
-
-# include("./md/potentials/params/loadVars.jl")
 end # module
