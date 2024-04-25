@@ -1,6 +1,6 @@
 export getHarmonicFreqs, animateMode, getModePES
 
-function getHarmonicFreqs(EoM!, bdys; kwargs...)
+function getHarmonicFreqs(EoM, bdys; kwargs...)
   _hbar = 1.0545718001391127e-34
   _e    = 1.6021766208e-19
   _amu  = 1.66053904e-27
@@ -14,14 +14,15 @@ function getHarmonicFreqs(EoM!, bdys; kwargs...)
   #Refer to optimizations.jl 
   m          = [i.m for i in bdys]
   x0         = prepX0(bdys)
+  potVars    = EoM(bdys)
   pars, mols = getPairs(bdys)
-  vars       = optVars(mols, pars, m)
+  vars       = optVars(potVars, mols, pars, m)
   im         = [i.m ^ -0.5 for i in bdys for j in 1:3]
   m          = im * im' #inverse mass scaling matrix
 
   function f(x, vars)
     G = zero(x)
-    EoM!(nothing, G, x, vars)
+    EoM(nothing, G, x, vars)
     return G
   end
 
