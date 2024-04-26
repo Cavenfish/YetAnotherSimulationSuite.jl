@@ -95,7 +95,7 @@ function _longDisp(ri, rj, Cij; damp=nothing, p=nothing)
   r    = norm(rvec)
   
   # Get damping value if wanted
-  damp != nothing ? d = damp(r, p) : d = 1 
+  damp != nothing ? d = damp(r, p) : d = (1,0) 
 
   a = -Cij / r^6
   b = -6 * a * rvec / r^2
@@ -110,7 +110,7 @@ function _longDisp!(F, u, i, j, Cij; damp=nothing, p=nothing)
   r     = norm(rvec)
 
   # Get damping value if wanted
-  damp != nothing ? d = damp(r, p) : d = 1
+  damp != nothing ? d = damp(r, p) : d = (1,0)
 
   a     = -Cij / r^6
   b     = -6 * a * rvec / r^2
