@@ -42,12 +42,11 @@ function _getPermanentEfield!(Eq, u, Q, α)
 
 end
 
-function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α, Eq)
+function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α, Eq, M)
 
   Tij(r, A, a) = (1 - exp(-a*(r/A)^4) + (a^(1/4) * r / A) * gamma(3/4, a * (r/A)^4)) / r
 
   n  = length(α)
-  M  = zeros(n,n)
 
   for i = 1:n
     for j = 1:n

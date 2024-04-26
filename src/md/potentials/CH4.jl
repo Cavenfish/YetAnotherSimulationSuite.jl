@@ -30,6 +30,7 @@ struct _CH4_PotVars{F<:Float64} <: PotVars
   μ::Vector
   α::Vector
   Q::Vector
+  M::Matrix
 end
 
 function CH4(bdys::Vector{Atom})
@@ -42,6 +43,7 @@ function CH4(bdys::Vector{Atom})
   α  = repeat([αc, αh, αh, αh, αh], N)
   Q  = repeat([Qc, Qh, Qh, Qh, Qh], N)
   Eq = [zeros(3) for i = 1:length(α)]
+  M  = zeros(length(α), length(α))
 
   _CH4_PotVars(
     4.0017,  # eV
@@ -68,7 +70,8 @@ function CH4(bdys::Vector{Atom})
     Eq,
     μ,
     α,
-    Q
+    Q,
+    M
   )
 end
 
@@ -80,7 +83,7 @@ function CH4(dv, v, u, p, t)
   P = p.potVars
 
   _getPermanentEfield!(P.Eq, u, P.Q, P.α)
-  _getDipoles4TTM_MatrixInversion!(P.μ, u, P.Q, P.α, P.Eq)
+  _getDipoles4TTM_MatrixInversion!(P.μ, u, P.Q, P.α, P.Eq, P.M)
 
   for i = 1:length(u)
     E -= 0.5 * dot(P.μ[i], P.Eq[i])
@@ -158,7 +161,7 @@ function CH4(F, G, y0, p)
 
   _getPermanentEfield!(P.Eq, u, P.Q, P.α)
   # _getDipoles4TTM_Iterative!(P.μ, u, P.Q, P.α, p.mols, P.Eq)
-  _getDipoles4TTM_MatrixInversion!(P.μ, u, P.Q, P.α, P.Eq)
+  _getDipoles4TTM_MatrixInversion!(P.μ, u, P.Q, P.α, P.Eq, P.M)
 
   for i = 1:length(u)
     E -= 0.5 * dot(P.μ[i], P.Eq[i])
