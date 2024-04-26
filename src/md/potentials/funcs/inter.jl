@@ -191,7 +191,7 @@ function _Vpol4Fcd!(F, u, i, j, Qi, Qj, μi, μj, A)
   F[i] -= Fqu
   # F[j] += Fqu
 
-  Equ
+  # Equ
 end
 
 function _Vpol4Fdd(ri, rj, Qi, Qj, μi, μj, A)
@@ -217,7 +217,7 @@ end
 function _Vpol4Fdd!(F, u, i, j, Qi, Qj, μi, μj, A)
   rvec = u[j] - u[i]
   r    = norm(rvec)
-  a    = 0.055*0.626
+  a    = 0.055#*0.626
 
   c    = exp(-a*(r/A)^4)
   s1   =  1 - c
@@ -234,5 +234,6 @@ function _Vpol4Fdd!(F, u, i, j, Qi, Qj, μi, μj, A)
   F[i] -= Fuu
   # F[j] += Fuu
 
-  Euu
+  # println(Fuu)
+  # Euu
 end

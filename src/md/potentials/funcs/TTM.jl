@@ -3,15 +3,20 @@
 function _interTTM!(F, u, μ, i, j, Qi, Qj, Aij, Bij, Cij, A6ij; kwargs...)
 
   E  = 0.0
-  E += _Coulomb!(  F, u, i, j, Qi, Qj)
+  # E += _Coulomb!(  F, u, i, j, Qi, Qj)
   E += _shortDisp!(F, u, i, j, Aij, Bij)
   E += _longDisp!( F, u, i, j, Cij; kwargs...)
-  # E += _Vpol4Fcc!( F, u, i, j, Qi, Qj, A6ij)
-  E += _Vpol4Fcd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
-  E += _Vpol4Fdd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
+  E += _Vpol4Fcc!( F, u, i, j, Qi, Qj, A6ij)
+  _Vpol4Fcd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
+  _Vpol4Fdd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
+  _Vpol4Fcd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
+  _Vpol4Fdd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
 
-  E += _Vpol4Fcd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
-  E += _Vpol4Fdd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
+  # E += _Vpol4Fcd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
+  # E += _Vpol4Fdd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
+
+  # E += _Vpol4Fcd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
+  # E += _Vpol4Fdd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
 
   E
 end
@@ -24,10 +29,10 @@ function _getDipolePolarizationEnergy(μ, α)
   E
 end
 
-function _getPermanentEfield(u, Q, α)
-  E = [zeros(3) for i = 1:length(α)]
+function _getPermanentEfield!(Eq, u, Q, α)
 
   for i = 1:length(u)
+    Eq[i] .*= 0.0
     for j = 1:length(u)
 
       i == j && continue
@@ -38,26 +43,24 @@ function _getPermanentEfield(u, Q, α)
       c   = exp(-0.4 * (r/A)^4)
       s1  = 1 - c
 
-      E[i] .+= -s1 * rij * Q[j] / r^3
+      Eq[i] .+= -s1 * rij * Q[j] / r^3
     end
   end
 
-  E
 end
 
-function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α)
+function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α, Eq)
 
   Tij(r, A, a) = (1 - exp(-a*(r/A)^4) + (a^(1/4) * r / A) * gamma(3/4, a * (r/A)^4)) / r
 
   n  = length(α)
   M  = zeros(n,n)
-  Eq = _getPermanentEfield(u, Q, α)
 
   for i = 1:n
     for j = 1:n
 
       if i == j
-        M[i,j] = - α[i]^-1
+        M[i,j] = α[i]^-1
       else
         r      = u[i] - u[j] |> norm
         A      = (α[i]*α[j])^(1/6)
@@ -66,6 +69,8 @@ function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α)
 
     end
   end
+
+  println(M)
 
   tmp = inv(M) * Eq
 
