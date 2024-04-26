@@ -3,7 +3,6 @@
 function _interTTM!(F, u, μ, i, j, Qi, Qj, Aij, Bij, Cij, A6ij; kwargs...)
 
   E  = 0.0
-  # E += _Coulomb!(  F, u, i, j, Qi, Qj)
   E += _shortDisp!(F, u, i, j, Aij, Bij)
   E += _longDisp!( F, u, i, j, Cij; kwargs...)
   E += _Vpol4Fcc!( F, u, i, j, Qi, Qj, A6ij)
@@ -11,12 +10,6 @@ function _interTTM!(F, u, μ, i, j, Qi, Qj, Aij, Bij, Cij, A6ij; kwargs...)
   _Vpol4Fdd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
   _Vpol4Fcd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
   _Vpol4Fdd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
-
-  # E += _Vpol4Fcd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
-  # E += _Vpol4Fdd!( F, u, i, j, Qi, Qj, μ[i], μ[j], A6ij)
-
-  # E += _Vpol4Fcd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
-  # E += _Vpol4Fdd!( F, u, j, i, Qj, Qi, μ[j], μ[i], A6ij)
 
   E
 end
@@ -77,6 +70,115 @@ function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α, Eq)
     μ[i] .= tmp[i]
   end
 
+end
+
+function _Vpol4Fcc(ri, rj, Qi, Qj, A)
+  rvec = rj - ri
+  r    = norm(rvec)
+  a    = 0.4
+
+  c    = a * (r/A)^4
+  s0   = 1 - exp(-c) + (a^0.25 * r / A) * gamma(0.75, c)
+  s1   = 1 - exp(-c)
+
+  Eqq  = s0 * Qi * Qj / r
+  Fqq  = s1 * Qi * Qj / r^3 * rvec
+
+  Eqq, Fqq
+end
+
+function _Vpol4Fcc!(F, u, i, j, Qi, Qj, A)
+  rvec  = u[j] - u[i]
+  r     = norm(rvec)
+  a     = 0.4
+
+  c     = a * (r/A)^4
+  s0    = 1 - exp(-c) + (a^0.25 * r / A) * gamma(0.75, c)
+  s1    = 1 - exp(-c)
+
+  Eqq   = s0 * Qi * Qj / r
+  Fqq   = s1 * Qi * Qj / r^3 * rvec
+
+  F[i] -= Fqq
+  F[j] += Fqq
+
+  Eqq
+end
+
+function _Vpol4Fcd(ri, rj, Qi, Qj, μi, μj, A)
+  rvec = rj - ri
+  r    = norm(rvec)
+  a    = 0.4
+
+  c     = exp(-a*(r/A)^4)
+  s1    =  1 - c
+  s2    = s1 - (4a/3) * (r/A)^4 * c
+  s3    = s2 - (4a/15) * (r/A)^4 * (4a * (r/4)^4 - 1) * c
+
+  rμi   = dot(rvec, μi)
+  rμj   = dot(rvec, μj)
+  Equ   = (Qi * rμj - Qj * rμi) * (s1 / r^3)
+  Fqu   = (Qi * rμj - Qj * rμi) * (s2 * 3 / r^5 * rvec) .+ (Qj * μi .- Qi * μj) * (s1 / r^3)
+
+  Equ, Fqu
+end
+
+function _Vpol4Fcd!(F, u, i, j, Qi, Qj, μi, μj, A)
+  rvec  = u[j] - u[i]
+  r     = norm(rvec)
+  a     = 0.4
+
+  c     = exp(-a*(r/A)^4)
+  s1    =  1 - c
+  s2    = s1 - (4a/3) * (r/A)^4 * c
+  s3    = s2 - (4a/15) * (r/A)^4 * (4a * (r/4)^4 - 1) * c
+
+  rμi   = dot(rvec, μi)
+  rμj   = dot(rvec, μj)
+  Fqu   = (Qi * rμj - Qj * rμi) * (s2 * 3 / r^5 * rvec) .+ (Qj * μi .- Qi * μj) * (s1 / r^3)
+
+  F[i] -= Fqu
+
+end
+
+function _Vpol4Fdd(ri, rj, Qi, Qj, μi, μj, A)
+  rvec = rj - ri
+  r    = norm(rvec)
+  a    = 0.055
+
+  c    = exp(-a*(r/A)^4)
+  s1   =  1 - c
+  s2   = s1 - (4a/3) * (r/A)^4 * c
+  s3   = s2 - (4a/15) * (r/A)^4 * (4a * (r/4)^4 - 1) * c
+
+  rμi  = dot(rvec, μi)
+  rμj  = dot(rvec, μj)
+  μij  = dot(μi, μj)
+
+  Euu  = (s1 / r^3 * μij) - (s2 * 3 / r^5 * rμi * rμj)
+  Fuu  = (-s3 * 15 / r^7 * rμi * rμj * rvec) .+ (s2 * 3 / r^5) * (μij * rvec .+ rμi * μj .+ rμj * μi)
+
+  Euu, Fuu
+end
+
+function _Vpol4Fdd!(F, u, i, j, Qi, Qj, μi, μj, A)
+  rvec = u[j] - u[i]
+  r    = norm(rvec)
+  a    = 0.055
+
+  c    = exp(-a*(r/A)^4)
+  s1   =  1 - c
+  s2   = s1 - (4a/3) * (r/A)^4 * c
+  s3   = s2 - (4a/15) * (r/A)^4 * (4a * (r/4)^4 - 1) * c
+
+  rμi  = dot(rvec, μi)
+  rμj  = dot(rvec, μj)
+  μij  = dot(μi, μj)
+
+  Fuu  = (-s3 * 15 / r^7 * rμi * rμj * rvec) .+ (s2 * 3 / r^5) * (μij * rvec .+ rμi * μj .+ rμj * μi)
+
+  F[i] -= Fuu
+  
 end
 
 
@@ -144,3 +246,5 @@ end
     println("Total Iterations $iter")
   
   end
+
+  
