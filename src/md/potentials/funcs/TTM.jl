@@ -64,13 +64,11 @@ function _getDipoles4TTM_MatrixInversion!(μ, u, Q, α, Eq)
       else
         r      = u[i] - u[j] |> norm
         A      = (α[i]*α[j])^(1/6)
-        M[i,j] = - Tij(r, A, 0.4)
+        M[i,j] = - Tij(r, A, 0.055)
       end
 
     end
   end
-
-  println(M)
 
   tmp = inv(M) * Eq
 
@@ -85,10 +83,9 @@ end
 #TODO:
   # Make iterative dipole function have a cutoff
 
-  function _getDipoles4TTM_Iterative!(μ, u, Q, α, mols; μtol=1e-2, Etol=1e-6)
+  function _getDipoles4TTM_Iterative!(μ, u, Q, α, mols, Eq; μtol=1e-2, Etol=1e-6)
     μConv = false
     EConv = false
-    Eq    = _getPermanentEfield(u, Q, α)
     E     = zero.(μ)
     μOld  = zero.(μ)
     EOld  = zero.(μ)
@@ -120,9 +117,9 @@ end
               rij = u[i] - u[j]
               r   = norm(rij)
               A   = (α[i] * α[j])^(1/6)
-              c   = exp(-0.572 * (r/A)^4)
+              c   = exp(-0.055 * (r/A)^4)
               s1  = 1 - c
-              s2  = s1 - (4*0.572/3) * (r/A)^4 * c
+              s2  = s1 - (4*0.055/3) * (r/A)^4 * c
       
               Eμ = s2 * (3/r^5) * dot(rij, μOld[j]) * rij .- s1 * μOld[j] / r^3
       

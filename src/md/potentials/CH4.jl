@@ -156,14 +156,9 @@ function CH4(F, G, y0, p)
     push!(forces, [0.0, 0.0, 0.0])
   end
 
-  # _getDipoles4TTM_Iterative!(P.μ, u, Q, α, p.mols)
   _getPermanentEfield!(P.Eq, u, P.Q, P.α)
+  # _getDipoles4TTM_Iterative!(P.μ, u, P.Q, P.α, p.mols, P.Eq)
   _getDipoles4TTM_MatrixInversion!(P.μ, u, P.Q, P.α, P.Eq)
-  # E += _getDipolePolarizationEnergy(P.μ, P.α)
-
-  # for i = 1:length(u)
-  #   E += 0.5 * ((dot(P.μ[i], P.μ[i]) / P.α[i]) - dot(P.μ[i], P.Eq[i]))
-  # end
 
   for i = 1:length(u)
     E -= 0.5 * dot(P.μ[i], P.Eq[i])
