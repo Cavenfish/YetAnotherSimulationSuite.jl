@@ -46,7 +46,7 @@ function MBX(bdys::Vector{Atom}, json::String)
   at_nams = [string(i.s) for i in bdys]
 
   mon_nams = String[]
-  num_ats  = Int64[]
+  num_ats  = Int32[]
 
   tmp = values(monomers) |> (x -> length.(x)) |> unique |> sort |> reverse
   
@@ -73,13 +73,5 @@ function MBX(bdys::Vector{Atom}, json::String)
 
   sym = dlsym(libmbx, :initialize_system_py_)
 
-  # @ccall $sym(
-  #   xyz::Ptr{Cdouble},
-  #   num_ats::Ptr{Cint},
-  #   at_nams::Ptr{Ptr{UInt8}},
-  #   mon_nams::Ptr{Ptr{UInt8}},
-  #   num_mon::Ref{Cint},
-  #   json::Ptr{UInt8}
-  # )::Cvoid
   _MBX_PotVars(xyz, json, num_ats, at_nams, num_mon, mon_nams)
 end

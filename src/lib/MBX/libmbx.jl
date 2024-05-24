@@ -20,10 +20,10 @@ function mbx_initialize_system(vars)
   @ccall $sym(
     vars.xyz::Ptr{Cdouble},
     vars.num_ats::Ptr{Cint},
-    vars.at_nams::Ptr{Ptr{UInt8}},
-    vars.mon_nams::Ptr{Ptr{UInt8}},
+    vars.at_nams::Ptr{Ptr{Cchar}},
+    vars.mon_nams::Ptr{Ptr{Cchar}},
     vars.num_mon::Ref{Cint},
-    vars.json::Ptr{UInt8}
+    vars.json::Ptr{Cchar}
   )::Cvoid
 end
 
@@ -33,10 +33,10 @@ function mbx_initialize_system(xyz, num_ats, at_nams, mon_nams, num_mon, json)
   @ccall $sym(
     xyz::Ptr{Cdouble},
     num_ats::Ptr{Cint},
-    at_nams::Ptr{Ptr{UInt8}},
-    mon_nams::Ptr{Ptr{UInt8}},
+    at_nams::Ptr{Ptr{Cchar}},
+    mon_nams::Ptr{Ptr{Cchar}},
     num_mon::Ref{Cint},
-    json::Ptr{UInt8}
+    json::Ptr{Cchar}
   )::Cvoid
 end
 
