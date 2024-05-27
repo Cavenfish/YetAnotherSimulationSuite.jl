@@ -1,5 +1,6 @@
 
-const libmbx = dlopen(joinpath(@__DIR__, "libmbx.so"), Libdl.RTLD_GLOBAL) 
+const MBXjson   = joinpath(@__DIR__, "mbx.json")
+const libmbx    = dlopen(joinpath(@__DIR__, "libmbx.so"), Libdl.RTLD_GLOBAL) 
 const E_MBX2JMD = 0.043 # kcal/mol --> eV
 
 # /**
@@ -50,7 +51,7 @@ function mbx_get_energy(xyz, nats)
   E[] * E_MBX2JMD
 end
 
-function mbx_get_energy_grad(xyz, nats, G)
+function mbx_get_energy_grad!(G, xyz, nats)
   sym = dlsym(libmbx, :get_energy_g_)
 
   E   = Ref{Cdouble}(0)
@@ -62,7 +63,9 @@ function mbx_get_energy_grad(xyz, nats, G)
     G::Ptr{Cdouble}
   )::Cvoid
 
-  E[] * E_MBX2JMD, G * E_MBX2JMD
+  G .*= E_MBX2JMD
+
+  E[] * E_MBX2JMD
 end
 
 function mbx_finalize_system()
