@@ -48,7 +48,7 @@ function MvHffCO(dv, v, u, p, t)
   P = p.potVars
 
   for mol in p.mols
-    E += _Morse!(forces, u, mol[1], mol[2], P.D, P.a, P.req)
+    E += _Morse!(F, u, mol[1], mol[2], P.D, P.a, P.req)
   end
 
   for par in p.pars
@@ -56,23 +56,23 @@ function MvHffCO(dv, v, u, p, t)
     c2, o2 = par[2]
 
     #C--C
-    E += _shortDisp!(forces, u, c1, c2, P.Acc, P.Bcc)
-    E += _longDisp!( forces, u, c1, c2, P.Ccc)
+    E += _shortDisp!(F, u, c1, c2, P.Acc, P.Bcc)
+    E += _longDisp!( F, u, c1, c2, P.Ccc)
 
     #C--O
-    E += _shortDisp!(forces, u, c1, o2, P.Aco, P.Bco)
-    E += _longDisp!( forces, u, c1, o2, P.Cco)
+    E += _shortDisp!(F, u, c1, o2, P.Aco, P.Bco)
+    E += _longDisp!( F, u, c1, o2, P.Cco)
 
     #O--C
-    E += _shortDisp!(forces, u, o1, c2, P.Aco, P.Bco)
-    E += _longDisp!( forces, u, o1, c2, P.Cco)
+    E += _shortDisp!(F, u, o1, c2, P.Aco, P.Bco)
+    E += _longDisp!( F, u, o1, c2, P.Cco)
 
     #O--O
-    E += _shortDisp!(forces, u, o1, o2, P.Aoo, P.Boo)
-    E += _longDisp!( forces, u, o1, o2, P.Coo)
+    E += _shortDisp!(F, u, o1, o2, P.Aoo, P.Boo)
+    E += _longDisp!( F, u, o1, o2, P.Coo)
 
     #Special Electrostatics
-    E += _electroMvH!(forces, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
+    E += _electroMvH!(F, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
 
   end
 
