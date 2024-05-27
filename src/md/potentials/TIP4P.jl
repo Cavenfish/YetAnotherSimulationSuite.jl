@@ -38,7 +38,7 @@ function TIP4P(dv, v, u, p, t)
 
 
   for mol in p.mols
-    h1, h2, o     = mol
+    o, h1, h2 = mol
 
     E += _Morse!(F, u, o, h1, P.D, P.a, P.req)
     E += _Morse!(F, u, o, h2, P.D, P.a, P.req)
@@ -46,8 +46,8 @@ function TIP4P(dv, v, u, p, t)
   end
 
   for par in p.pars
-    h1, h2, o1 = par[1]
-    h3, h4, o2 = par[2]
+    o1, h1, h2 = par[1]
+    o2, h3, h4 = par[2]
 
     E += _vdw!(F, u, o1, o2, P.ϵoo, P.σoo)
 
@@ -84,7 +84,7 @@ function TIP4P(F, G, y0, p)
   end
 
   for mol in p.mols
-    h1, h2, o     = mol
+    o, h1, h2 = mol
 
     E += _Morse!(forces, u, o, h1, P.D, P.a, P.req)
     E += _Morse!(forces, u, o, h2, P.D, P.a, P.req)
@@ -92,8 +92,8 @@ function TIP4P(F, G, y0, p)
   end
 
   for par in p.pars
-    h1, h2, o1 = par[1]
-    h3, h4, o2 = par[2]
+    o1, h1, h2 = par[1]
+    o2, h3, h4 = par[2]
 
     E += _vdw!(forces, u, o1, o2, P.ϵoo, P.σoo)
 
