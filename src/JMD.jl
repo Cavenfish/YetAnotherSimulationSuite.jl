@@ -43,6 +43,7 @@ include("./helpers.jl")
 include("./lib/MBX/libmbx.jl")
 
 include("./md/bodies.jl")
+include("./md/potentials/MvHffCO.jl")
 include("./md/potentials/COCOff.jl")
 include("./md/potentials/HGNN.jl")
 include("./md/potentials/TIP4P.jl")

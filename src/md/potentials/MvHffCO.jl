@@ -21,7 +21,7 @@ struct _MvHffCO_PotVars{F<:Float64} <: PotVars
   αo::F
 end
 
-function MvHffCO(bdys::Vector{Atom}) = _MvHffCO_PotVars (
+MvHffCO(bdys::Vector{Atom}) = _MvHffCO_PotVars(
   11.230139012256362,
   2.3281,
   1.1282058129221093,
@@ -34,29 +34,26 @@ function MvHffCO(bdys::Vector{Atom}) = _MvHffCO_PotVars (
   33.44955570065988,
   15.189133724736946,
   10.546349734130885,
+  -1.7835026375774934,
+  -2.333732174702465,
   3.843702939952312,
   2.131611069944055
 )
 
-function MvHffCO(F, G, y0, p)
+function MvHffCO(dv, v, u, p, t)
 
   # initialize things
-  P      = p.potVars
-  E      = 0.0
-  u      = Vector[]
-  forces = Vector[]
-  for i in 1:3:length(y0)
-    push!(u, y0[i:i+2])
-    push!(forces, [0.0, 0.0, 0.0])
-  end
+  E = 0.0
+  F = zero(u)
+  P = p.potVars
 
   for mol in p.mols
     E += _Morse!(forces, u, mol[1], mol[2], P.D, P.a, P.req)
   end
 
   for par in p.pars
-    c1, o1 = p.pars[1]
-    c2, o2 = p.pars[2]
+    c1, o1 = par[1]
+    c2, o2 = par[2]
 
     #C--C
     E += _shortDisp!(forces, u, c1, c2, P.Acc, P.Bcc)
@@ -75,7 +72,58 @@ function MvHffCO(F, G, y0, p)
     E += _longDisp!( forces, u, o1, o2, P.Coo)
 
     #Special Electrostatics
-    E += _electroMvH!(forces, u, par, P.Qc, P.Qo, P.αc, P.αo)
+    E += _electroMvH!(forces, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
+
+  end
+
+  dv .= F ./ p.m
+  if typeof(p) == NVTsimu
+    p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
+  end
+
+  push!(p.energy, E)
+  push!(p.forces, F)
+
+end
+
+function MvHffCO(F, G, y0, p)
+
+  # initialize things
+  P      = p.potVars
+  E      = 0.0
+  u      = Vector[]
+  forces = Vector[]
+  for i in 1:3:length(y0)
+    push!(u, y0[i:i+2])
+    push!(forces, [0.0, 0.0, 0.0])
+  end
+
+  for mol in p.mols
+    E += _Morse!(forces, u, mol[1], mol[2], P.D, P.a, P.req)
+  end
+
+  for par in p.pars
+    c1, o1 = par[1]
+    c2, o2 = par[2]
+
+    #C--C
+    E += _shortDisp!(forces, u, c1, c2, P.Acc, P.Bcc)
+    E += _longDisp!( forces, u, c1, c2, P.Ccc)
+
+    #C--O
+    E += _shortDisp!(forces, u, c1, o2, P.Aco, P.Bco)
+    E += _longDisp!( forces, u, c1, o2, P.Cco)
+
+    #O--C
+    E += _shortDisp!(forces, u, o1, c2, P.Aco, P.Bco)
+    E += _longDisp!( forces, u, o1, c2, P.Cco)
+
+    #O--O
+    E += _shortDisp!(forces, u, o1, o2, P.Aoo, P.Boo)
+    E += _longDisp!( forces, u, o1, o2, P.Coo)
+
+    #Special Electrostatics
+    E += _electroMvH!(forces, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
 
   end
 
@@ -95,12 +143,12 @@ end
 function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
 
   #Atom indicies
-  C1, O1 = pars[1]
-  C2, O2 = pars[2]
+  C1, O1 = par[1]
+  C2, O2 = par[2]
 
   #Atom locations
-  c1, o1 = u[pars[1]]
-  c2, o2 = u[pars[2]]
+  c1, o1 = u[par[1]]
+  c2, o2 = u[par[2]]
 
   #Bond lengths
   R1 = c1 - o1
@@ -128,95 +176,95 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   #the position dependent charges is: -α * Q * rvec / r
 
   #C--C
-  ϵ, F   = _Coulomb(c1, c2, Qc1, Qc2)
-  E     += ϵ
-  F_Q1   = αC * ϵ * R1 / r1
-  F_Q2   = αC * ϵ * R2 / r2
-  F[C1] -= (F + F_Q1)
+  ϵ, f   = _Coulomb(c1, c2, Qc1, Qc2)
+  E      = ϵ
+  F_Q1   = αc * ϵ * R1 / r1
+  F_Q2   = αc * ϵ * R2 / r2
+  F[C1] -= (f + F_Q1)
   F[O1] += F_Q1
-  F[C2] +=  F - F_Q2
+  F[C2] +=  f - F_Q2
   F[O2] += F_Q2
 
 # C-X
-  ϵ, F   = V_coul(rX2i0..., QC1*QX2)
+  ϵ, f   = _Coulomb(c1, x2, Qc1, Qx2)
   E     += ϵ
-  F_Q1   = αC * ϵ * R1 / r1
-  F_Q2   = - (αC * QC2 + αO * QO2) * ϵ/QX2 * R2 / r2
-  F[C1] -= (F + F_Q1)
+  F_Q1   = αc * ϵ * R1 / r1
+  F_Q2   = - (αc * Qc2 + αo * Qo2) * ϵ/Qx2 * R2 / r2
+  F[C1] -= (f + F_Q1)
   F[O1] += F_Q1
-  F[C2] += (wC * F) - F_Q2
-  F[O2] += (wO * F) + F_Q2
+  F[C2] += (wc * f) - F_Q2
+  F[O2] += (wo * f) + F_Q2
 
   # C-O
-  ϵ, F   = V_coul(rj1i0..., QC1*QO2)
+  ϵ, f   = _Coulomb(c1, o2, Qc1, Qo2)
   E     += ϵ
-  F_Q1   = αC * ϵ * R1 / r1
-  F_Q2   = αO * ϵ * R2 / r2
-  F[C1] -= (F + F_Q1)
+  F_Q1   = αc * ϵ * R1 / r1
+  F_Q2   = αo * ϵ * R2 / r2
+  F[C1] -= (f + F_Q1)
   F[O1] += F_Q1
   F[C2] -= F_Q2
-  F[O2] += (F + F_Q2)
+  F[O2] += (f + F_Q2)
 
   # X-C
-  ϵ, F   = V_coul(rj0X1..., QX1*QC2)
+  ϵ, f   = _Coulomb(x1, c2, Qx1, Qc2)
   E     += ϵ
-  F_Q1   = - (αC * QC1 + αO * QO1) * ϵ/QX1 * R1 / r1
-  F_Q2   = αC * ϵ * R2 / r2
-  F[C1] -= ((wC * F) + F_Q1)
-  F[O1] += F_Q1 - (wO * F)
-  F[C2] += (F - F_Q2)
+  F_Q1   = - (αc * Qc1 + αo * Qo1) * ϵ/Qx1 * R1 / r1
+  F_Q2   = αc * ϵ * R2 / r2
+  F[C1] -= ((wc * f) + F_Q1)
+  F[O1] += F_Q1 - (wo * f)
+  F[C2] += (f - F_Q2)
   F[O2] += F_Q2
 
   # X-X
-  ϵ, F   = V_coul(rX2X1..., QX1*QX2)
+  ϵ, f   = _Coulomb(x1, x2, Qx1, Qx2)
   E     += ϵ
-  F_Q1   = - (αC * QC1 + αO * QO1) * ϵ/QX1 * R1 / r1
-  F_Q2   = - (αC * QC2 + αO * QO2) * ϵ/QX2 * R2 / r2
-  F[C1] += ((-wC * F) - F_Q1)
-  F[O1] += ((-wO * F) + F_Q1)
-  F[C2] += (( wC * F) - F_Q2)
-  F[O2] += (( wO * F) + F_Q2)
+  F_Q1   = - (αc * Qc1 + αo * Qo1) * ϵ/Qx1 * R1 / r1
+  F_Q2   = - (αc * Qc2 + αo * Qo2) * ϵ/Qx2 * R2 / r2
+  F[C1] += ((-wc * f) - F_Q1)
+  F[O1] += ((-wo * f) + F_Q1)
+  F[C2] += (( wc * f) - F_Q2)
+  F[O2] += (( wo * f) + F_Q2)
 
 
   # X-O
-  ϵ, F   = V_coul(rj1X1..., QX1*QO2)
+  ϵ, f   = _Coulomb(x1, o2, Qx1, Qo2)
   E     += ϵ
-  F_Q1   = - (αC * QC1 + αO * QO1) * ϵ/QX1 * R1 / r1
-  F_Q2   = αO * ϵ * R2 / r2
-  F[C1] -= ((wC * F) + F_Q1)
-  F[O1] += (F_Q1 - (wO * F))
+  F_Q1   = - (αc * Qc1 + αo * Qo1) * ϵ/Qx1 * R1 / r1
+  F_Q2   = αo * ϵ * R2 / r2
+  F[C1] -= ((wc * f) + F_Q1)
+  F[O1] += (F_Q1 - (wo * f))
   F[C2] -= F_Q2
-  F[O2] += (F + F_Q2)
+  F[O2] += (f + F_Q2)
 
   # O-C
-  ϵ, F   = V_coul(rj0i1..., QO1*QC2)
+  ϵ, f   = _Coulomb(o1, c2, Qo1, Qc2)
   E     += ϵ
-  F_Q1   = αO * E * R1 / r1
-  F_Q2   = αC * E * R2 / r2
+  F_Q1   = αo * E * R1 / r1
+  F_Q2   = αc * E * R2 / r2
   F[C1] -= F_Q1
-  F[O1] += (F_Q1 - F)
-  F[C2] += (F - F_Q2)
+  F[O1] += (F_Q1 - f)
+  F[C2] += (f - F_Q2)
   F[O2] += F_Q2
 
   # O-X
-  ϵ, F   = V_coul(rX2i1..., QO1*QX2)
+  ϵ, f   = _Coulomb(o1, x2, Qo1, Qx2)
   E     += ϵ
-  F_Q1   = αO * E * R1 / r1
-  F_Q2   = - (αC * QC2 + αO * QO2) * E/QX2 * R2 / r2
+  F_Q1   = αo * E * R1 / r1
+  F_Q2   = - (αc * Qc2 + αo * Qo2) * E/Qx2 * R2 / r2
   F[C1] -= F_Q1
-  F[O1] += (F_Q1 - F)
-  F[C2] += ((wC * F) - F_Q2)
-  F[O2] += ((wO * F) + F_Q2)
+  F[O1] += (F_Q1 - f)
+  F[C2] += ((wc * f) - F_Q2)
+  F[O2] += ((wo * f) + F_Q2)
 
   # O-O
-  ϵ, F   = V_coul(rj1i1..., QO1*QO2)
+  ϵ, f   = _Coulomb(o1, o2, Qo1, Qo2)
   E     += ϵ
-  F_Q1   = αO * E * R1 / r1
-  F_Q2   = αO * E * R2 / r2
+  F_Q1   = αo * E * R1 / r1
+  F_Q2   = αo * E * R2 / r2
   F[C1] -= F_Q1
-  F[O1] += (F_Q1 - F)
+  F[O1] += (F_Q1 - f)
   F[C2] -= F_Q2
-  F[O2] += (F + F_Q2)
+  F[O2] += (f + F_Q2)
   
   E
 end
