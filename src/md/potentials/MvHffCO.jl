@@ -107,20 +107,16 @@ function MvHffCO(F, G, y0, p)
     c2, o2 = par[2]
 
     #C--C
-    E += _shortDisp!(forces, u, c1, c2, P.Acc, P.Bcc)
-    E += _longDisp!( forces, u, c1, c2, P.Ccc)
+    E += _Buckingham!(forces, u, c1, c2, P.Acc, P.Bcc, P.Ccc)
 
     #C--O
-    E += _shortDisp!(forces, u, c1, o2, P.Aco, P.Bco)
-    E += _longDisp!( forces, u, c1, o2, P.Cco)
+    E += _Buckingham!(forces, u, c1, o2, P.Aco, P.Bco, P.Cco)
 
     #O--C
-    E += _shortDisp!(forces, u, o1, c2, P.Aco, P.Bco)
-    E += _longDisp!( forces, u, o1, c2, P.Cco)
+    E += _Buckingham!(forces, u, o1, c2, P.Aco, P.Bco, P.Cco)
 
     #O--O
-    E += _shortDisp!(forces, u, o1, o2, P.Aoo, P.Boo)
-    E += _longDisp!( forces, u, o1, o2, P.Coo)
+    E += _Buckingham!(forces, u, o1, o2, P.Aoo, P.Boo, P.Coo)
 
     #Special Electrostatics
     E += _electroMvH!(forces, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
@@ -151,8 +147,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   c2, o2 = u[par[2]]
 
   #Bond lengths
-  R1 = c1 - o1
-  R2 = c2 - o2
+  R1 = o1 - c1
+  R2 = o2 - c2
   r1 = norm(R1)
   r2 = norm(R2)
 

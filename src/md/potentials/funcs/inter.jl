@@ -121,7 +121,3 @@ function _longDisp!(F, u, i, j, Cij; damp=nothing, p=nothing)
 
   E
 end
-
-function _Buckingham!(F, u, i, j, Aij, Bij, Cij)
-  #is this needed or should i just call above two??
-end

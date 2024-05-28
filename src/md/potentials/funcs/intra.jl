@@ -12,10 +12,11 @@ function _Morse(r, rvec, D, a, req)
 end
 
 function _Morse!(F, u, i, j, D, a, req)
-  r, rvec = diffDotSqrt(u[j], u[i])
-  c       = exp(-a*(r-req))
-  E       = D * (1 - c)^2
-  f       = -2D * a * c * (1 - c) * rvec / r
+  rvec  = u[j] - u[i]
+  r     = norm(rvec)
+  c     = exp(-a*(r-req))
+  E     = D * (1 - c)^2
+  f     = -2D * a * c * (1 - c) * rvec / r
 
   F[i] -= f
   F[j] += f
