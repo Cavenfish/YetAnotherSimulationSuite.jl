@@ -49,11 +49,9 @@ function MBX(bdys::Vector{Atom})
   num_ats  = Int32[]
 
   tmp = values(monomers) |> (x -> length.(x)) |> unique |> sort |> reverse
-  
-
-  #TODO: add a break case to prevent infinite loop
 
   a = 1
+  b = 0
   while a <= length(at_nams)
     for i in tmp
       a+i-1 > length(at_nams) && continue
@@ -66,6 +64,10 @@ function MBX(bdys::Vector{Atom})
           break
         end
       end
+    end
+    b += 1
+    if b > length(at_nams)
+      @error "Check xyz file"
     end
   end
 
