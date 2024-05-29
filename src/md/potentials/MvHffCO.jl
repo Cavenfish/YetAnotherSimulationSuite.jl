@@ -56,20 +56,16 @@ function MvHffCO(dv, v, u, p, t)
     c2, o2 = par[2]
 
     #C--C
-    E += _shortDisp!(F, u, c1, c2, P.Acc, P.Bcc)
-    E += _longDisp!( F, u, c1, c2, P.Ccc)
+    E += _Buckingham!(F, u, c1, c2, P.Acc, P.Bcc, P.Ccc)
 
     #C--O
-    E += _shortDisp!(F, u, c1, o2, P.Aco, P.Bco)
-    E += _longDisp!( F, u, c1, o2, P.Cco)
+    E += _Buckingham!(F, u, c1, o2, P.Aco, P.Bco, P.Cco)
 
     #O--C
-    E += _shortDisp!(F, u, o1, c2, P.Aco, P.Bco)
-    E += _longDisp!( F, u, o1, c2, P.Cco)
+    E += _Buckingham!(F, u, o1, c2, P.Aco, P.Bco, P.Cco)
 
     #O--O
-    E += _shortDisp!(F, u, o1, o2, P.Aoo, P.Boo)
-    E += _longDisp!( F, u, o1, o2, P.Coo)
+    E += _Buckingham!(F, u, o1, o2, P.Aoo, P.Boo, P.Coo)
 
     #Special Electrostatics
     E += _electroMvH!(F, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
