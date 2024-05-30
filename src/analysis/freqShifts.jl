@@ -230,9 +230,7 @@ function getAllFreqs(EoM, bdys; ind=[0,1])
   allFreqs
 end
 
-function getFvE(EoM, bdys, Erange)
-
-  v,m = getHarmonicFreqs(EoM, bdys)
+function getFvE(EoM, bdys, Erange, vec)
 
   freqs = []
   for E in Erange
@@ -241,10 +239,9 @@ function getFvE(EoM, bdys, Erange)
       bdy.v .*= 0.0
     end
 
-    vibExcite!(bdys, m[:,6], E)
+    vibExcite!(bdys, vec, E)
 
     nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys; save="sparse") |> processDynamics
-    # r    = [j[mol] for j in nve.r]
     bl   = [norm(j[2]-j[1]) for j in nve.r]
     wave = _getWave(bl)
 
