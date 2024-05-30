@@ -12,6 +12,13 @@ struct INM
   ν::Float64
 end
 
+function _getbl(nve, vec)
+  foo(x) = [j for i in x for j in i]
+  bar(y) = foo(y) |> (x -> dot(x, vec))
+
+  [bar(nve.r[i]) for i = 1:length(nve.r)]
+end
+
 function _getWave(bl)
   pks  = findPeaks(bl)
   i    = pks[1]
@@ -241,8 +248,8 @@ function getFvE(EoM, bdys, Erange, vec)
 
     vibExcite!(bdys, vec, E)
 
-    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys; save="sparse") |> processDynamics
-    bl   = [norm(j[2]-j[1]) for j in nve.r]
+    nve  = runNVE(EoM, (0, 100fs), 0.01fs, bdys; save="sparse") |> processDynamics
+    bl   = _getbl(nve, vec)
     wave = _getWave(bl)
 
     n = div(length(wave), 2)
