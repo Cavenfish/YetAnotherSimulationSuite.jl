@@ -24,6 +24,25 @@ function _Morse!(F, u, i, j, D, a, req)
   E
 end
 
+function _harmonicBond(r, rvec, K, req)
+  E     = 0.5 * K * (r - req)^2
+  f     = - K * (r - req) * revc / r
+
+  E, F
+end
+
+function _harmonicBond!(F, u, i, j, K, req)
+  rvec  = u[j] - u[i]
+  r     = norm(rvec)
+  E     = 0.5 * K * (r - req)^2
+  f     = - K * (r - req) * rvec / r
+
+  F[i] -= f
+  F[j] += f
+
+  E
+end
+
 function _harmonicBondAngle(r1, r2, K, θeq)
   θ   = dot(r1, r2) / (norm(r1) * norm(r2)) |> (x -> round(x, digits=10)) |> acos
   E   = 0.5 * K * (θ - θeq)^2
