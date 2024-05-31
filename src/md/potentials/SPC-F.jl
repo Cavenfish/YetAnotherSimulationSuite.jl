@@ -9,8 +9,8 @@ struct _SPCF_PotVars{F<:Float64} <: PotVars
   θeq::F
   σ::F
   ϵ::F
-  Qh::F
   Qo::F
+  Qh::F
 end
 
 SPCF(bdys::Vector{Atom}) = _SPCF_PotVars(
@@ -21,7 +21,7 @@ SPCF(bdys::Vector{Atom}) = _SPCF_PotVars(
   3.145, 
   0.007,
   -2.959855,
-  -2 * 2.959855
+  0.5 * 2.959855
 )
 
 function SPCF(F, G, y0, p)
@@ -58,10 +58,12 @@ function SPCF(F, G, y0, p)
       end
     end
 
-    for i in [o1, o2]
-      for j in [h1, h2, h3, h4]
-        E += _Coulomb!(forces, u, i, j, P.Qo, P.Qh)
-      end
+    for i in [h1,h2]
+      E += _Coulomb!(forces, u, o2, i, P.Qo, P.Qh)
+    end
+
+    for i in [h3,h4]
+      E += _Coulomb!(forces, u, o1, i, P.Qo, P.Qh)
     end
 
   end
