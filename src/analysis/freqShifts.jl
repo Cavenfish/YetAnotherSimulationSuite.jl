@@ -20,9 +20,9 @@ function _getbl(nve, vec)
 end
 
 function _getWave(bl)
-  pks  = findPeaks(bl)
+  pks  = findTurningPoints(bl)
   i    = pks[1]
-  j    = pks[2]
+  j    = pks[3]
   wave = bl[i:j] .- mean(bl[i:j]) |> (x -> repeat(x, 1000))
 
   wave
@@ -246,19 +246,25 @@ function getFvE(EoM, bdys, Erange, vec)
       bdy.v .*= 0.0
     end
 
-    vibExcite!(bdys, vec, E)
+    try
+      vibExcite!(bdys, vec, E)
 
-    nve  = runNVE(EoM, (0, 100fs), 0.01fs, bdys; save="sparse") |> processDynamics
-    bl   = _getbl(nve, vec)
-    wave = _getWave(bl)
+      nve  = runNVE(EoM, (0, 100fs), 0.01fs, bdys; save="sparse") |> processDynamics
+      bl   = _getbl(nve, vec)
+      wave = _getWave(bl)
 
-    n = div(length(wave), 2)
-    I = abs.(fft(wave))
-    v = fftfreq(length(I), 1e17) ./ 29979245800.0
+      n = div(length(wave), 2)
+      I = abs.(fft(wave))
+      v = fftfreq(length(I), 1e17) ./ 29979245800.0
 
-    pks = findPeaks(I[1:n]; min=1e3)
-    
-    push!(freqs, v[pks[1]])
+      pks = findPeaks(I[1:n]; min=1e3)
+      
+      push!(freqs, v[pks[1]])
+    catch
+      @warn "Had to skip energy E=$(E)"
+      push!(freqs, NaN)
+    end
+
   end
 
   freqs
