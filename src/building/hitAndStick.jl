@@ -6,6 +6,7 @@ struct HnS
   xyz::String
   mol::String
   save::String
+  dt::Float64
   thermo
   thermoInps
 end
@@ -94,7 +95,7 @@ function hitAndStick(EoM, inp; callback=nothing)
     
     #Run NVE
     time = inp.htime * ps
-    solu = runNVE(EoM, (0, time), fs, bdys)
+    solu = runNVE(EoM, (0, time), inp.dt, bdys)
     getLastFrame!(bdys, solu)
     zeroVCoM!(bdys)
     
@@ -103,7 +104,7 @@ function hitAndStick(EoM, inp; callback=nothing)
 
     #Run NVT
     time = inp.stime * ps
-    solu = runNVT(EoM, (0, time), fs, bdys, inp.thermo, inp.thermoInps)
+    solu = runNVT(EoM, (0, time), inp.dt, bdys, inp.thermo, inp.thermoInps)
     getLastFrame!(bdys, solu)
     
     #Free memory
