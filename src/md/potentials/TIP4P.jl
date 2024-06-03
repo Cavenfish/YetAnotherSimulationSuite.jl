@@ -121,8 +121,8 @@ function TIP4P(F, G, y0, p)
 end
 
 function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
-  h1, h2, o1 = w1
-  h3, h4, o2 = w2
+  o1, h1, h2 = w1
+  o2, h3, h4 = w2
 
   # Get Angle
   θ1  = getAngle(u[h1] - u[o1], u[h2] - u[o1])
