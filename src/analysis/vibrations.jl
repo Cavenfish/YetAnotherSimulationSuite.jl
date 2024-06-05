@@ -65,9 +65,9 @@ function animateMode(bdys, mode, fileName)
   close(f)
 end
 
-function getModePES(EoM!, bdys, mode; range=collect(-1:0.001:2))
+function getModePES(EoM, bdys, mode; range=collect(-1:0.001:2))
 
-  x0, vars = prep4pot(bdys)
+  x0, vars = prep4pot(EoM, bdys)
 
   x, y = [], []
 
@@ -76,7 +76,7 @@ function getModePES(EoM!, bdys, mode; range=collect(-1:0.001:2))
     j = @. x0 + i * mode 
 
     push!(x, i)
-    push!(y, EoM!(true, nothing, j, vars))
+    push!(y, EoM(true, nothing, j, vars))
 
   end
   return x, y
