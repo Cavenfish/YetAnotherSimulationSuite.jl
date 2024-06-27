@@ -140,7 +140,6 @@ function vibExcite!(mol, eignvec, E)
 
   vcom = vCoM(mol)
   for i in 1:3:length(v)
-    j::UInt32 = (i+2)/3
     mol[j].v += v[i:i+2]
   end 
 
