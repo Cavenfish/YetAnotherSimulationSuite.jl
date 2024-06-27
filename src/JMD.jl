@@ -67,6 +67,7 @@ include("./analysis/decayRates.jl")
 include("./analysis/freqShifts.jl")
 include("./analysis/participationRatio.jl")
 include("./analysis/neighbors.jl")
+include("./analysis/vibCoup.jl")
 
 include("./plotting/config.jl")
 include("./plotting/vibDisp.jl")
