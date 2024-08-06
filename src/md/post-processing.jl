@@ -129,7 +129,7 @@ function trackEnergyDissipation(traj, pot, mol; eignvec=nothing)
     r = traj.r[i]
     v = traj.v[i]
 
-    mvib = getCOVibEnergy(r[mol], v[mol], m[mol]; pot=pot)
+    mvib = getVibEnergy(r[mol], v[mol], m[mol]; pot=pot)
     mrot = getRotEnergy(  r[mol], v[mol], m[mol])
     mtra = getTransEnergy(r[mol], v[mol], m[mol])
 
@@ -139,7 +139,7 @@ function trackEnergyDissipation(traj, pot, mol; eignvec=nothing)
 
     avib,arot,atra = 0.0,0.0,0.0
     for j in others
-      avib += getCOVibEnergy(r[j], v[j], m[j]; pot=pot)
+      avib += getVibEnergy(r[j], v[j], m[j]; pot=pot)
       arot += getRotEnergy(  r[j], v[j], m[j])
       atra += getTransEnergy(r[j], v[j], m[j])
     end
