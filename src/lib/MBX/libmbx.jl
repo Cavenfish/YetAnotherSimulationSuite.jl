@@ -68,6 +68,12 @@ function mbx_get_energy_grad!(G, xyz, nats)
   E[] * E_MBX2JMD
 end
 
+function mbx_get_total_dipole(μ)
+  sym = dlsym(libmbx, :get_total_dipole_)
+
+  @ccall $sym(μ::Ptr{Cdouble})::Cvoid
+end
+
 function mbx_finalize_system()
   sym = dlsym(libmbx, :finalize_system_)
 
