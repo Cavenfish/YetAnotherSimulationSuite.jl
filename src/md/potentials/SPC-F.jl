@@ -13,7 +13,7 @@ struct _SPCF_PotVars{F<:Float64} <: PotVars
   Qh::F
 end
 
-SPCF(bdys::Vector{Atom}) = _SPCF_PotVars(
+SPCF(bdys) = _SPCF_PotVars(
   48.05913,
   1.0,
   3.97,

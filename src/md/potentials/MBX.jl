@@ -19,7 +19,7 @@ struct _MBX_PotVars <: PotVars
   mon_nams
 end
 
-function MBX(bdys::Vector{Atom})
+function MBX(bdys)
   monomers = Dict()
   monomers["nh4+"] = ["N","H","H","H","H"]
   monomers["nh3"] = ["N","H","H","H"]

@@ -21,7 +21,7 @@ struct _MvHffCO_PotVars{F<:Float64} <: PotVars
   αo::F
 end
 
-MvHffCO(bdys::Vector{Atom}) = _MvHffCO_PotVars(
+MvHffCO(bdys) = _MvHffCO_PotVars(
   11.230139012256362,
   2.3281,
   1.1282058129221093,

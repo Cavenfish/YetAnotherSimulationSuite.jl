@@ -55,7 +55,7 @@ struct _HGNN_PotVars <: PotVars
   pairVars
 end 
 
-function HGNN(bdys::Vector{Atom})
+function HGNN(bdys)
   f = jldopen(joinpath(@__DIR__, "params/hgnn.jld2"))
   molVars  = f["molVars"]
   pairVars = f["pairVars"]
