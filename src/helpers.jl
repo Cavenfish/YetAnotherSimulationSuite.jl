@@ -42,11 +42,22 @@ end
 
 function getFrame(tj, i::Int64)
   m = tj.m
-  s = map(x -> x > 15 ? 'O' : 'C', tj.m)
+  s = tj.s
   r = tj.r[i]
   v = tj.v[i]
 
   [Atom(r[j], v[j], m[j], s[j]) for j in 1:length(m)]
+end
+
+function getFrame!(bdys, tj, i::Int64)
+  r = tj.r[i]
+  v = tj.v[i]
+
+  for j = 1:length(bdys)
+    bdys[j].r = r[j]
+    bdys[j].v = v[j]
+  end
+
 end
 
 function getLastFrame(solu)

@@ -86,10 +86,8 @@ function writeXyzTraj(fileName::String, solu; dt=1)
   close(f)
 end 
 
-#Hacky and only works for CO right now
 function writeXyzTraj(fileName::String, tj::MyTraj; dt=1)
   f = open(fileName, "w")
-  S = map(x -> x > 15 ? 'O' : 'C', tj.m)
   T = length(tj.t)
   N = length(tj.m)
 
@@ -102,10 +100,10 @@ function writeXyzTraj(fileName::String, tj::MyTraj; dt=1)
 
     for j in 1:N
 
-      s     = S[j]
+      s     = tj.s[j]
       x,y,z = u[j]
 
-      println(f, "$s   $x   $y   $z   $vx   $vy   $vz")
+      println(f, "$s   $x   $y   $z")
     end 
 
   end
