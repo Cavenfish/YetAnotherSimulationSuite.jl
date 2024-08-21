@@ -75,10 +75,11 @@ function writeXyzTraj(fileName::String, solu; dt=1)
 
     for j in 1:N
 
-      s     = bdys[j].s
-      x,y,z = u[j]
+      s          = bdys[j].s
+      x,y,z      = u[j]
+      vx, vy, vz = bdys[j].v 
 
-      println(f, "$s   $x   $y   $z")
+      println(f, "$s   $x   $y   $z   $vx   $vy   $vz")
     end 
 
   end
