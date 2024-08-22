@@ -74,8 +74,10 @@ function MBX(bdys)
   num_mon = length(mon_nams)
 
   sym = dlsym(libmbx, :initialize_system_py_)
+  
+  isdefined(JMD, :userJson) ? json = userJson : json = MBXjson
 
-  vars = _MBX_PotVars(xyz, MBXjson, num_ats, at_nams, num_mon, mon_nams)
+  vars = _MBX_PotVars(xyz, json, num_ats, at_nams, num_mon, mon_nams)
 
   @ccall $sym(
     vars.xyz::Ptr{Cdouble},
