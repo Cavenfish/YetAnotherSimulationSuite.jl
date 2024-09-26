@@ -7,6 +7,7 @@ struct Traj <: MyTraj
   r::Vector
   v::Vector
   m::Vector{Float64}
+  s::Vector
 end
 
 function processDynamics(solu; dt=fs, step=1)
@@ -29,8 +30,9 @@ function processDynamics(solu; dt=fs, step=1)
   v = [solu.u[i].x[1] for i in 1:step:N]
   m = solu.prob.p.m
   T = [getTemp(m, i, kB, length(m)) for i in v]
+  s = [atm.s for atm in solu.prob.p.bdys]
 
-  return Traj(t, E, T, F, r, v, m)
+  Traj(t, E, T, F, r, v, m, s)
 end
 
 function processDynamics!(tj, solu; dt=fs, step=1)
@@ -112,7 +114,7 @@ function trackVACF(files, safe)
   return df
 end
 
-function trackEnergyDissipation(traj, pot, mol; eignvec=nothing)
+function trackEnergyDissipation(traj, pot, mol, eignvec)
 
   m = traj.m
   N = length(traj.t)
@@ -121,17 +123,20 @@ function trackEnergyDissipation(traj, pot, mol; eignvec=nothing)
   molVib, molRot, molTra = Float64[], Float64[], Float64[]
   avgVib, avgRot, avgTra = Float64[], Float64[], Float64[]
 
-  others = [[i,i+1] for i in 1:2:n if !(i in mol)]
-
-  zpe = zeros(N)
+  bdys   = getFrame(traj, 1)
+  mols   = if length(bdys) <= 3
+    getMols(bdys, 1.5, D=length(bdys)-1) 
+  else
+    getMols(bdys, 1.5)
+  end
+  others = [i for i in mols if i != mol]
 
   for i in 1:N
-    r = traj.r[i]
-    v = traj.v[i]
+    getFrame!(bdys, traj, i)
 
-    mvib = getCOVibEnergy(r[mol], v[mol], m[mol]; pot=pot)
-    mrot = getRotEnergy(  r[mol], v[mol], m[mol])
-    mtra = getTransEnergy(r[mol], v[mol], m[mol])
+    mvib = getVibEnergy(bdys[mol], eignvec; pot=pot)
+    mrot = getRotEnergy(bdys[mol])
+    mtra = getTransEnergy(bdys[mol])
 
     push!(molVib, mvib)
     push!(molRot, mrot)
@@ -139,17 +144,9 @@ function trackEnergyDissipation(traj, pot, mol; eignvec=nothing)
 
     avib,arot,atra = 0.0,0.0,0.0
     for j in others
-      avib += getCOVibEnergy(r[j], v[j], m[j]; pot=pot)
-      arot += getRotEnergy(  r[j], v[j], m[j])
-      atra += getTransEnergy(r[j], v[j], m[j])
-    end
-
-    if eignvec != nothing
-      bdys = getFrame(traj, i)
-      
-      for e in eignvec
-        zpe[i] += getVibEnergy(bdys, e)
-      end
+      avib += getPotEnergy(pot, bdys[j])
+      arot += getRotEnergy(bdys[j])
+      atra += getTransEnergy(bdys[j])
     end
 
     push!(avgVib, avib/n)
@@ -164,8 +161,7 @@ function trackEnergyDissipation(traj, pot, mol; eignvec=nothing)
                  molTra = molTra,
                  avgVib = avgVib,
                  avgRot = avgRot,
-                 avgTra = avgTra,
-                   vzpe = zpe)
+                 avgTra = avgTra)
 
   return df
 end

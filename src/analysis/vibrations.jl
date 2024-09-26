@@ -1,6 +1,6 @@
 export getHarmonicFreqs, animateMode, getModePES
 
-function getHarmonicFreqs(EoM!, bdys; kwargs...)
+function getHarmonicFreqs(EoM, bdys; kwargs...)
   _hbar = 1.0545718001391127e-34
   _e    = 1.6021766208e-19
   _amu  = 1.66053904e-27
@@ -12,15 +12,17 @@ function getHarmonicFreqs(EoM!, bdys; kwargs...)
 
   #This code block is borrowed from opt 
   #Refer to optimizations.jl 
+  m          = [i.m for i in bdys]
   x0         = prepX0(bdys)
+  potVars    = EoM(bdys)
   pars, mols = getPairs(bdys)
-  vars       = optVars(mols, pars)
+  vars       = optVars(potVars, mols, pars, m)
   im         = [i.m ^ -0.5 for i in bdys for j in 1:3]
   m          = im * im' #inverse mass scaling matrix
 
   function f(x, vars)
     G = zero(x)
-    EoM!(nothing, G, x, vars)
+    EoM(nothing, G, x, vars)
     return G
   end
 
@@ -63,9 +65,9 @@ function animateMode(bdys, mode, fileName)
   close(f)
 end
 
-function getModePES(EoM!, bdys, mode; range=collect(-1:0.001:2))
+function getModePES(EoM, bdys, mode; range=collect(-1:0.001:2))
 
-  x0, vars = prep4pot(bdys)
+  x0, vars = prep4pot(EoM, bdys)
 
   x, y = [], []
 
@@ -74,7 +76,7 @@ function getModePES(EoM!, bdys, mode; range=collect(-1:0.001:2))
     j = @. x0 + i * mode 
 
     push!(x, i)
-    push!(y, EoM!(true, nothing, j, vars))
+    push!(y, EoM(true, nothing, j, vars))
 
   end
   return x, y

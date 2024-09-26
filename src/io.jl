@@ -39,9 +39,16 @@ function readXyz(xyz)
     s = split(line, " ")
     s = deleteat!(s, findall(e -> e == "", s))
 
-    pos  = parse.(Float64, s[2:end])
+    pos  = parse.(Float64, s[2:4])
     pos  = Vector(pos)
-    vel  = Vector([0.0,0.0,0.0])
+    
+    vel  = if length(s) >= 7
+      tmp = parse.(Float64, s[5:end])
+      Vector(tmp)
+    else
+      Vector([0.0,0.0,0.0]) 
+    end
+    
     mas  = amu[s[1]]
     sym  = s[1][1]
 
@@ -68,20 +75,19 @@ function writeXyzTraj(fileName::String, solu; dt=1)
 
     for j in 1:N
 
-      s     = bdys[j].s
-      x,y,z = u[j]
+      s          = bdys[j].s
+      x,y,z      = u[j]
+      vx, vy, vz = bdys[j].v 
 
-      println(f, "$s   $x   $y   $z")
+      println(f, "$s   $x   $y   $z   $vx   $vy   $vz")
     end 
 
   end
   close(f)
 end 
 
-#Hacky and only works for CO right now
 function writeXyzTraj(fileName::String, tj::MyTraj; dt=1)
   f = open(fileName, "w")
-  S = map(x -> x > 15 ? 'O' : 'C', tj.m)
   T = length(tj.t)
   N = length(tj.m)
 
@@ -94,7 +100,7 @@ function writeXyzTraj(fileName::String, tj::MyTraj; dt=1)
 
     for j in 1:N
 
-      s     = S[j]
+      s     = tj.s[j]
       x,y,z = u[j]
 
       println(f, "$s   $x   $y   $z")
@@ -114,10 +120,11 @@ function writeXyz(fileName::String, bdys)
 
   for j in 1:N
 
-    s     = bdys[j].s
-    x,y,z = bdys[j].r
+    s          = bdys[j].s
+    x,y,z      = bdys[j].r
+    vx, vy, vz = bdys[j].v 
 
-    println(f, "$s   $x   $y   $z")
+    println(f, "$s   $x   $y   $z   $vx   $vy   $vz")
   end 
 
   close(f)

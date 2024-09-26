@@ -1,52 +1,32 @@
 
+
 #Atoms in simulation
-mutable struct Atom
+#Needs mutable to swap masses on the fly
+mutable struct Atom 
   r::Vector{Float64}
   v::Vector{Float64}
   m::Float64
   s::Char
 end
 
-struct Molecule{N}
-  r::SMatrix{N,3,Float64}
-  v::SMatrix{N,3,Float64}
-  m::SVector{N,Float64}
-  name::String
-end
-
-function getMols(bdys, rmin)
+function getMols(bdys, rmin; D=3)
   r   = [i.r for i in bdys]
 
-  pts = mapreduce(permutedims, vcat, r)
+  pts = hcat(r...)
 
-  ret = dbscan(pts, rmin)
+  ret = dbscan(pts[1:D, :], rmin)
 
   [i.core_indices for i in ret.clusters]
 end
 
-function getMols(bdys)
-  # Get distance matrix 
-  d = [[norm(j.r - i.r) for j in bdys] for i in bdys]
-
-  # Get molecules (only works for CO)
-  mols = findall.(e -> e < 2, d)
-
-  # Drop duplicates
-  mols = unique(mols)
-
-  mols
-end
-
 function getPairs(bdys)
 
-  # Get distance matrix 
-  d = [[norm(j.r - i.r) for j in bdys] for i in bdys]
-
-  # Get molecules (only works for CO)
-  mols = findall.(e -> e < 2, d)
-
-  # Drop duplicates
-  mols = unique(mols)
+  # Get mols and N
+  mols = if length(bdys) <= 3
+    getMols(bdys, 1.5, D=length(bdys)-1) 
+  else
+    getMols(bdys, 1.5)
+  end
   N    = size(mols)[1]
 
   # Make all pairs

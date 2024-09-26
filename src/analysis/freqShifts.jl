@@ -7,13 +7,108 @@ struct MolFreq
   θ::Float64
 end
 
+struct INM
+  E::Float64
+  ν::Float64
+end
+
+function _getbl(nve, vec)
+  foo(x) = [j for i in x for j in i]
+  bar(y) = foo(y) |> (x -> dot(x, vec))
+
+  [bar(nve.r[i]) for i = 1:length(nve.r)]
+end
+
 function _getWave(bl)
-  pks  = findPeaks(bl)
+  pks  = findTurningPoints(bl)
   i    = pks[1]
-  j    = pks[2]
+  j    = pks[3]
   wave = bl[i:j] .- mean(bl[i:j]) |> (x -> repeat(x, 1000))
 
   wave
+end
+
+function getINM(EoM, bdys, mol, eignvec, energies; t=50fs, dt=0.01fs)
+  inms = INM[]
+
+  for E in energies
+
+    tmp  = deepcopy(bdys)
+    vibExcite!(tmp[mol], eignvec, E)
+
+
+    nve  = runNVE(EoM, (0, t), dt, tmp; save="sparse") |> processDynamics
+    frms = getFrame.([nve], collect(1:length(nve.t)))
+    x1   = [j for i in frms[1][mol] for j in i.r]
+    
+    bl = Float64[]
+    for frm in frms[2:end]
+      xi = [j for i in frm[mol] for j in i.r]
+      dot(xi - x1, eignvec) |> (x -> push!(bl, x))
+    end
+    
+    wave = try
+      _getWave(bl)
+    catch err
+      @warn "Skipping Energy: $(E)"
+      continue
+    end
+
+    n = div(length(wave), 2)
+    I = abs.(fft(wave))
+    p = 1fs/dt |> round |> (x -> 1e15 * x)
+    v = fftfreq(length(I), p) ./ 29979245800.0
+
+    pks = findPeaks(I[1:n]; min=5e1)
+
+    length(pks) > 0 || continue
+
+    push!(inms, INM(E, v[pks[1]]))
+  end
+
+  inms
+end
+
+function getINM(EoM, mol, eignvec, tj; dt=1, nveTime=50fs, nveDt=0.001fs)
+  inms = INM[]
+
+  for i in 1:dt:length(tj.t)
+    
+    bdys = getFrame(tj, i)
+    
+    #NEED TO FIX
+    E = getVibEnergy(bdys[mol], eignvec, pot=EoM)
+
+    nve  = runNVE(EoM, (0, nveTime), nveDt, bdys; save="sparse") |> processDynamics
+    frms = getFrame.([nve], collect(1:length(nve.t)))
+    x1   = [j for i in frms[1] for j in i.r]
+    
+    bl = Float64[]
+    for frm in frms
+      xi = [j for i in frm for j in i.r]
+      dot(xi - x1, eignvec) |> (x -> push!(bl, x))
+    end
+    
+    wave = try
+      _getWave(bl)
+    catch err
+      @warn "Skipping timestep: $(tj.t[i])"
+      continue
+    end
+
+    n = div(length(wave), 2)
+    I = abs.(fft(wave))
+    p = 1fs/nveDt |> round |> (x -> 1e15 * x)
+    v = fftfreq(length(I), p) ./ 29979245800.0
+
+    pks = findPeaks(I[1:n]; min=5e1)
+
+    length(pks) > 0 || continue
+
+    push!(inms, INM(E, v[pks[1]]))
+  end
+
+  inms
 end
 
 function getMolFreq(EoM, tj, dt)
@@ -142,9 +237,7 @@ function getAllFreqs(EoM, bdys; ind=[0,1])
   allFreqs
 end
 
-function getFvE(EoM, bdys, Erange)
-
-  v,m = getHarmonicFreqs(EoM, bdys)
+function getFvE(EoM, bdys, Erange, vec)
 
   freqs = []
   for E in Erange
@@ -153,20 +246,25 @@ function getFvE(EoM, bdys, Erange)
       bdy.v .*= 0.0
     end
 
-    vibExcite!(bdys, m[:,6], E)
+    try
+      vibExcite!(bdys, vec, E)
 
-    nve  = runNVE(EoM, (0, 50fs), 0.01fs, bdys; save="sparse") |> processDynamics
-    # r    = [j[mol] for j in nve.r]
-    bl   = [norm(j[2]-j[1]) for j in nve.r]
-    wave = _getWave(bl)
+      nve  = runNVE(EoM, (0, 100fs), 0.01fs, bdys; save="sparse") |> processDynamics
+      bl   = _getbl(nve, vec)
+      wave = _getWave(bl)
 
-    n = div(length(wave), 2)
-    I = abs.(fft(wave))
-    v = fftfreq(length(I), 1e17) ./ 29979245800.0
+      n = div(length(wave), 2)
+      I = abs.(fft(wave))
+      v = fftfreq(length(I), 1e17) ./ 29979245800.0
 
-    pks = findPeaks(I[1:n]; min=1e3)
-    
-    push!(freqs, v[pks[1]])
+      pks = findPeaks(I[1:n]; min=1e3)
+      
+      push!(freqs, v[pks[1]])
+    catch
+      @warn "Had to skip energy E=$(E)"
+      push!(freqs, NaN)
+    end
+
   end
 
   freqs

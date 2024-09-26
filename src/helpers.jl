@@ -17,6 +17,12 @@ function translateBdys!(bdys, v)
   end
 end
 
+function diffDotSqrt(v2, v1)
+  rvec = v2 - v1
+  r    = sqrt(dot(rvec, rvec))
+  (r, rvec)
+end
+
 function getAngle(r1, r2)
   x  = (dot(r1, r2)) / (norm(r1) * norm(r2))
   x  = round(x, digits=15)
@@ -36,11 +42,22 @@ end
 
 function getFrame(tj, i::Int64)
   m = tj.m
-  s = map(x -> x > 15 ? 'O' : 'C', tj.m)
+  s = tj.s
   r = tj.r[i]
   v = tj.v[i]
 
   [Atom(r[j], v[j], m[j], s[j]) for j in 1:length(m)]
+end
+
+function getFrame!(bdys, tj, i::Int64)
+  r = tj.r[i]
+  v = tj.v[i]
+
+  for j = 1:length(bdys)
+    bdys[j].r = r[j]
+    bdys[j].v = v[j]
+  end
+
 end
 
 function getLastFrame(solu)
@@ -140,7 +157,7 @@ function vibExcite!(mol, eignvec, E)
 
   if !isapprox(vCoM(mol), vcom; atol=1e-8)
     println("Uh Oh")
-    zeroVCoM!(bdys)
+    zeroVCoM!(mol)
   end
 
 end
@@ -248,7 +265,7 @@ function getCOVibEnergy(pos,vel,mas; pot=nothing)
 end
 
 function getPotEnergy(EoM, bdys)
-  x0, vars = prep4pot(bdys)
+  x0, vars = prep4pot(EoM, bdys)
   energy   = EoM(true, nothing, x0, vars)
   return energy
 end

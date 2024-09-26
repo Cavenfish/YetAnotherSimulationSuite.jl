@@ -1,4 +1,3 @@
-#__precompile__()
 """
 Julia Molecular Dynamics
 
@@ -12,6 +11,7 @@ module JMD
 using TOML
 using JLD2
 using FFTW
+using Libdl
 using Optim
 using LsqFit
 using CodecZlib
@@ -26,6 +26,7 @@ using LinearAlgebra
 using Distributions
 using KernelDensity
 using OrdinaryDiffEq
+using SpecialFunctions
 using FiniteDifferences
 
 const fs   = 0.09822694788464063 # 1fs in ASE time
@@ -39,12 +40,23 @@ include("./io.jl")
 include("./macros.jl")
 include("./helpers.jl")
 
+include("./lib/MBX/libmbx.jl")
+
 include("./md/bodies.jl")
+include("./md/potentials/MvHffCO.jl")
 include("./md/potentials/COCOff.jl")
 include("./md/potentials/HGNN.jl")
+include("./md/potentials/TIP4P.jl")
+include("./md/potentials/SPC-F.jl")
+include("./md/potentials/CH4.jl")
+include("./md/potentials/MBX.jl")
 include("./md/simulation.jl")
 include("./md/thermostats.jl")
 include("./md/post-processing.jl")
+include("./md/potentials/funcs/intra.jl")
+include("./md/potentials/funcs/inter.jl")
+include("./md/potentials/funcs/damping.jl")
+include("./md/potentials/funcs/TTMnrg.jl")
 
 include("./analysis/vacf.jl")
 include("./analysis/desorb.jl")
@@ -55,6 +67,7 @@ include("./analysis/decayRates.jl")
 include("./analysis/freqShifts.jl")
 include("./analysis/participationRatio.jl")
 include("./analysis/neighbors.jl")
+include("./analysis/vibCoup.jl")
 
 include("./plotting/config.jl")
 include("./plotting/vibDisp.jl")
@@ -74,6 +87,4 @@ include("./experiments/energyDissipation.jl")
 include("./QM/orcaConfig.jl")
 
 include("./organization/dataManagement.jl")
-
-include("./md/potentials/params/loadVars.jl")
 end # module

@@ -29,7 +29,113 @@ Essentially:
      ^      ^       ^
   matrix  column   row
           vector  vector 
+
+Switching to PotVars struct has changed allocations in two ways
+  1) Significantly increased allocations during for calls
+     to the potential. This comes from loading the molVars
+     and pairVars during the call rather than at module load.
+  2) Significantly decreased allocations associated with the
+     following vars: A, P, dPdr, rhats. This comes from them
+     acting like a cache now rather than being reallocated at
+     each new call.
+
+The overall result is that for quick uses of the potential
+(ie. single point energy) this method is slower and allocates
+more than the previous method. However, for longer uses of the
+potential (ie. md simulations) this significantly speeds up the
+code by reducing allocations.
 """
+
+struct _HGNN_PotVars <: PotVars
+  A::Matrix{Float64}
+  P::SizedVector{7}
+  dPdr::SizedMatrix{7,6}
+  rhats::SizedMatrix{6,3}
+  molVars
+  pairVars
+end 
+
+function HGNN(bdys)
+  f = jldopen(joinpath(@__DIR__, "params/hgnn.jld2"))
+  molVars  = f["molVars"]
+  pairVars = f["pairVars"]
+  close(f)
+
+  # Pre-allocate for performance gains
+  rhats = SizedMatrix{6,3}(zeros(Float64, 6, 3))
+  dPdr  = SizedMatrix{7,6}(zeros(Float64, 7, 6))
+  P     = SizedVector{7}(zeros(Float64, 7))
+  A     = zeros(Float64, 7, 45)
+
+  _HGNN_PotVars(A, P, dPdr, rhats, molVars, pairVars)
+end
+
+function HGNN(dv, v, u, p, t)
+
+  # initialize things
+  E = 0.0
+  F = zero(u)
+  P = p.potVars
+  r = u ./ 0.5291772083 # to Bohr
+
+  for i in p.mols
+    E += molPot!(F, r, i, P.molVars)
+  end
+
+  for i in p.pars
+    E += pairPot!(F, r, i, P.pairVars, P.rhats, P.dPdr, P.P, P.A)
+  end
+  
+  E  *= 0.000124 # cm-1 to eV
+  F .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
+
+  
+  dv .= F ./ p.m
+  if typeof(p) == NVTsimu
+    p.thermostat!(p.temp, dv, v, p.m, p.thermoInps)
+  end
+
+  push!(p.energy, E)
+  push!(p.forces, F)
+end
+
+function HGNN(F, G, y0, p)
+
+  # initialize things
+  P      = p.potVars
+  x0     = Vector[]
+  forces = Vector[]
+  for i in 1:3:length(y0)
+    push!(x0, y0[i:i+2])
+    push!(forces, [0.0, 0.0, 0.0])
+  end
+
+  # initialize things
+  energy = 0.0
+  r      = x0 ./ 0.5291772083 # to Bohr
+
+  for i in p.mols
+    energy += molPot!(forces, r, i, P.molVars)
+  end
+
+  for i in p.pars
+    energy += pairPot!(forces, r, i, P.pairVars, P.rhats, P.dPdr, P.P, P.A)
+  end
+  
+  energy  *= 0.000124 # cm-1 to eV
+  forces .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
+
+  if G != nothing
+    tmp = [j for i in forces for j in i]
+    for i in 1:length(G)
+      G[i] = -tmp[i]
+    end
+  end
+
+  if F != nothing
+    return energy
+  end
+end
 
 function g(i,j)
   ita  = 0.3
@@ -187,97 +293,6 @@ function getUnitVectors!(r, c1, o1, c2, o2)
   r[4,:] = rhat(o2 - c1)
   r[5,:] = rhat(o1 - o2)
   r[6,:] = rhat(c1 - c2)
-end
-
-function HGNN(a, du, u, p, t)
-
-  # initialize things
-  E = 0.0
-  F = zero(u)
-  r = u ./ 0.5291772083 # to Bohr
-  
-  # Pre-allocate for performance gains
-  rhats = SizedMatrix{6,3}(zeros(Float64, 6, 3))
-  dPdr  = SizedMatrix{7,6}(zeros(Float64, 7, 6))
-  P     = SizedVector{7}(zeros(Float64, 7))
-  A     = zeros(Float64, 7, 45)
-
-  for i in p.mols
-    E += molPot!(F, r, i, hgnnMolVars)
-  end
-
-  for i in p.pars
-
-    # if norm(r[c1] - r[c2]) > 18
-    #   continue
-    # end
-
-    E += pairPot!(F, r, i, hgnnPairVars, rhats, dPdr, P, A)
-  end
-  
-  E  *= 0.000124 # cm-1 to eV
-  F .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
-
-  
-  a .= F ./ p.m
-  if typeof(p) == NVTsimu
-    p.thermostat!(p.temp,a, du, p.m, p.thermoInps)
-  end
-
-  push!(p.energy, E)
-  push!(p.forces, F)
-end
-
-function HGNN(F, G, y0, p)
-
-  # Pre-allocate for performance gains
-  rhats = SizedMatrix{6,3}(zeros(Float64, 6, 3))
-  dPdr  = SizedMatrix{7,6}(zeros(Float64, 7, 6))
-  P     = SizedVector{7}(zeros(Float64, 7))
-  A     = zeros(Float64, 7, 45)
-
-  # I couldn't get Optim to work with a 2D vector
-  # so I had to flatten the vector before sending 
-  # it through. This worked but I then need to 
-  # flatten -> send -> unflatten. Which is such 
-  # a pain. I need a better solution.
-  x0     = Vector[]
-  forces = Vector[]
-  for i in 1:3:length(y0)
-    push!(x0, y0[i:i+2])
-    push!(forces, [0.0, 0.0, 0.0])
-  end
-
-  # initialize things
-  energy = 0.0
-  r      = x0 ./ 0.5291772083 # to Bohr
-
-  for i in p.mols
-    energy += molPot!(forces, r, i, hgnnMolVars)
-  end
-
-  for i in p.pars
-
-    # if norm(r[c1] - r[c2]) > 18
-    #   continue
-    # end
-
-    energy += pairPot!(forces, r, i, hgnnPairVars, rhats, dPdr, P, A)
-  end
-  
-  energy  *= 0.000124 # cm-1 to eV
-  forces .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
-
-  if G != nothing
-    tmp = [j for i in forces for j in i]
-    for i in 1:length(G)
-      G[i] = -tmp[i]
-    end
-  end
-
-  if F != nothing
-    return energy
-  end
 end
 
 function multiHGNN(a, du, u, p, t)
