@@ -14,14 +14,11 @@ using FFTW
 using Libdl
 using Optim
 using LsqFit
-using CodecZlib
 using MiniQhull
 using DataFrames
 using Statistics
-using CairoMakie
 using Clustering
 using StaticArrays
-using Serialization
 using LinearAlgebra
 using Distributions
 using KernelDensity
@@ -69,10 +66,6 @@ include("./analysis/participationRatio.jl")
 include("./analysis/neighbors.jl")
 include("./analysis/vibCoup.jl")
 
-include("./plotting/config.jl")
-include("./plotting/vibDisp.jl")
-include("./plotting/clusters.jl")
-
 include("./mathtk/alphashape.jl")
 include("./mathtk/savitzkyGolay.jl")
 include("./mathtk/peakFinding.jl")
@@ -80,11 +73,5 @@ include("./mathtk/peakFinding.jl")
 include("./building/anneal.jl")
 include("./building/hitAndStick.jl")
 
-include("./experiments/localHeating.jl")
-include("./experiments/bindingEnergy.jl")
-include("./experiments/energyDissipation.jl")
-
 include("./QM/orcaConfig.jl")
-
-include("./organization/dataManagement.jl")
 end # module
