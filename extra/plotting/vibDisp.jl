@@ -19,8 +19,10 @@ function spaghetti(files)
   c   = 255
   k   = 220 / N
   fig = Figure()
-  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
   dfs = [jldopen(file)["df"] for file in files]
+  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
+  ina = Axis(fig, yscale=log, bbox=BBox(350, 560, 230, 385), backgroundcolor=:white)
+  translate!(ina.blockscene, 0, 0, 100)
 
   for df in dfs
 
@@ -28,6 +30,7 @@ function spaghetti(files)
     y    = Float64.(df.molVib[102:end])
 
     lines!(ax, x, y, color=RGBf(c/255, 0, c/255))
+    # lines!(ina, x, y, color=RGBf(c/255, 0, c/255))
     c -= k
   end
 
@@ -35,6 +38,10 @@ function spaghetti(files)
   y = sum([df.molVib[102:end] for df in dfs]) ./ length(dfs)
 
   lines!(ax, x, y, color=:gold, label="Average")
+  lines!(ina, x, y, color=:gold)
+
+  ina.yticks = [0.001, 0.01, 0.1]
+  # hidedecorations!(ina, ticks=false)
 
   axislegend(ax)
 
