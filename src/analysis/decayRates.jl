@@ -21,6 +21,13 @@ function prep4fit(df)
   (t,y)
 end
 
+struct TauVsDeltaNu
+  label::String
+  τ::Vector{Float64}
+  τe::Vector{Float64}
+  dv::Vector{Float64}
+end
+
 function trackTau(df, N)
   t,y = prep4fit(df)
 
@@ -41,3 +48,20 @@ function trackTau(df, N)
   τ, τe
 end
 
+function getTauVsDeltaNu(df, vd, label; N=300)
+ 
+  E     = df.molVib[102:end]
+  τ, τe = trackTau(df, N)
+
+  dv  = let
+    i   = findall(e ->  1500< e < 3000, vd.v)
+    v   = findPeaks(vd."1"[i], min=10, max=500, width=10)  |> (x -> vd.v[i[x[end]]])
+    vs  = findPeaks(vd."1"[i], min=500) |> (x -> vd.v[i[x[1]]])
+    v0  = vs / sqrt((11.23-E[1]) / 11.23)
+    vp  = freqShiftMorse.([v0], [11.23], E)
+    
+    vp .- v
+  end
+
+  TauVsDeltaNu(label, τ, τe, dv[1:length(τ)])
+end
