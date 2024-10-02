@@ -268,9 +268,18 @@ function pltTauVsDeltaNu(left, right)
     xlabel=L"$\Delta \nu$ (cm$^{-1}$)", 
     xlabelsize=30)
 
+  labels  = []
+  markers = []
+
+  for i = 1:length(left)
+    m = MarkerElement(marker=:circle, color=myLightColors[i], markersize=20)
+    push!(markers, m)
+  end
+
   for obj in left
     l = convert(typeof(L""), obj.label)
     scatter!(ax1, obj.dv, obj.τ, label=l)
+    push!(labels, l)
   end
 
   for obj in right
@@ -278,18 +287,15 @@ function pltTauVsDeltaNu(left, right)
     scatter!(ax2, obj.dv, obj.τ, label=l)
   end
 
-  fig[2, 1:2] = Legend(fig, ax1, orientation=:horizontal, 
-                       labelsize=28, markersize=1000)
+  fig[2, 1:2] = Legend(fig, markers, labels, orientation=:horizontal, 
+                       labelsize=28)
 
   hideydecorations!(ax2, grid=false)
 
   xlims!(ax1, -110, 110)
-  ylims!(ax1, 0, 3000)
-
   xlims!(ax2, -110, 110)
-  ylims!(ax2, 0, 3000)
   
 
-  fig
+  fig, ax1, ax2
 end
 
