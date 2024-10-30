@@ -99,7 +99,7 @@ function VDOS(inp; atms=nothing)
   out.v = abs.(v)
   out.I = abs.(I)
 
-  return out
+  out
 end
 
 function getVelMas(solu)
@@ -107,5 +107,5 @@ function getVelMas(solu)
   vel = [solu.u[i].x[1] for i in 1:T]
   mas = [i.m for i in solu.prob.p.bdys]
   
-  return vel, mas
+  vel, mas
 end

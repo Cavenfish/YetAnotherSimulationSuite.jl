@@ -48,7 +48,7 @@ function getEdges(simp)
     end
   end
 
-  return e
+  e
 end
 
 function getSimplexes(pts)
@@ -64,7 +64,8 @@ function getSimplexes(pts)
     V = getSimplexVolume(p)
     push!(simplexes, Simplex(p,j,r,V))
   end
-  return simplexes
+
+  simplexes
 end
 
 function getSimplexVolume(pts)
@@ -83,9 +84,7 @@ function getSimplexVolume(pts)
   #Get constant
   c = (-1)^(n+1) * factorial(n)^2 * 2^n
 
-  #Get volume
-  V = sqrt(det(CM) / c)
-  return V
+  sqrt(det(CM) / c)
 end
 
 function getSimplexRadius(pts)
@@ -114,10 +113,7 @@ function getSimplexRadius(pts)
   #Get Simplex circumcenter
   c = sum(pts .* x[1:N])
 
-  #Get Simplex circumradius
-  r = norm(pts[1] - c)
-
-  return r
+  norm(pts[1] - c)
 end
 
 function getAlpha(pts)
@@ -187,6 +183,5 @@ function alphashape(pts; α=nothing)
     end
   end
 
-  A = AlphaShape(pts, perimeter, simplexes, area)
-  return A
+  AlphaShape(pts, perimeter, simplexes, area)
 end

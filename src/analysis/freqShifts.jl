@@ -12,14 +12,14 @@ struct INM
   ν::Float64
 end
 
-function _getbl(nve, vec)
+function getbl(nve, vec)
   foo(x) = [j for i in x for j in i]
   bar(y) = foo(y) |> (x -> dot(x, vec))
 
   [bar(nve.r[i]) for i = 1:length(nve.r)]
 end
 
-function _getWave(bl)
+function getWave(bl)
   pks  = findTurningPoints(bl)
   i    = pks[1]
   j    = pks[3]
@@ -48,7 +48,7 @@ function getINM(EoM, bdys, mol, eignvec, energies; t=50fs, dt=0.01fs)
     end
     
     wave = try
-      _getWave(bl)
+      getWave(bl)
     catch err
       @warn "Skipping Energy: $(E)"
       continue
@@ -90,7 +90,7 @@ function getINM(EoM, mol, eignvec, tj; dt=1, nveTime=50fs, nveDt=0.001fs)
     end
     
     wave = try
-      _getWave(bl)
+      getWave(bl)
     catch err
       @warn "Skipping timestep: $(tj.t[i])"
       continue
@@ -132,7 +132,7 @@ function getMolFreq(EoM, tj, dt)
     bl   = [norm(j[2]-j[1]) for j in r]
 
     wave = try
-      _getWave(bl)
+      getWave(bl)
     catch err
       @warn "Skipping timestep: $(tj.t[i])"
       continue
@@ -177,7 +177,7 @@ function getAllFreqs(EoM, tj, dt)
       bl   = [norm(j[2]-j[1]) for j in r]
 
       wave = try
-        _getWave(bl)
+        getWave(bl)
       catch err
         @warn "Skipping timestep: $(tj.t[i])"
         continue
@@ -214,7 +214,7 @@ function getAllFreqs(EoM, bdys; ind=[0,1])
     bl   = [norm(j[2]-j[1]) for j in r]
 
     wave = try
-      _getWave(bl)
+      getWave(bl)
     catch err
       @warn "Skipping timestep: $(tj.t[i])"
       continue
@@ -250,8 +250,8 @@ function getFvE(EoM, bdys, Erange, vec)
       vibExcite!(bdys, vec, E)
 
       nve  = runNVE(EoM, (0, 100fs), 0.01fs, bdys; save="sparse") |> processDynamics
-      bl   = _getbl(nve, vec)
-      wave = _getWave(bl)
+      bl   = getbl(nve, vec)
+      wave = getWave(bl)
 
       n = div(length(wave), 2)
       I = abs.(fft(wave))
