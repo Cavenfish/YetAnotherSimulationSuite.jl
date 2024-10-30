@@ -41,7 +41,7 @@ module JMD
     # getMols, getPairs include?
 
     #potentials
-    MvHffCO, HGNN, MBX, SPCF, TIP4P,
+    COCO, HGNN, MBX, SPCF, TIP4P,
 
     #simulation.jl
     runNVE, runNVT,
