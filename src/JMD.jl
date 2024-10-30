@@ -35,7 +35,8 @@ module JMD
     readASExyz, readXyz, writeXyz, writeXyzTraj,
 
     #helpers.jl
-    getFrame, getFrame!, getLastFrame, getLastFrame!,
+    CoM, vCoM, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
+    getFrame, getFrame!, getLastFrame, getLastFrame!, getPotEnergy,
 
     #bodies.jl
     # getMols, getPairs include?

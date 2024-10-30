@@ -1,3 +1,5 @@
+using TOML, Base.Threads, StatsBase
+
 """
 Calculates binding energies based on given
 toml input card.
@@ -27,7 +29,6 @@ pst.iterations = 100000
 [Saving]
 df = "beDF.jld2"
 """
-
 function calcBEs(inpFile::String)
   inp = TOML.parsefile(inpFile)
 
@@ -35,8 +36,8 @@ function calcBEs(inpFile::String)
   cnfg = inp["Settings"]
 
   #Load up EoM and opt algo
-  EoM  = mkvar(cnfg["EoM"])
-  algo = mkvar(inp["OPT"]["algo"])()
+  EoM  = JMD.mkvar(cnfg["EoM"])
+  algo = JMD.mkvar(inp["OPT"]["algo"])()
 
   #Build pre opt kwargs dict
   pre = Dict()
@@ -96,7 +97,7 @@ function calcBEs(inpFile::String)
       new = deepcopy(mol)
 
       #Randomly rotate molecule (see hitAndStick for function code)
-      randRotate!(new)
+      JMD.randRotate!(new)
 
       #Spawn molecule and optimise 
       bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; pst...))
@@ -111,7 +112,7 @@ function calcBEs(inpFile::String)
 
     BE[i:i+savN-1] .+= vcat(ret...) |> dropZeros!
     df = mkBEdf(BE * -1)
-    jldsave(inp["Saving"]["df"]; df)
+    JMD.jldsave(inp["Saving"]["df"]; df)
     
     #increment i or change savN
     i + savN - 1 > N ? savN = N - i + 1 : i += savN
@@ -131,7 +132,7 @@ function mkBEdf(arr)
   eVtoK  = 11604.525
   eVtocm = 8065.56
 
-  df = Dict("eV" => arr, "K" => arr*eVtoK, "cm-1" => arr*eVtocm) |> DataFrame
+  df = Dict("eV" => arr, "K" => arr*eVtoK, "cm-1" => arr*eVtocm) |> JMD.DataFrame
 
   df
 end
@@ -155,19 +156,19 @@ end
 
 function spawnMol(mol, clu, com, spot, minD)
 
-  vhat = (spot - com) ./ norm(spot - com)
+  vhat = (spot - com) ./ JMD.norm(spot - com)
 
   v    = spot + minD * vhat
 
   moveMol!(mol, v)
   
-  d = [norm(j.r - i.r) for i in clu for j in mol] |> minimum
+  d = [JMD.norm(j.r - i.r) for i in clu for j in mol] |> minimum
 
   while d < minD
 
     moveMol!(mol, vhat*0.1)
 
-    d = [norm(j.r - i.r) for i in clu for j in mol] |> minimum
+    d = [JMD.norm(j.r - i.r) for i in clu for j in mol] |> minimum
 
   end
 
