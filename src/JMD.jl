@@ -5,7 +5,6 @@ A very minimal package for me to do MD.
 
 author: Brian C. Ferrari
 """
-
 module JMD
 
   using TOML
@@ -16,14 +15,15 @@ module JMD
   using LsqFit
   using MiniQhull
   using DataFrames
-  using Statistics
+  using Statistics#might not be used
   using Clustering
   using StaticArrays
+  using Serialization
   using LinearAlgebra
-  using Distributions
+  using Distributions#might not be used
   using KernelDensity
   using OrdinaryDiffEq
-  using SpecialFunctions
+  using SpecialFunctions#might not be used
   using FiniteDifferences
 
 

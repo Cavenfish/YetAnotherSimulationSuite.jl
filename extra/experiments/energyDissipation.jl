@@ -1,4 +1,4 @@
-using TOML, JLD2
+using TOML, JLD2, Serialization
 
 """
 Runs a vibrational energy dissipation simulation 
