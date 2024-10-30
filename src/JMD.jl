@@ -35,7 +35,7 @@ module JMD
     readASExyz, readXyz, writeXyz, writeXyzTraj,
 
     #helpers.jl
-    CoM, vCoM, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
+    CoM, vCoM, zeroVCoM!, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
     getFrame, getFrame!, getLastFrame, getLastFrame!, getPotEnergy,
 
     #bodies.jl

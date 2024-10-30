@@ -1,4 +1,4 @@
-using TOML, Base.Threads, StatsBase
+using TOML, Base.Threads, StatsBase, JLD2, DataFrames, LinearAlgebra
 
 """
 Calculates binding energies based on given
@@ -112,7 +112,7 @@ function calcBEs(inpFile::String)
 
     BE[i:i+savN-1] .+= vcat(ret...) |> dropZeros!
     df = mkBEdf(BE * -1)
-    JMD.jldsave(inp["Saving"]["df"]; df)
+    jldsave(inp["Saving"]["df"]; df)
     
     #increment i or change savN
     i + savN - 1 > N ? savN = N - i + 1 : i += savN
@@ -132,7 +132,7 @@ function mkBEdf(arr)
   eVtoK  = 11604.525
   eVtocm = 8065.56
 
-  df = Dict("eV" => arr, "K" => arr*eVtoK, "cm-1" => arr*eVtocm) |> JMD.DataFrame
+  df = Dict("eV" => arr, "K" => arr*eVtoK, "cm-1" => arr*eVtocm) |> DataFrame
 
   df
 end
@@ -156,19 +156,19 @@ end
 
 function spawnMol(mol, clu, com, spot, minD)
 
-  vhat = (spot - com) ./ JMD.norm(spot - com)
+  vhat = (spot - com) ./ norm(spot - com)
 
   v    = spot + minD * vhat
 
   moveMol!(mol, v)
   
-  d = [JMD.norm(j.r - i.r) for i in clu for j in mol] |> minimum
+  d = [norm(j.r - i.r) for i in clu for j in mol] |> minimum
 
   while d < minD
 
     moveMol!(mol, vhat*0.1)
 
-    d = [JMD.norm(j.r - i.r) for i in clu for j in mol] |> minimum
+    d = [norm(j.r - i.r) for i in clu for j in mol] |> minimum
 
   end
 

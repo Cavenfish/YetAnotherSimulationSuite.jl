@@ -1,3 +1,5 @@
+using TOML, JLD2
+
 """
 Runs a vibrational energy dissipation simulation 
 based on conditions given via a toml input card.
@@ -33,13 +35,10 @@ tj = "co-am13C18O_MvH_TJ_1.jld2"
 vd = "co-am13C18O_MvH_VD_1.jld2"
 re = "co-am13C18O_MvH_RE_1.jld2"
 """
-
 function vibDisp(inpFile::String)
 
   # Read in input card
-  f   = open(inpFile, "r")
-  inp = TOML.parse(f)
-  close(f)
+  inp = TOML.parsefile(inpFile)
 
   # Split dict for easier usage
   expt = inp["expt"]
@@ -49,8 +48,7 @@ function vibDisp(inpFile::String)
   "dt" in keys(expt) ? dt = expt["dt"]*fs : dt = fs
 
   # Load up EoM 
-  fn  = Symbol(expt["EoM"])
-  EoM = @eval $fn
+  EoM = JMD.mkvar(expt["EoM"])
 
   # Load other vars for easier usage
   E      = expt["energy"]
@@ -131,7 +129,7 @@ function vibDisp(inpFile::String)
     end
 
     #Free memory
-    @free nve
+    JMD.@free nve
   end
 
   # Post-process
