@@ -9,6 +9,7 @@ Example of Input Card
 
 [expt]
 EoM = "COCO"
+vibMode = 6
 energy = 0.4
 time = 2000
 dt = 1
@@ -107,9 +108,9 @@ function vibDisp(inpFile::String)
   end
 
   # Excite CO
-  co  = bdys[mol]
-  f,m = getHarmonicFreqs(EoM, co)
-  vibExcite!(co, m[:,6], E)
+  f,m = getHarmonicFreqs(EoM, bdys[mol])
+  ν   = expt["vibMode"]
+  vibExcite!(co, m[:,ν], E)
 
   #Translational excitation
   if "KE" in keys(expt)
@@ -135,11 +136,7 @@ function vibDisp(inpFile::String)
   # Post-process
   tmp  = ["$i.tmp" for i in 0:splits]
   traj = processTmpFiles(tmp; step=100)
-  df   = if "vzpe" in keys(expt)
-    trackEnergyDissipation(traj, EoM, mol, eignvec=expt["vzpe"]["modes"])
-  else
-    trackEnergyDissipation(traj, EoM, mol)
-  end
+  df   = trackEnergyDissipation(traj, EoM, mol, eignvec=m[:,ν])
 
   # Load saving vars for easy usage
   dfName = savi["df"] 
