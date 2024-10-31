@@ -107,15 +107,15 @@ function vibDisp(inpFile::String)
     serialize(f, equil)
   end
 
-  # Excite CO
+  # Excite molecule
   f,m = getHarmonicFreqs(EoM, bdys[mol])
   ν   = expt["vibMode"]
-  vibExcite!(co, m[:,ν], E)
+  vibExcite!(bdys[mol], m[:,ν], E)
 
   #Translational excitation
   if "KE" in keys(expt)
     KE = expt["KE"]
-    transExcite!(co, KE)
+    transExcite!(bdys[mol], KE)
   end
 
   # Run in parts to avoid segfaults
@@ -136,7 +136,7 @@ function vibDisp(inpFile::String)
   # Post-process
   tmp  = ["$i.tmp" for i in 0:splits]
   traj = processTmpFiles(tmp; step=100)
-  df   = trackEnergyDissipation(traj, EoM, mol, eignvec=m[:,ν])
+  df   = trackEnergyDissipation(traj, EoM, mol, m[:,ν])
 
   # Load saving vars for easy usage
   dfName = savi["df"] 
@@ -162,7 +162,7 @@ function vibDisp(inpFile::String)
     reName = savi["re"]
     Rs     = inp["track"]["Rs"]
 
-    re = trackRadialEnergy(traj; pot=EoM, Rs=Rs)
+    re = trackRadialEnergy(traj, EoM, mol, Rs=Rs)
 
     jldsave(reName; re)
   end
