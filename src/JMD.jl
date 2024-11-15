@@ -39,7 +39,7 @@ module JMD
     getFrame, getFrame!, getLastFrame, getLastFrame!, getPotEnergy,
 
     #bodies.jl
-    # getMols, getPairs include?
+    getMols, getPairs,
 
     #potentials
     COCO, HGNN, MBX, SPCF, TIP4P,
