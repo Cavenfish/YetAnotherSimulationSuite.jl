@@ -12,6 +12,7 @@ module JMD
   using FFTW
   using Libdl
   using Optim
+  using PyCall
   using LsqFit
   using MiniQhull
   using DataFrames
