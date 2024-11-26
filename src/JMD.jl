@@ -95,7 +95,10 @@ module JMD
     anneal,
 
     #hitAndStick.jl
-    hitAndStick, HnS
+    hitAndStick, HnS,
+
+    #phonopy.jl
+    PhonopyCellInfo, phonopy_generate_displacements, phonopy_save, phonopy_load_and_get_DOS
   
   #end exports
 
@@ -111,6 +114,7 @@ module JMD
   include("./helpers.jl")
 
   include("./lib/MBX/libmbx.jl")
+  include("./lib/Phonopy/phonopy.jl")
 
   include("./md/bodies.jl")
   include("./md/potentials/MvHffCO.jl")
