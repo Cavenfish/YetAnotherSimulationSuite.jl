@@ -24,7 +24,7 @@ function phonopy_save(obj, forces)
   obj.save()
 end
 
-function phonopy_load_and_get_DOS(yamlFile, path, labels, npoints)
+function phonopy_load_and_get_DOS(yamlFile, path, labels, npoints dosFile, pdosFile)
   phonopy  = pyimport("phonopy")
 
   phonon = phonopy.load(yamlFile)
@@ -34,14 +34,12 @@ function phonopy_load_and_get_DOS(yamlFile, path, labels, npoints)
 
   phonon.run_band_structure(qpoints, path_connections=connections, labels=labels)
 
-  # To plot DOS next to band structure
   phonon.run_mesh([20, 20, 20])
   phonon.run_total_dos()
-  phonon.write_total_dos()
+  phonon.write_total_dos(dosFile)
 
-  # To plot PDOS next to band structure
   phonon.run_mesh([20, 20, 20], with_eigenvectors=True, is_mesh_symmetry=False)
   phonon.run_projected_dos()
-  phonon.write_projected_dos()
+  phonon.write_projected_dos(pdosFile)
 
 end
