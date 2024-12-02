@@ -270,6 +270,14 @@ function getPotEnergy(EoM, bdys)
   return energy
 end
 
+function getForces(EoM, bdys)
+  x0, vars = prep4pot(EoM, bdys)
+  G        = zero(x0)
+  EoM(nothing, G, x0, vars)
+
+  [G[i:i+2] for i = 1:3:length(G)]
+end
+
 function getSurfaceMolecules(bdys; α=nothing)
   _, mols = getPairs(bdys)
 
