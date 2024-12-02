@@ -37,7 +37,7 @@ module JMD
 
     #helpers.jl
     CoM, vCoM, zeroVCoM!, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
-    getFrame, getFrame!, getLastFrame, getLastFrame!, getPotEnergy,
+    getFrame, getFrame!, getLastFrame, getLastFrame!, getPotEnergy, getForces,
 
     #bodies.jl
     getMols, getPairs,
@@ -99,7 +99,7 @@ module JMD
     hitAndStick, HnS,
 
     #phonopy.jl
-    PhonopyCellInfo, phonopy_generate_displacements, phonopy_save, phonopy_load_and_get_DOS
+    phonopy_addForces
   
   #end exports
 
