@@ -1,7 +1,6 @@
-
-const MBXjson   = joinpath(@__DIR__, "mbx.json")
 const libmbx    = dlopen(joinpath(@__DIR__, "libmbx.so"), Libdl.RTLD_GLOBAL) 
 const E_MBX2JMD = 0.043 # kcal/mol --> eV
+MBXjson         = joinpath(@__DIR__, "mbx.json")
 
 # /**
 #  * Initializes the system in the heap.
