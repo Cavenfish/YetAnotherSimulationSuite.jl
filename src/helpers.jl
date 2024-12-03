@@ -93,6 +93,13 @@ function swapAtoms!(bdys, i, j)
   bdys[j].r = a
 end
 
+function centerBdys!(bdys)
+  com = CoM(bdys)
+  for i in bdys
+    i.r -= com
+  end
+end
+
 function CoM(bdys)
   M = sum([i.m for i in bdys])
   r = sum([i.m*i.r for i in bdys])

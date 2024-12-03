@@ -38,6 +38,7 @@ module JMD
     #helpers.jl
     CoM, vCoM, zeroVCoM!, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
     getFrame, getFrame!, getLastFrame, getLastFrame!, getPotEnergy, getForces,
+    centerBdys!,
 
     #bodies.jl
     getMols, getPairs,
