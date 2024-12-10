@@ -39,22 +39,26 @@ function fve(inpFile::String)
 
   for k1 in keys(clus)
 
-    bdys = clus[k1]
-    
-    # Open data file to write data in
-    # I close between bdys incase one crashes you have some data still
-    jldopen(inp["data"], "a+") do file
+    for k2 in keys(clus[k1])
 
-      for k2 in keys(modes[k1])
+      bdys = clus[k1][k2]
+      
+      # Open data file to write data in
+      # I close between bdys incase one crashes you have some data still
+      jldopen(inp["data"], "a+") do file
 
-        m = modes[k1][k2]
-        ν = getFvE(MBX, bdys, E, m)
+        for k3 in keys(modes[k1][k2])
 
-        file["$(k1)/$(k2)"] = ν
+          m = modes[k1][k2][k3]
+          ν = getFvE(MBX, bdys, E, m)
 
-      end# k2
+          file["$(k1)/$(k2)/$(k3)"] = ν
 
-    end# close file
+        end# k3
+
+      end# close file
+
+    end# k2
 
   end# k1
 
