@@ -22,20 +22,22 @@ function fve(inpFile::String)
 
   # Read input card
   inp = TOML.parsefile(inpFile)
+  cfg = inp["Settings"]
+  sav = inp["Saving"]["data"]
 
   # Load clusters and modes
-  clus  = jldopen(inp["clus"])
-  modes = jldopen(inp["modes"])
+  clus  = jldopen(cfg["clus"])
+  modes = jldopen(cfg["modes"])
 
   # Load EoM 
-  EoM = JMD.mkvar(expt["EoM"])
+  EoM = JMD.mkvar(cfg["EoM"])
 
   # Make energy range
-  a = inp["Erange"]
+  a = cfg["Erange"]
   E = collect(a[1]:a[2]:a[3])
 
   # Save energy range and init saving file
-  jldsave(inp["data"]; E)
+  jldsave(sav; E)
 
   for k1 in keys(clus)
 
@@ -45,7 +47,7 @@ function fve(inpFile::String)
       
       # Open data file to write data in
       # I close between bdys incase one crashes you have some data still
-      jldopen(inp["data"], "a+") do file
+      jldopen(sav, "a+") do file
 
         for k3 in keys(modes[k1][k2])
 
