@@ -128,3 +128,20 @@ function MBX(F, G, y0, p)
   end
 
 end
+
+function MBX(box, scaled_pos)
+
+  y0 = zeros(length(scaled_pos))
+
+  for i = 1:3:length(y0)
+    y0[i]   = scaled_pos[i]   * box[1]
+    y0[i+1] = scaled_pos[i+1] * box[2]
+    y0[i+2] = scaled_pos[i+2] * box[3]
+  end
+
+  nats = convert(Int32, length(y0)/3)
+  tmp  = [box[1], 0,0,0, box[2], 0,0,0, box[3]]
+  
+  mbx_set_box(tmp)
+  mbx_get_energy(y0, nats)
+end
