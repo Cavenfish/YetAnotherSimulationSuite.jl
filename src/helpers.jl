@@ -282,7 +282,7 @@ function getForces(EoM, bdys)
   G        = zero(x0)
   EoM(nothing, G, x0, vars)
 
-  [G[i:i+2] for i = 1:3:length(G)]
+  [-G[i:i+2] for i = 1:3:length(G)]
 end
 
 function getSurfaceMolecules(bdys; α=nothing)
