@@ -36,6 +36,27 @@ function readASExyz(xyz; getCell=false)
   set
 end #read_ase_xyz
 
+function writeASEcell(fileName, cell)
+  f = open(fileName, "w")
+  N = length(cell.symbols)
+  
+  l = replace("$(cell.lattice)", [';', '[', ']'] => "")
+  r = getPos(cell)
+
+  println(f, N)
+  println(f, "Lattice=\" $l \"")
+
+  for i in 1:N
+
+    s          = cell.symbols[i]
+    x,y,z      = r[i]
+
+    println(f, "$s   $x   $y   $z")
+  end 
+
+  close(f)
+end
+
 function readXyz(xyz)
   stream = readlines(xyz)
   amu    = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]

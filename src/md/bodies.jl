@@ -39,17 +39,3 @@ function getPairs(bdys)
 
   return pars, mols
 end
-
-# Only works with orthorombic 
-function getScaledPos(bdys, box)
-
-  scaledPos = [i.r for i in bdys]
-
-  for i = 1:length(scaledPos)
-    for j = 1:3
-      scaledPos[i][j] /= box[j]
-    end
-  end
-  
-  scaledPos
-end

@@ -33,7 +33,7 @@ module JMD
     fs, ps, ns, kB,
 
     #io.jl
-    readASExyz, readXyz, writeXyz, writeXyzTraj,
+    readASExyz, writeASEcell, readXyz, writeXyz, writeXyzTraj,
 
     #helpers.jl
     CoM, vCoM, zeroVCoM!, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
@@ -42,6 +42,9 @@ module JMD
 
     #bodies.jl
     getMols, getPairs,
+
+    #cells.jl
+    makeCell, getScaledPos, getPos, wrap!,
 
     #potentials
     COCO, HGNN, MBX, SPCF, TIP4P,
@@ -118,6 +121,7 @@ module JMD
   include("./lib/MBX/libmbx.jl")
   include("./lib/Phonopy/phonopy.jl")
 
+  include("./md/cells.jl")
   include("./md/bodies.jl")
   include("./md/potentials/MvHffCO.jl")
   include("./md/potentials/COCOff.jl")
