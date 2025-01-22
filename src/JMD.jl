@@ -14,6 +14,7 @@ module JMD
   using Optim
   using PyCall
   using LsqFit
+  using Spglib
   using MiniQhull
   using DataFrames
   using Statistics#might not be used
