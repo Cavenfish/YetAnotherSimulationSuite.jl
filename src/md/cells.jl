@@ -1,7 +1,7 @@
 #TODO:
 #   -Make function to center lattice
-#   -Make function to get super cells
 #   -Make function to get primitive cells
+#   -Make function to clean duplicates
 
 struct Cell
   lattice::Matrix{Float64}
@@ -18,6 +18,13 @@ function makeCell(bdys, lattice)
     [i.m for i in bdys],
     [i.s for i in bdys]
   )
+end
+
+function makeBdys(cell)
+  pos  = getPos(cell)
+  vel  = [zeros(3) for i in pos]
+
+  [Atom(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
 end
 
 function getScaledPos(bdys, lattice)
@@ -72,9 +79,12 @@ end
 function makeSuperCell(cell, T)
 
   lattice = T * cell.lattice
-  n       = det(T)
+  N       = [T[1,1], T[2,2], T[3,3]]
+  
+  super   = replicate(cell, N)
+  bdys    = makeBdys(super)
+  wrap!(bdys, lattice)
 
-
-
+  makeCell(bdys, lattice)
 end
 

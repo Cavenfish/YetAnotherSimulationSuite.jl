@@ -129,19 +129,15 @@ function MBX(F, G, y0, p)
 
 end
 
-function MBX(box, scaled_pos)
+# MBX can only handle Diagonal lattices
+function MBX(box, scaled_pos, p)
 
-  y0 = zeros(length(scaled_pos))
-
-  for i = 1:3:length(y0)
-    y0[i]   = scaled_pos[i]   * box[1]
-    y0[i+1] = scaled_pos[i+1] * box[2]
-    y0[i+2] = scaled_pos[i+2] * box[3]
-  end
-
-  nats = convert(Int32, length(y0)/3)
-  tmp  = [box[1], 0,0,0, box[2], 0,0,0, box[3]]
+  L    = reshape(box, (3,3)) |> Diagonal
+  r    = [L * i for i in scaled_pos]
+  y0   = [j for i in r for j in i]
+  nats = length(r)
+  box  = reshape(L, 9) |> (x -> convert(Vector{Float64}, x))
   
-  mbx_set_box(tmp)
+  mbx_set_box(box)
   mbx_get_energy(y0, nats)
 end

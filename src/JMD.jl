@@ -34,7 +34,7 @@ module JMD
     fs, ps, ns, kB,
 
     #io.jl
-    readASExyz, writeASEcell, readXyz, writeXyz, writeXyzTraj,
+    readASExyz, readXyz, writeXyz, readCell, writeCell, writeXyzTraj,
 
     #helpers.jl
     CoM, vCoM, zeroVCoM!, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
@@ -45,7 +45,8 @@ module JMD
     getMols, getPairs,
 
     #cells.jl
-    makeCell, getScaledPos, getPos, wrap!,
+    makeCell, makeBdys, getScaledPos, getPos, wrap!, replicate, makeSuperCell,
+
 
     #potentials
     COCO, HGNN, MBX, SPCF, TIP4P,

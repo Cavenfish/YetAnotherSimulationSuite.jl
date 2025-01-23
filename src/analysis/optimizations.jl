@@ -71,20 +71,19 @@ function opt(EoM, algo, bdys; kwargs...)
   optBdys
 end
 
-function optCell(EoM, bdys, box0; kwargs...)
+function optCell(EoM, cell; kwargs...)
 
-  x0, vars = prep4pot(EoM, bdys)
+  # Need to init vars for simulations 
+  bdys = makeBdys(cell)
+  p    = EoM(bdys)
+  #TODO: make EoM(cell) variant to avoid making bodies above
 
-  for i = 1:3:length(x0)
-    x0[i]   /= box0[1]
-    x0[i+1] /= box0[2]
-    x0[i+2] /= box0[3]
-  end
-
+  x0       = cell.scaled_pos
+  box0     = transpose(cell.lattice) |> (x -> reshape(x, 9)) |> (
+    x -> convert(Vector{Float64}, x))
   convCrit = Optim.Options(; kwargs...)
-  res      = optimize(box -> EoM(box, x0), box0, NelderMead(), convCrit)
-  newBox   = res.minimizer
-  newBdys  = getNewBdys(bdys, x0, newBox)
+  res      = optimize(box -> EoM(box, x0, p), box0, NelderMead(), convCrit)
+  newBox   = reshape(res.minimizer, (3,3)) |> transpose
 
-  newBdys, newBox
+  Cell(newBox, cell.scaled_pos, cell.masses, cell.symbols)
 end
