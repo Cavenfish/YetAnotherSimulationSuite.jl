@@ -2,7 +2,7 @@
 
 #Atoms in simulation
 #Needs mutable to swap masses on the fly
-mutable struct Atom 
+mutable struct Atom <: MyAtoms
   r::Vector{Float64}
   v::Vector{Float64}
   m::Float64

@@ -3,20 +3,22 @@
 #   -Make function to get primitive cells
 #   -Make function to clean duplicates
 
-struct Cell
+struct Cell <: MyCell
   lattice::Matrix{Float64}
   scaled_pos::Vector{Vector{Float64}}
   masses::Vector{Float64}
   symbols::Vector{Char}
+  PBC::Vector{Bool}
 end
 
-function makeCell(bdys, lattice)
+function makeCell(bdys, lattice; PBC=repeat([true], 3))
 
   Cell(
     lattice,
     getScaledPos(bdys, lattice),
     [i.m for i in bdys],
-    [i.s for i in bdys]
+    [i.s for i in bdys],
+    PBC
   )
 end
 
@@ -72,7 +74,7 @@ function replicate(cell, N)
 
   newScaledPos = [inv(newLat) * r for r in newPos]
 
-  Cell(newLat, newScaledPos, newM, newS)
+  Cell(newLat, newScaledPos, newM, newS, cell.PBC)
 end
 
 
@@ -85,6 +87,6 @@ function makeSuperCell(cell, T)
   bdys    = makeBdys(super)
   wrap!(bdys, lattice)
 
-  makeCell(bdys, lattice)
+  makeCell(bdys, lattice, PBC=cell.PBC)
 end
 

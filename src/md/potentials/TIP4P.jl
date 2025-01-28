@@ -51,9 +51,18 @@ function TIP4P(dv, v, u, p, t)
 
     E += _vdw!(F, u, o1, o2, P.ϵoo, P.σoo)
 
+    if p.PBC
+      #TODO
+    end
+
     for i in [h1, h2]
       for j in [h3, h4]
         E += _Coulomb!(F, u, i, j, P.Qh, P.Qh)
+
+        if p.PBC
+          #TODO
+        end
+
       end
     end
 

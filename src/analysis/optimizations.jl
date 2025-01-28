@@ -74,8 +74,7 @@ end
 function optCell(EoM, cell; kwargs...)
 
   # Need to init vars for simulations 
-  bdys = makeBdys(cell)
-  p    = EoM(bdys)
+  p    = makeBdys(cell) |> EoM
   #TODO: make EoM(cell) variant to avoid making bodies above
 
   x0       = cell.scaled_pos
