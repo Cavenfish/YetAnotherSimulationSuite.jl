@@ -9,12 +9,12 @@ mutable struct Atom
   s::Char
 end
 
-function getMols(bdys, rmin; D=3)
+function getMols(bdys, rmax; D=3)
   r   = [i.r for i in bdys]
 
   pts = hcat(r...)
 
-  ret = dbscan(pts[1:D, :], rmin)
+  ret = dbscan(pts[1:D, :], rmax)
 
   [i.core_indices for i in ret.clusters]
 end
@@ -38,4 +38,18 @@ function getPairs(bdys)
   end
 
   return pars, mols
+end
+
+# Only works with orthorombic 
+function getScaledPos(bdys, box)
+
+  scaledPos = [i.r for i in bdys]
+
+  for i = 1:length(scaledPos)
+    for j = 1:3
+      scaledPos[i][j] /= box[j]
+    end
+  end
+  
+  scaledPos
 end

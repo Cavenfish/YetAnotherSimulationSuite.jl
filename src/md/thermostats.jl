@@ -1,15 +1,11 @@
 
-function Maxwell_Boltzmann(v, m, T, kB)
-  #Need to make this for Langevin
-end
-
 function getTemp(m, v, kB, N)
   # Leave out the 1/2 to get 2Ekin for T calc
   Nf   = 3N - 3
   v2   = [i'i for i in v]
   Ekin = sum(m .* v2)
-  Tsim = Ekin / (kB * Nf)
-  return Tsim
+  
+  Ekin / (kB * Nf)
 end
 
 struct Berendsen

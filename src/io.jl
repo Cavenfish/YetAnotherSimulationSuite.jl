@@ -1,6 +1,5 @@
-export readASExyz, readXyz, writeXyz, writeXyzTraj
 
-function readASExyz(xyz)
+function readASExyz(xyz; getCell=false)
   sys = readlines(xyz)
   N   = length(sys) - 2
   hed = sys[2]
@@ -19,14 +18,22 @@ function readASExyz(xyz)
       vel = Vector(props[5:7] ./ mas)
     else
       mas = amu[s]
-      vel = Vector(props[4:6] ./ mas)
+      # vel = Vector(props[4:6] ./ mas)
+      vel = zeros(3)
     end #if-else
 
     particle = Atom(pos, vel, mas, s[1])
     push!(set, particle)
   end #for loop
 
-  return set
+  if getCell
+    tmp  = split(hed, "Lattice=")[2] |> (x -> split(x, "\"")[2]) |> (x -> split(x, " "))
+    cell = parse.(Float64, tmp)
+
+    return set, cell
+  end
+
+  set
 end #read_ase_xyz
 
 function readXyz(xyz)
@@ -46,7 +53,7 @@ function readXyz(xyz)
       tmp = parse.(Float64, s[5:end])
       Vector(tmp)
     else
-      Vector([0.0,0.0,0.0]) 
+      zeros(3)
     end
     
     mas  = amu[s[1]]

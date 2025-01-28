@@ -222,30 +222,19 @@ function trackAllVibEnergy(tj; pot=nothing)
   return dis, vib
 end
 
-function trackRadialEnergy(tj; pot=nothing, Rs=[[3,5],[5,9],[9,30]])
+function trackRadialEnergy(tj, EoM, mol; Rs=[[3,5],[5,9],[9,30]])
 
-  #I'm working in let-end blocks to local scope some
-  # variables so they don't get double referenced
-  
-  #Find indicies of excited molecule
-  ind = let
-    v = tj.v[102]
+  bdys = getFrame(tj, 1)
 
-    i = findfirst(e -> e == maximum(v), v)
-
-    isodd(i) ? [i, i+1] : [i-1, i]
-  end 
-
-  #Get all molecules (only works for CO)
-  mols = let
-    r  = tj.r[1]
-    d  = [[norm(j - i) for j in r] for i in r]
-    
-    findall.(e -> e < 2, d) |> unique
+  #Get all molecules
+  mols = if length(bdys) <= 3
+    getMols(bdys, 1.5, D=length(bdys)-1) 
+  else
+    getMols(bdys, 1.5)
   end
 
   #Remove excited molecule from mols list
-  findfirst(e -> e == ind, mols) |> (x -> popat!(mols, x))
+  findfirst(e -> e == mol, mols) |> (x -> popat!(mols, x))
 
   #Pre-allocate distance array
   d = zeros(length(mols))
@@ -265,13 +254,15 @@ function trackRadialEnergy(tj; pot=nothing, Rs=[[3,5],[5,9],[9,30]])
 
   #Very complicated nested loop
   for t in 1:length(tj.t)
+    getFrame!(bdys, tj, t)
+
     d .*= 0.0
 
     r = tj.r[t]
     v = tj.v[t]
 
-    com  =  CoM(r[ind], m[ind])
-    coms = [CoM(r[mol], m[mol]) for mol in mols]
+    com  =  CoM(bdys[mol])
+    coms = [CoM(bdys[i]) for i in mols]
     d  .+= [norm(i - com) for i in coms]
 
     for k in 1:length(Rs)
@@ -288,9 +279,9 @@ function trackRadialEnergy(tj; pot=nothing, Rs=[[3,5],[5,9],[9,30]])
       for i in 1:length(l)
         j = mols[l[i]]
 
-        tra += getTransEnergy(r[j], v[j], m[j])
-        rot += getRotEnergy(  r[j], v[j], m[j])
-        vib += getCOVibEnergy(r[j], v[j], m[j]; pot=pot)
+        tra += getTransEnergy(bdys[j])
+        rot += getRotEnergy(bdys[j])
+        vib += getPotEnergy(EoM, bdys[j])
 
       end#mols within low-hi loop
 

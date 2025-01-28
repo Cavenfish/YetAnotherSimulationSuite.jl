@@ -26,7 +26,8 @@ function randVector()
 
   r  = [x,y,z]
   r /= norm(r) 
-  return r
+  
+  r
 end
 
 function randRotate!(mol)
@@ -56,7 +57,7 @@ function spawnMol(mol, bdys, com)
     push!(spawn, Atom(r, i.v, i.m, i.s))
   end
 
-  return spawn
+  spawn
 end
 
 function giveKE!(mol, com, KE)

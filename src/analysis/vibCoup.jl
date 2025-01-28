@@ -1,5 +1,4 @@
 
-
 function getVibCoup(EoM, bdys, ϵ, vec; r0=0.0)
 
   function bar(r)

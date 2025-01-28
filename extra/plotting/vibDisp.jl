@@ -19,8 +19,10 @@ function spaghetti(files)
   c   = 255
   k   = 220 / N
   fig = Figure()
-  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
   dfs = [jldopen(file)["df"] for file in files]
+  ax  = Axis(fig[1,1], xlabel="Time (ps)", ylabel="Energy (eV)")
+  ina = Axis(fig, yscale=log, bbox=BBox(350, 560, 230, 385), backgroundcolor=:white)
+  translate!(ina.blockscene, 0, 0, 100)
 
   for df in dfs
 
@@ -28,6 +30,7 @@ function spaghetti(files)
     y    = Float64.(df.molVib[102:end])
 
     lines!(ax, x, y, color=RGBf(c/255, 0, c/255))
+    # lines!(ina, x, y, color=RGBf(c/255, 0, c/255))
     c -= k
   end
 
@@ -35,6 +38,10 @@ function spaghetti(files)
   y = sum([df.molVib[102:end] for df in dfs]) ./ length(dfs)
 
   lines!(ax, x, y, color=:gold, label="Average")
+  lines!(ina, x, y, color=:gold)
+
+  ina.yticks = [0.001, 0.01, 0.1]
+  # hidedecorations!(ina, ticks=false)
 
   axislegend(ax)
 
@@ -231,31 +238,6 @@ function pltFreqShift(k)
   fig
 end
 
-struct TauVsDeltaNu
-  label::String
-  τ::Vector{Float64}
-  τe::Vector{Float64}
-  dv::Vector{Float64}
-end
-
-function getTauVsDeltaNu(df, vd, label; N=300)
- 
-  E     = df.molVib[102:end]
-  τ, τe = trackTau(df, N)
-
-  dv  = let
-    i   = findall(e ->  1500< e < 3000, vd.v)
-    v   = findPeaks(vd."1"[i], min=10, max=500, width=10)  |> (x -> vd.v[i[x[end]]])
-    vs  = findPeaks(vd."1"[i], min=500) |> (x -> vd.v[i[x[1]]])
-    v0  = vs / sqrt((11.23-E[1]) / 11.23)
-    vp  = freqShiftMorse.([v0], [11.23], E)
-    
-    vp .- v
-  end
-
-  TauVsDeltaNu(label, τ, τe, dv[1:length(τ)])
-end
-
 function pltTauVsDeltaNu(toPlt)
 
   set_theme!(myLightTheme)
@@ -286,9 +268,18 @@ function pltTauVsDeltaNu(left, right)
     xlabel=L"$\Delta \nu$ (cm$^{-1}$)", 
     xlabelsize=30)
 
+  labels  = []
+  markers = []
+
+  for i = 1:length(left)
+    m = MarkerElement(marker=:circle, color=myLightColors[i], markersize=20)
+    push!(markers, m)
+  end
+
   for obj in left
     l = convert(typeof(L""), obj.label)
     scatter!(ax1, obj.dv, obj.τ, label=l)
+    push!(labels, l)
   end
 
   for obj in right
@@ -296,22 +287,31 @@ function pltTauVsDeltaNu(left, right)
     scatter!(ax2, obj.dv, obj.τ, label=l)
   end
 
+<<<<<<< HEAD:src/plotting/vibDisp.jl
   labels  = [convert(typeof(L""),i.label) for i in left]
   markers = [MarkerElement(marker=:circle, color=myLightColors[i], markersize=20) for i = 1:length(left)]
 
   fig[2, 1:2] = Legend(fig, markers, labels, orientation=:horizontal, labelsize=28)
   # fig[2, 1:2] = Legend(fig, ax1, orientation=:horizontal, 
                       #  labelsize=28, markersize=1000)
+=======
+  fig[2, 1:2] = Legend(fig, markers, labels, orientation=:horizontal, 
+                       labelsize=28)
+>>>>>>> dev:extra/plotting/vibDisp.jl
 
   hideydecorations!(ax2, grid=false)
 
   xlims!(ax1, -110, 110)
+<<<<<<< HEAD:src/plotting/vibDisp.jl
   ylims!(ax1, 0, 4250)
 
   xlims!(ax2, -110, 110)
   ylims!(ax2, 0, 4250)
+=======
+  xlims!(ax2, -110, 110)
+>>>>>>> dev:extra/plotting/vibDisp.jl
   
 
-  fig
+  fig, ax1, ax2
 end
 

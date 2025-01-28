@@ -1,3 +1,5 @@
+using TOML, Base.Threads, StatsBase, JLD2, DataFrames, LinearAlgebra
+
 """
 Calculates binding energies based on given
 toml input card.
@@ -27,7 +29,6 @@ pst.iterations = 100000
 [Saving]
 df = "beDF.jld2"
 """
-
 function calcBEs(inpFile::String)
   inp = TOML.parsefile(inpFile)
 
@@ -35,8 +36,8 @@ function calcBEs(inpFile::String)
   cnfg = inp["Settings"]
 
   #Load up EoM and opt algo
-  EoM  = mkvar(cnfg["EoM"])
-  algo = mkvar(inp["OPT"]["algo"])()
+  EoM  = JMD.mkvar(cnfg["EoM"])
+  algo = JMD.mkvar(inp["OPT"]["algo"])()
 
   #Build pre opt kwargs dict
   pre = Dict()
@@ -96,7 +97,7 @@ function calcBEs(inpFile::String)
       new = deepcopy(mol)
 
       #Randomly rotate molecule (see hitAndStick for function code)
-      randRotate!(new)
+      JMD.randRotate!(new)
 
       #Spawn molecule and optimise 
       bdys = spawnMol(new, clu, com, spot, minD) |> (x -> opt(EoM, algo, x; pst...))

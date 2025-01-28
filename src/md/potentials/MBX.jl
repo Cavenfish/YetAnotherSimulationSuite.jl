@@ -74,10 +74,8 @@ function MBX(bdys)
   num_mon = length(mon_nams)
 
   sym = dlsym(libmbx, :initialize_system_py_)
-  
-  isdefined(JMD, :userJson) ? json = userJson : json = MBXjson
 
-  vars = _MBX_PotVars(xyz, json, num_ats, at_nams, num_mon, mon_nams)
+  vars = _MBX_PotVars(xyz, MBXjson, num_ats, at_nams, num_mon, mon_nams)
 
   @ccall $sym(
     vars.xyz::Ptr{Cdouble},
@@ -129,4 +127,21 @@ function MBX(F, G, y0, p)
     return E
   end
 
+end
+
+function MBX(box, scaled_pos)
+
+  y0 = zeros(length(scaled_pos))
+
+  for i = 1:3:length(y0)
+    y0[i]   = scaled_pos[i]   * box[1]
+    y0[i+1] = scaled_pos[i+1] * box[2]
+    y0[i+2] = scaled_pos[i+2] * box[3]
+  end
+
+  nats = convert(Int32, length(y0)/3)
+  tmp  = [box[1], 0,0,0, box[2], 0,0,0, box[3]]
+  
+  mbx_set_box(tmp)
+  mbx_get_energy(y0, nats)
 end

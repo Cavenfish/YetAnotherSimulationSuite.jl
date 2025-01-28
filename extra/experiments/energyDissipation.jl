@@ -1,3 +1,5 @@
+using TOML, JLD2, Serialization
+
 """
 Runs a vibrational energy dissipation simulation 
 based on conditions given via a toml input card.
@@ -7,6 +9,7 @@ Example of Input Card
 
 [expt]
 EoM = "COCO"
+vibMode = 6
 energy = 0.4
 time = 2000
 dt = 1
@@ -33,13 +36,10 @@ tj = "co-am13C18O_MvH_TJ_1.jld2"
 vd = "co-am13C18O_MvH_VD_1.jld2"
 re = "co-am13C18O_MvH_RE_1.jld2"
 """
-
 function vibDisp(inpFile::String)
 
   # Read in input card
-  f   = open(inpFile, "r")
-  inp = TOML.parse(f)
-  close(f)
+  inp = TOML.parsefile(inpFile)
 
   # Split dict for easier usage
   expt = inp["expt"]
@@ -49,8 +49,7 @@ function vibDisp(inpFile::String)
   "dt" in keys(expt) ? dt = expt["dt"]*fs : dt = fs
 
   # Load up EoM 
-  fn  = Symbol(expt["EoM"])
-  EoM = @eval $fn
+  EoM = JMD.mkvar(expt["EoM"])
 
   # Load other vars for easier usage
   E      = expt["energy"]
@@ -108,15 +107,15 @@ function vibDisp(inpFile::String)
     serialize(f, equil)
   end
 
-  # Excite CO
-  co  = bdys[mol]
-  f,m = getHarmonicFreqs(EoM, co)
-  vibExcite!(co, m[:,6], E)
+  # Excite molecule
+  f,m = getHarmonicFreqs(EoM, bdys[mol])
+  ν   = expt["vibMode"]
+  vibExcite!(bdys[mol], m[:,ν], E)
 
   #Translational excitation
   if "KE" in keys(expt)
     KE = expt["KE"]
-    transExcite!(co, KE)
+    transExcite!(bdys[mol], KE)
   end
 
   # Run in parts to avoid segfaults
@@ -131,17 +130,13 @@ function vibDisp(inpFile::String)
     end
 
     #Free memory
-    @free nve
+    JMD.@free nve
   end
 
   # Post-process
   tmp  = ["$i.tmp" for i in 0:splits]
   traj = processTmpFiles(tmp; step=100)
-  df   = if "vzpe" in keys(expt)
-    trackEnergyDissipation(traj, EoM, mol, eignvec=expt["vzpe"]["modes"])
-  else
-    trackEnergyDissipation(traj, EoM, mol)
-  end
+  df   = trackEnergyDissipation(traj, EoM, mol, m[:,ν])
 
   # Load saving vars for easy usage
   dfName = savi["df"] 
@@ -167,7 +162,7 @@ function vibDisp(inpFile::String)
     reName = savi["re"]
     Rs     = inp["track"]["Rs"]
 
-    re = trackRadialEnergy(traj; pot=EoM, Rs=Rs)
+    re = trackRadialEnergy(traj, EoM, mol, Rs=Rs)
 
     jldsave(reName; re)
   end

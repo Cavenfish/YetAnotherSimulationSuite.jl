@@ -1,4 +1,3 @@
-export rdf, adf, density
 
 function rdf(bdys; kwargs...)
   N = length(bdys)

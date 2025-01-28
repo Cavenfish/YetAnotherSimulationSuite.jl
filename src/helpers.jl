@@ -93,6 +93,13 @@ function swapAtoms!(bdys, i, j)
   bdys[j].r = a
 end
 
+function centerBdys!(bdys)
+  com = CoM(bdys)
+  for i in bdys
+    i.r -= com
+  end
+end
+
 function CoM(bdys)
   M = sum([i.m for i in bdys])
   r = sum([i.m*i.r for i in bdys])
@@ -268,6 +275,14 @@ function getPotEnergy(EoM, bdys)
   x0, vars = prep4pot(EoM, bdys)
   energy   = EoM(true, nothing, x0, vars)
   return energy
+end
+
+function getForces(EoM, bdys)
+  x0, vars = prep4pot(EoM, bdys)
+  G        = zero(x0)
+  EoM(nothing, G, x0, vars)
+
+  [-G[i:i+2] for i = 1:3:length(G)]
 end
 
 function getSurfaceMolecules(bdys; α=nothing)

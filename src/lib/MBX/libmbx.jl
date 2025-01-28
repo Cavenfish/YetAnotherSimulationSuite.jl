@@ -1,7 +1,6 @@
-
-const MBXjson   = joinpath(@__DIR__, "mbx.json")
 const libmbx    = dlopen(joinpath(@__DIR__, "libmbx.so"), Libdl.RTLD_GLOBAL) 
 const E_MBX2JMD = 0.043 # kcal/mol --> eV
+MBXjson         = joinpath(@__DIR__, "mbx.json")
 
 # /**
 #  * Initializes the system in the heap.
@@ -46,7 +45,11 @@ function mbx_get_energy(xyz, nats)
 
   E   = Ref{Cdouble}(0)
 
-  @ccall $sym(xyz::Ptr{Cdouble}, nats::Ref{Cint}, E::Ref{Cdouble})::Cvoid
+  @ccall $sym(
+    xyz::Ptr{Cdouble},
+    nats::Ref{Cint},
+    E::Ref{Cdouble}
+  )::Cvoid
 
   E[] * E_MBX2JMD
 end
@@ -78,4 +81,16 @@ function mbx_finalize_system()
   sym = dlsym(libmbx, :finalize_system_)
 
   @ccall $sym()::Cvoid
+end
+
+function mbx_set_box(box)
+  sym = dlsym(libmbx, :set_box_)
+
+  l = length(box)
+
+  @ccall $sym(
+    l::Ref{Cint},
+    box::Ptr{Cdouble}
+  )::Cvoid
+
 end
