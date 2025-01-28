@@ -9,16 +9,17 @@ struct Cell <: MyCell
   masses::Vector{Float64}
   symbols::Vector{Char}
   PBC::Vector{Bool}
+  NC::Vector{Int32}
 end
 
-function makeCell(bdys, lattice; PBC=repeat([true], 3))
+function makeCell(bdys::Vector{MyAtoms}, lattice; PBC=repeat([true], 3), NC=[1,1,1])
 
   Cell(
     lattice,
     getScaledPos(bdys, lattice),
     [i.m for i in bdys],
     [i.s for i in bdys],
-    PBC
+    PBC, NC
   )
 end
 
@@ -29,11 +30,18 @@ function makeBdys(cell)
   [Atom(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
 end
 
-function getScaledPos(bdys, lattice)
+function getScaledPos(bdys::Vector{MyAtoms}, lattice)
 
   T    = inv(lattice)
   
   [T * i.r for i in bdys]
+end
+
+function getScaledPos(x0, lattice)
+
+  T    = inv(lattice)
+  
+  [T * x0[i:i+2] for i = 1:3:length(x0)-1]
 end
 
 function getPos(cell)

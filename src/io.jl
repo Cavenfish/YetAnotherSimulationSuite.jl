@@ -6,7 +6,7 @@ function readASExyz(xyz; getCell=false)
   sys = split.(sys[3:end], " ")
   sys = deleteat!.(sys, findall.(e -> e == "", sys))
   amu = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
-  set = Atom[]
+  set = MyAtoms[]
 
   for i in range(1,N)
     props = parse.(Float64, sys[i][2:end])
@@ -39,7 +39,7 @@ end #read_ase_xyz
 function readXyz(xyz::String)
   stream = readlines(xyz)
   amu    = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
-  set    = Atom[]
+  set    = MyAtoms[]
 
   #Skip header lines then parse file
   for line in stream[3:end]
@@ -88,7 +88,7 @@ end
 function readCell(fileName::String)
   stream = readlines(fileName)
   amu    = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
-  bdys   = Atom[]
+  bdys   = MyAtoms[]
 
   tmp  = split(stream[2], "Lattice=")[2] |> (
     x -> split(x, "\"")[2]) |> (x -> split(x, " "))

@@ -4,6 +4,9 @@ struct optVars
   mols::Vector
   pars::Vector
   m::Vector
+  PBC::Vector{Bool}
+  NC::Vector{Int32}
+  lattice::Matrix
 end
 
 
@@ -14,12 +17,26 @@ function prepX0(bdys)
   x0
 end
 
-function prep4pot(EoM, bdys)
+function prep4pot(EoM, bdys::MyAtoms)
   m          = [i.m for i in bdys]
   x0         = prepX0(bdys)
   potVars    = EoM(bdys)
   pars, mols = getPairs(bdys)
-  vars       = optVars(potVars, mols, pars, m)
+  NC         = [0,0,0]
+  PBC        = repeat([false], 3)
+  lattice    = zeros(3,3)
+  vars       = optVars(potVars, mols, pars, m, PBC, NC, lattice)
+  
+  x0, vars
+end
+
+function prep4pot(EoM, cell::MyCell)
+  bdys       = makeBdys(cell)
+  x0         = prepX0(bdys)
+  potVars    = EoM(bdys)
+  pars, mols = getPairs(bdys)
+  vars       = optVars(potVars, mols, pars, cell.masses, 
+                       cell.PBC, cell.NC, cell.lattice)
   
   x0, vars
 end
@@ -27,7 +44,7 @@ end
 function getNewBdys(bdys, res)
   N   = length(bdys)
   opt = res.minimizer
-  new = Atom[]
+  new = MyAtoms[]
 
   for i in 1:3:N*3
     j::UInt16 = (i+2) / 3
@@ -42,25 +59,7 @@ function getNewBdys(bdys, res)
   new
 end
 
-function getNewBdys(bdys, x0, box)
-  N    = length(bdys)
-  new  = Atom[]
-  x0 .*= repeat(box, N)
-
-  for i in 1:3:N*3
-    j::UInt16 = (i+2) / 3
-
-    r = SVector{3}([x0[i], x0[i+1], x0[i+2]])
-    v = bdys[j].v
-    m = bdys[j].m
-    s = bdys[j].s
-    push!(new, Atom(r,v,m,s))
-  end
-
-  new
-end
-
-function opt(EoM, algo, bdys; kwargs...)
+function opt(EoM, algo, bdys::MyAtoms; kwargs...)
 
   x0, vars = prep4pot(EoM, bdys)
   optFunc  = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
@@ -69,6 +68,17 @@ function opt(EoM, algo, bdys; kwargs...)
   optBdys  = getNewBdys(bdys, res)
 
   optBdys
+end
+
+function opt(EoM, algo, cell::MyCell; kwargs...)
+
+  x0, vars = prep4pot(EoM, cell)
+  optFunc  = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
+  convCrit = Optim.Options(; kwargs...)
+  res      = optimize(optFunc, x0, algo, convCrit)
+  spos     = getScaledPos(res.minimizer, cell.lattice)
+
+  Cell(cell.lattice, spos, cell.masses, cell.symbols, cell.PBC, cell.NC)
 end
 
 function optCell(EoM, cell; kwargs...)

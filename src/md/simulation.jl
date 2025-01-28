@@ -33,6 +33,7 @@ struct Simulation
   temp::Vector
   save::String
   PBC::Vector{Bool}
+  NC::Vector{Int32}
   lattice::Matrix
   m::Vector
   potVars::PotVars
@@ -44,6 +45,7 @@ end
 function run(EoM, bdys::MyAtoms, NVT::Bool, tspan::Tuple{Float64, Float64},
              dt::Float64; save="full", kwargs...)
              
+  NC         = [0,0,0]
   PBC        = repeat([false], 3)
   lattice    = zeros(3,3)
   mas        = [i.m for i in bdys]
@@ -62,7 +64,7 @@ function run(EoM, bdys::MyAtoms, NVT::Bool, tspan::Tuple{Float64, Float64},
 
   simu = Simulation(
     bdys, pars, mols, [], [], [],
-    save, PBC, lattice, mas, potVars,
+    save, PBC, NC, lattice, mas, potVars,
     NVT, tFunc, tInps
   )
 
@@ -90,7 +92,7 @@ function run(EoM, cell::MyCell, NVT::Bool, tspan::Tuple{Float64, Float64},
 
   simu = Simulation(
     bdys, pars, mols, [], [], [],
-    save, cell.PBC, cell.lattice, cell.masses, potVars,
+    save, cell.PBC, cell.NC, cell.lattice, cell.masses, potVars,
     NVT, tFunc, tInps
   )
 

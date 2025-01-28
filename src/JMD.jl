@@ -135,6 +135,7 @@ module JMD
   include("./md/simulation.jl")
   include("./md/thermostats.jl")
   include("./md/post-processing.jl")
+  include("./md/potentials/funcs/PBC.jl")
   include("./md/potentials/funcs/intra.jl")
   include("./md/potentials/funcs/inter.jl")
   include("./md/potentials/funcs/damping.jl")
