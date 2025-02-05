@@ -85,6 +85,25 @@ function replicate(cell, N)
   Cell(newLat, newScaledPos, newM, newS, cell.PBC)
 end
 
+function getMIC(bdys, lattice)
+  a,b,c  = eachrow(lattice)
+  new    = MyAtoms[]
+  s      = repeat([i.s for i in bdys], 27)
+  m      = repeat([i.m for i in bdys], 27)
+
+  # I think it is
+  f = [i*a + j*b + k*c + bdys[q].r
+        for i = -1:1 
+          for j = -1:1 
+            for k = -1:1 
+              for q = 1:length(bdys)]
+
+  for i = 1:length(f)
+    push!(new, Atom(f[i], zeros(3), m[i], s[i]))
+  end
+
+  new
+end
 
 function makeSuperCell(cell, T)
 
