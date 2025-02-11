@@ -42,7 +42,7 @@ struct Simulation
   thermoInps
 end
 
-function run(EoM, bdys::MyAtoms, NVT::Bool, tspan::Tuple{Float64, Float64},
+function run(EoM, bdys::Vector{MyAtoms}, NVT::Bool, tspan::Tuple{Float64, Float64},
              dt::Float64; save="full", kwargs...)
              
   NC         = [0,0,0]

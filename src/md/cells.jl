@@ -1,5 +1,4 @@
 #TODO:
-#   -Make function to center lattice
 #   -Make function to get primitive cells
 #   -Make function to clean duplicates
 
@@ -23,7 +22,7 @@ function makeCell(bdys::Vector{MyAtoms}, lattice; PBC=repeat([true], 3), NC=[1,1
   )
 end
 
-function makeBdys(cell)
+function makeBdys(cell)::Vector{MyAtoms}
   pos  = getPos(cell)
   vel  = [zeros(3) for i in pos]
 
@@ -58,8 +57,24 @@ function wrap!(bdys, lattice)
 
 end
 
-# function center!()
-# end
+function center!(cell)
+  #Maybe a way to consolodate the following segment would be nice?
+  amax = [i[1] for i in cell.scaled_pos] |> maximum
+  amin = [i[1] for i in cell.scaled_pos] |> minimum
+  bmax = [i[2] for i in cell.scaled_pos] |> maximum
+  bmin = [i[2] for i in cell.scaled_pos] |> minimum
+  cmax = [i[3] for i in cell.scaled_pos] |> maximum
+  cmin = [i[3] for i in cell.scaled_pos] |> minimum
+  
+  A = (1 - amax - amin) / 2
+  B = (1 - bmax - bmin) / 2
+  C = (1 - cmax - cmin) / 2
+
+  for i in cell.scaled_pos
+    i .+= [A, B, C]
+  end
+
+end
 
 function replicate(cell, N)
 

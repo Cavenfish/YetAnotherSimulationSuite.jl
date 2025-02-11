@@ -17,7 +17,7 @@ function prepX0(bdys)
   x0
 end
 
-function prep4pot(EoM, bdys::MyAtoms)
+function prep4pot(EoM, bdys::Vector{MyAtoms})
   m          = [i.m for i in bdys]
   x0         = prepX0(bdys)
   potVars    = EoM(bdys)
@@ -59,7 +59,7 @@ function getNewBdys(bdys, res)
   new
 end
 
-function opt(EoM, algo, bdys::MyAtoms; kwargs...)
+function opt(EoM, algo, bdys::Vector{MyAtoms}; kwargs...)
 
   x0, vars = prep4pot(EoM, bdys)
   optFunc  = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
