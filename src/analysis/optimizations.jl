@@ -30,10 +30,11 @@ function prep4pot(EoM, bdys::Vector{MyAtoms})
   x0, vars
 end
 
+#TODO: Update this to stop making bdys
 function prep4pot(EoM, cell::MyCell)
   bdys       = makeBdys(cell)
   x0         = prepX0(bdys)
-  potVars    = EoM(bdys)
+  potVars    = EoM(cell)
   pars, mols = getPairs(bdys)
   vars       = optVars(potVars, mols, pars, cell.masses, 
                        cell.PBC, cell.NC, cell.lattice)
@@ -88,11 +89,11 @@ function optCell(EoM, cell; kwargs...)
   #TODO: make EoM(cell) variant to avoid making bodies above
 
   x0       = cell.scaled_pos
-  box0     = transpose(cell.lattice) |> (x -> reshape(x, 9)) |> (
-    x -> convert(Vector{Float64}, x))
+  # box0     = transpose(cell.lattice) |> (x -> reshape(x, 9)) |> (
+  #   x -> convert(Vector{Float64}, x))
   convCrit = Optim.Options(; kwargs...)
-  res      = optimize(box -> EoM(box, x0, p), box0, NelderMead(), convCrit)
-  newBox   = reshape(res.minimizer, (3,3)) |> transpose
+  res      = optimize(c -> EoM(cell.lattice .* c, x0, p), [1.0], NelderMead(), convCrit)
+  newBox   = cell.lattice .* res.minimizer
 
-  Cell(newBox, cell.scaled_pos, cell.masses, cell.symbols)
+  Cell(newBox, cell.scaled_pos, cell.masses, cell.symbols, cell.PBC, cell.NC)
 end
