@@ -82,6 +82,7 @@ function opt(EoM, algo, cell::MyCell; kwargs...)
   Cell(cell.lattice, spos, cell.masses, cell.symbols, cell.PBC, cell.NC)
 end
 
+# Kinda broken. MBX ususally crashes due to small cells being tested.
 function optCell(EoM, cell; kwargs...)
 
   # Need to init vars for simulations 
