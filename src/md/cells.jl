@@ -47,6 +47,12 @@ function getPos(cell)
   [cell.lattice * i for i in cell.scaled_pos]
 end
 
+function getVolume(cell)
+  a,b,c  = eachrow(cell.lattice)
+
+  norm(a) * norm(b) * norm(c)
+end 
+
 function wrap!(cell)
   r = getPos(cell)
   
