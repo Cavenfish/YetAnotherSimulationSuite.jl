@@ -75,7 +75,8 @@ module JMD
     #structural.jl
     rdf, adf, density,
 
-    #decayRates.jl
+    #stress.jl
+    getNumericalStress, getNumericalStressOrthogonal,
 
     #freqShifts.jl
     getINM, getMolFreq, getAllFreqs, getFvE, getFreqCoupling,
@@ -155,6 +156,7 @@ module JMD
   include("./mathtk/alphashape.jl")
   include("./mathtk/savitzkyGolay.jl")
   include("./mathtk/peakFinding.jl")
+  include("./mathtk/stress.jl")
 
   include("./building/anneal.jl")
   include("./building/hitAndStick.jl")
