@@ -1,6 +1,7 @@
-const libmbx    = dlopen(joinpath(@__DIR__, "libmbx.so"), Libdl.RTLD_GLOBAL) 
-const E_MBX2JMD = 0.043 # kcal/mol --> eV
-MBXjson         = joinpath(@__DIR__, "mbx.json")
+const libmbx       = dlopen(joinpath(@__DIR__, "libmbx.so"), Libdl.RTLD_GLOBAL) 
+const E_MBX2JMD    = 0.043 # kcal/mol --> eV
+const MBX_GAS_JSON = joinpath(@__DIR__, "gas.json")
+const MBX_PBC_JSON = joinpath(@__DIR__, "pbc.json")
 
 function mbx_get_monomer_info(at_nams)
   monomers = Dict()

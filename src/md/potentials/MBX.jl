@@ -31,7 +31,7 @@ function MBX(bdys::Vector{MyAtoms})
 
   sym = dlsym(libmbx, :initialize_system_py_)
 
-  vars = _MBX_PotVars(xyz, MBXjson, num_ats, at_nams, num_mon, mon_nams)
+  vars = _MBX_PotVars(xyz, MBX_GAS_JSON, num_ats, at_nams, num_mon, mon_nams)
 
   @ccall $sym(
     vars.xyz::Ptr{Cdouble},
@@ -57,7 +57,7 @@ function MBX(cell::MyCell)
 
   sym = dlsym(libmbx, :initialize_system_py_)
 
-  vars = _MBX_PotVars(xyz, MBXjson, num_ats, at_nams, num_mon, mon_nams)
+  vars = _MBX_PotVars(xyz, MBX_PBC_JSON, num_ats, at_nams, num_mon, mon_nams)
 
   @ccall $sym(
     vars.xyz::Ptr{Cdouble},
