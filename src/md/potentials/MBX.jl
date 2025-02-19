@@ -123,16 +123,16 @@ function MBX(F, G, y0, p)
 
 end
 
-# MBX can only handle Diagonal lattices
-function MBX(L, scaled_pos, p)
+# Orthogonal stress because MBX only does orthogonal
+function MBX(F, G, cell::MyCell, lat)
+  tmp          = deepcopy(cell)
+  tmp.lattice .= reshape(lat, (3,3))
 
-  println(L)
-  # L    = reshape(box, (3,3)) |> Diagonal
-  r    = [L * i for i in scaled_pos]
-  y0   = [j for i in r for j in i]
-  nats = length(r)
-  box  = reshape(L, 9) |> (x -> convert(Vector{Float64}, x))
-  
-  mbx_set_box(box)
-  mbx_get_energy(y0, nats)
+  if G != nothing
+    G .= getNumericalStressOrthogonal(MBX, tmp) |> (x -> reshape(x, 9))
+  end
+
+  if F != nothing
+    return getPotEnergy(MBX, tmp)
+  end
 end
