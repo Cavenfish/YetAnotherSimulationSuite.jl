@@ -68,6 +68,15 @@ function MBX(cell::MyCell)
     vars.json::Ptr{Cchar}
   )::Cvoid
 
+  if !isdiag(cell.lattice)
+    @warn "Cell lattice is not diagonal.
+    MBX requires a diagonal lattice.
+    Current lattice will be cast as diagonal 
+      --> cell.lattice .= Diagonal(cell.lattice)"
+
+    cell.lattice .= Diagonal(cell.lattice)
+  end
+
   box  = reshape(cell.lattice, 9) |> (x -> convert(Vector{Float64}, x))
   mbx_set_box(box)
 
