@@ -47,6 +47,23 @@ function getPos(cell)
   [cell.lattice * i for i in cell.scaled_pos]
 end
 
+function wrap!(cell)
+  r = getPos(cell)
+  
+  f = [floor.(transpose(cell.lattice) \ i) for i in r]
+
+  for i = 1:length(r)
+    r[i] .-= transpose(cell.lattice) * f[i]
+  end
+
+  T = inv(cell.lattice)
+
+  for i = 1:length(r)
+    cell.scaled_pos[i] .= T * r[i]
+  end
+
+end
+
 function wrap!(bdys, lattice)
 
   f = [floor.(transpose(lattice) \ i.r) for i in bdys]
@@ -57,6 +74,8 @@ function wrap!(bdys, lattice)
 
 end
 
+# Only works for orthogonal cells 
+#  TODO: make work for all cells
 function center!(cell)
   #Maybe a way to consolodate the following segment would be nice?
   amax = [i[1] for i in cell.scaled_pos] |> maximum
@@ -97,7 +116,7 @@ function replicate(cell, N)
 
   newScaledPos = [inv(newLat) * r for r in newPos]
 
-  Cell(newLat, newScaledPos, newM, newS, cell.PBC)
+  Cell(newLat, newScaledPos, newM, newS, cell.PBC, cell.NC)
 end
 
 function getMIC(bdys, lattice)
@@ -129,6 +148,22 @@ function makeSuperCell(cell, T)
   bdys    = makeBdys(super)
   wrap!(bdys, lattice)
 
-  makeCell(bdys, lattice, PBC=cell.PBC)
+  makeCell(bdys, lattice, PBC=cell.PBC, NC=cell.NC)
 end
 
+function getPrimitiveCell(cell, symprec)
+  amu  = TOML.parsefile(joinpath(@__DIR__, "../data/Atoms.toml"))["Mass"]
+  num  = TOML.parsefile(joinpath(@__DIR__, "../data/Atoms.toml"))["Number"]
+  rnum = Dict(values(num) .=> keys(num))
+  atms = string.(cell.symbols) |> (x -> [num[i] for i in x])
+  
+  L    = transpose(cell.lattice)
+  tmp  = Spglib.Cell(L, cell.scaled_pos, atms)
+  stan = standardize_cell(tmp, symprec)
+ 
+  syms = [rnum[i] for i in stan.atoms]
+  mas  = [ amu[i] for i in syms]
+  L    = transpose(stan.lattice)
+
+  Cell(L, stan.positions, mas, only.(syms), cell.PBC, cell.NC)
+end

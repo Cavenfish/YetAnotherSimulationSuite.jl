@@ -46,7 +46,7 @@ module JMD
 
     #cells.jl
     makeCell, makeBdys, getScaledPos, getPos, wrap!, replicate, makeSuperCell,
-    getMIC, center!,
+    getMIC, center!, getPrimitiveCell,
 
     #potentials
     COCO, HGNN, MBX, SPCF, TIP4P,
