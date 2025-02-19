@@ -9,7 +9,7 @@ mutable struct Atom <: MyAtoms
   s::Char
 end
 
-function getMols(bdys, rmax; D=3)
+function getMols(bdys::Vector{MyAtoms}, rmax; D=3)
   r   = [i.r for i in bdys]
 
   pts = hcat(r...)
@@ -19,7 +19,7 @@ function getMols(bdys, rmax; D=3)
   [i.core_indices for i in ret.clusters]
 end
 
-function getPairs(bdys)
+function getPairs(bdys::Vector{MyAtoms})
 
   # Get mols and N
   mols = if length(bdys) <= 3
@@ -37,5 +37,5 @@ function getPairs(bdys)
     end
   end
 
-  return pars, mols
+  pars, mols
 end

@@ -10,8 +10,15 @@ struct optVars
 end
 
 
-function prepX0(bdys)
+function prepX0(bdys::Vector{MyAtoms})
   r  = [i.r for i in bdys]
+  x0 = [j for i in r for j in i]
+  
+  x0
+end
+
+function prepX0(cell::MyCell)
+  r  = getPos(cell)
   x0 = [j for i in r for j in i]
   
   x0
@@ -30,12 +37,11 @@ function prep4pot(EoM, bdys::Vector{MyAtoms})
   x0, vars
 end
 
-#TODO: Update this to stop making bdys
 function prep4pot(EoM, cell::MyCell)
   bdys       = makeBdys(cell)
-  x0         = prepX0(bdys)
+  x0         = prepX0(cell)
   potVars    = EoM(cell)
-  pars, mols = getPairs(bdys)
+  pars, mols = getPairs(cell)
   vars       = optVars(potVars, mols, pars, cell.masses, 
                        cell.PBC, cell.NC, cell.lattice)
   
