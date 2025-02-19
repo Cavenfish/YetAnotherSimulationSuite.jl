@@ -82,19 +82,15 @@ function opt(EoM, algo, cell::MyCell; kwargs...)
   Cell(cell.lattice, spos, cell.masses, cell.symbols, cell.PBC, cell.NC)
 end
 
-# Kinda broken. MBX ususally crashes due to small cells being tested.
-function optCell(EoM, cell; kwargs...)
+function optCell(EoM, algo, cell::MyCell; kwargs...)
 
-  # Need to init vars for simulations 
-  p    = makeBdys(cell) |> EoM
-  #TODO: make EoM(cell) variant to avoid making bodies above
+  lat0         = reshape(cell.lattice, 9)
+  optFunc      = Optim.only_fg!((F,G,x) -> EoM(F,G, cell, x))
+  convCrit     = Optim.Options(; kwargs...)
+  res          = optimize(optFunc, lat0, algo, convCrit)
+  newLat       = reshape(res.minimizer, (3,3))
+  ret          = deepcopy(cell)
+  ret.lattice .= newLat
 
-  x0       = cell.scaled_pos
-  # box0     = transpose(cell.lattice) |> (x -> reshape(x, 9)) |> (
-  #   x -> convert(Vector{Float64}, x))
-  convCrit = Optim.Options(; kwargs...)
-  res      = optimize(c -> EoM(cell.lattice .* c, x0, p), [1.0], NelderMead(), convCrit)
-  newBox   = cell.lattice .* res.minimizer
-
-  Cell(newBox, cell.scaled_pos, cell.masses, cell.symbols, cell.PBC, cell.NC)
+  ret
 end
