@@ -123,11 +123,29 @@ function MBX(F, G, y0, p)
 
 end
 
-# Orthogonal stress because MBX only does orthogonal
 function MBX(F, G, cell::MyCell, lat)
   tmp          = deepcopy(cell)
   tmp.lattice .= reshape(lat, (3,3))
 
+  # Force all bond lengths to be 0.975 to prevent bias
+  pos  = getPos(cell)
+  for i = 1:3:length(pos)
+    ro, rh1, rh2 = pos[[i, i+1, i+2]]
+    
+    rvec  = ro - rh1
+    r     = norm(rvec)
+    x     = 0.975 - r
+    rh1 .-= x * (rvec / r)
+
+    rvec  = ro - rh2
+    r     = norm(rvec)
+    x     = 0.975 - r
+    rh2 .-= x * (rvec / r)
+
+    #Maybe I can condense this somehow
+  end
+
+  # Orthogonal stress because MBX only does orthogonal
   if G != nothing
     G .= getNumericalStressOrthogonal(MBX, tmp) |> (x -> reshape(x, 9))
   end
