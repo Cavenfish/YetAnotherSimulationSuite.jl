@@ -50,7 +50,7 @@ end
 function getVolume(cell)
   a,b,c  = eachrow(cell.lattice)
 
-  norm(a) * norm(b) * norm(c)
+  cross(b,c) |> (x -> dot(a,x))
 end 
 
 function wrap!(cell)
