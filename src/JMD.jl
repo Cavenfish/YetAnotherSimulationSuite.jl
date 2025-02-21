@@ -14,6 +14,7 @@ module JMD
   using Optim
   using PyCall
   using LsqFit
+  using Spglib
   using MiniQhull
   using DataFrames
   using Statistics#might not be used
@@ -33,7 +34,7 @@ module JMD
     fs, ps, ns, kB,
 
     #io.jl
-    readASExyz, readXyz, writeXyz, writeXyzTraj,
+    readASExyz, readXyz, writeXyz, readCell, writeCell, writeXyzTraj,
 
     #helpers.jl
     CoM, vCoM, zeroVCoM!, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
@@ -42,6 +43,10 @@ module JMD
 
     #bodies.jl
     getMols, getPairs,
+
+    #cells.jl
+    makeCell, makeBdys, getScaledPos, getPos, wrap!, replicate, makeSuperCell,
+    getMIC, center!, getPrimitiveCell, getVolume,
 
     #potentials
     COCO, HGNN, MBX, SPCF, TIP4P,
@@ -70,7 +75,8 @@ module JMD
     #structural.jl
     rdf, adf, density,
 
-    #decayRates.jl
+    #stress.jl
+    getNumericalStress, getNumericalStressOrthogonal,
 
     #freqShifts.jl
     getINM, getMolFreq, getAllFreqs, getFvE, getFreqCoupling,
@@ -118,6 +124,7 @@ module JMD
   include("./lib/MBX/libmbx.jl")
   include("./lib/Phonopy/phonopy.jl")
 
+  include("./md/cells.jl")
   include("./md/bodies.jl")
   include("./md/potentials/MvHffCO.jl")
   include("./md/potentials/COCOff.jl")
@@ -129,6 +136,7 @@ module JMD
   include("./md/simulation.jl")
   include("./md/thermostats.jl")
   include("./md/post-processing.jl")
+  include("./md/potentials/funcs/PBC.jl")
   include("./md/potentials/funcs/intra.jl")
   include("./md/potentials/funcs/inter.jl")
   include("./md/potentials/funcs/damping.jl")
@@ -148,6 +156,7 @@ module JMD
   include("./mathtk/alphashape.jl")
   include("./mathtk/savitzkyGolay.jl")
   include("./mathtk/peakFinding.jl")
+  include("./mathtk/stress.jl")
 
   include("./building/anneal.jl")
   include("./building/hitAndStick.jl")
