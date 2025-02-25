@@ -28,6 +28,10 @@ module JMD
   using SpecialFunctions#might not be used
   using FiniteDifferences
 
+  # Wrapper for ASE calculator with SCME/f potential
+  function __init__()
+    @pyinclude(joinpath(@__DIR__, "lib/SCMEf/libscmef.py"))
+  end
 
   export
     #constants
@@ -49,7 +53,7 @@ module JMD
     getMIC, center!, getPrimitiveCell, getVolume,
 
     #potentials
-    COCO, HGNN, MBX, SPCF, TIP4P,
+    COCO, HGNN, MBX, SPCF, TIP4P, SCMEf,
 
     #simulation.jl
     runNVE, runNVT,
@@ -126,6 +130,10 @@ module JMD
 
   include("./md/cells.jl")
   include("./md/bodies.jl")
+  include("./md/simulation.jl")
+  include("./md/thermostats.jl")
+  include("./md/post-processing.jl")
+
   include("./md/potentials/MvHffCO.jl")
   include("./md/potentials/COCOff.jl")
   include("./md/potentials/HGNN.jl")
@@ -133,9 +141,8 @@ module JMD
   include("./md/potentials/SPC-F.jl")
   include("./md/potentials/CH4.jl")
   include("./md/potentials/MBX.jl")
-  include("./md/simulation.jl")
-  include("./md/thermostats.jl")
-  include("./md/post-processing.jl")
+  include("./md/potentials/SCMEf.jl")
+
   include("./md/potentials/funcs/PBC.jl")
   include("./md/potentials/funcs/intra.jl")
   include("./md/potentials/funcs/inter.jl")
