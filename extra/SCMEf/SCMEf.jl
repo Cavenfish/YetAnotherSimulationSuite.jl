@@ -16,6 +16,8 @@ struct _SCMEf_PotVars <: JMD.PotVars
   lat
 end
 
+SCMEf(bdys::Vector{JMD.MyAtoms}) = _SCMEf_PotVars(ones(3)*1e3)
+
 function SCMEf(cell::JMD.MyCell)
   lat = reshape(cell.lattice, 9)
 
