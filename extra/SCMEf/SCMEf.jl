@@ -11,7 +11,7 @@ SCME/f Paper:
 https://pubs.acs.org/doi/full/10.1021/acs.jctc.2c00598
 """
 
-struct _SCMEf_PotVars
+struct _SCMEf_PotVars <: JMD.PotVars
   lat
 end
 
@@ -21,16 +21,21 @@ function SCMEf(cell::JMD.MyCell)
   _SCMEf_PotVars(lat[[1,5,9]])
 end
 
-function SCMFf(F, G, y0, p)
+function SCMEf(F, G, y0, p)
 
+  # initialize things
   E = 0.0
+  u = Vector[]
+  for i in 1:3:length(y0)
+    push!(u, y0[i:i+2])
+  end
 
   if G != nothing
-    e, f = py"scmef_get_energy_and_forces"(y0, p.potVars.lat)
+    e, f = py"scmef_get_energy_and_forces"(u, p.potVars.lat)
     E    = e
-    G   .= f 
+    G   .= transpose(-f) |> (x -> reshape(x, length(x)))
   else
-    E    = py"scmef_get_energy"(y0, p.potVars.lat)
+    E    = py"scmef_get_energy"(u, p.potVars.lat)
   end
 
   if F != nothing
@@ -40,4 +45,33 @@ function SCMFf(F, G, y0, p)
 end
 
 function SCMEf(F, G, cell::JMD.MyCell, lat)
+  tmp          = deepcopy(cell)
+  tmp.lattice .= reshape(lat, (3,3))
+
+  # Force all bond lengths to be 0.975 to prevent bias
+  pos  = getPos(cell)
+  for i = 1:3:length(pos)
+    ro, rh1, rh2 = pos[[i, i+1, i+2]]
+    
+    rvec  = ro - rh1
+    r     = norm(rvec)
+    x     = 0.975 - r
+    rh1 .-= x * (rvec / r)
+
+    rvec  = ro - rh2
+    r     = norm(rvec)
+    x     = 0.975 - r
+    rh2 .-= x * (rvec / r)
+
+    #Maybe I can condense this somehow
+  end
+
+  # Orthogonal stress because SCME/f only does orthogonal
+  if G != nothing
+    G .= getNumericalStressOrthogonal(SCMEf, tmp) |> (x -> reshape(x, 9))
+  end
+
+  if F != nothing
+    return getPotEnergy(SCMEf, tmp)
+  end
 end
