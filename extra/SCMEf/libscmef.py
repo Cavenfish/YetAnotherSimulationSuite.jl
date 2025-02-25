@@ -7,7 +7,7 @@ PyCall wrapping will make calls to SCME/f slower, but
 making this wrapper is quicker than a proper c wrapper.
 """
 
-def scmef_get_energy(pos, cell):
+def scmef_get_energy(pos, cell, NC=[1,1,1], pbc=True):
 
     # SCMEf imports
     import pyscme
@@ -36,7 +36,7 @@ def scmef_get_energy(pos, cell):
         "C10": 33441.0000e0,
         "scf_convcrit": 1e-12,
         "scf_policy": pyscme.SCFPolicy.strict,
-        "NC": [1,1,1],
+        "NC": NC,
         "dms": True,
         "qms": True
     }
@@ -45,7 +45,7 @@ def scmef_get_energy(pos, cell):
 
     bdys = Atoms(symbols, pos, cell=cell)
 
-    bdys.pbc = True
+    bdys.pbc = pbc
 
     # Set SCME calc
     bdys.calc =  SCMECalculator(atoms=bdys, **para_dict)
@@ -53,7 +53,7 @@ def scmef_get_energy(pos, cell):
 
     return bdys.get_potential_energy()
 
-def scmef_get_energy_and_forces(pos, cell):
+def scmef_get_energy_and_forces(pos, cell, NC=[1,1,1], pbc=True):
 
     # SCMEf imports
     import pyscme
@@ -82,7 +82,7 @@ def scmef_get_energy_and_forces(pos, cell):
         "C10": 33441.0000e0,
         "scf_convcrit": 1e-12,
         "scf_policy": pyscme.SCFPolicy.strict,
-        "NC": [1,1,1],
+        "NC": NC,
         "dms": True,
         "qms": True
     }
@@ -91,7 +91,7 @@ def scmef_get_energy_and_forces(pos, cell):
 
     bdys = Atoms(symbols, pos, cell=cell)
 
-    bdys.pbc = True
+    bdys.pbc = pbc
 
     # Set SCME calc
     bdys.calc =  SCMECalculator(atoms=bdys, **para_dict)

@@ -1,8 +1,9 @@
 """
 SCME/f potential 
 
-This calls a ASE calculator of the SCME/f potential (not great)
-I still want to make a better wrapper.
+This calls an ASE calculator of the SCME/f potential (not great)
+I still want to make a better wrapper. Idealy, one that calls
+the c++ routines directly (like MBX).
 
 SCME Paper:
 https://pubs.rsc.org/en/content/articlehtml/2013/cp/c3cp52097h
@@ -21,6 +22,23 @@ function SCMEf(cell::JMD.MyCell)
   _SCMEf_PotVars(lat[[1,5,9]])
 end
 
+function SCMEf(dv, v, u, p, t)
+  all(p.PBC) ? pbc = true : pbc = p.PBC
+
+  E, f = py"scmef_get_energy_and_forces"(u, p.potVars.lat, NC=p.NC, pbc=pbc)
+
+  F    = eachrow(f) |> (x -> convert(Vector{Vector{Float64}}, x))
+
+  dv .= F ./ p.m
+  if typeof(p) == NVTsimu
+    p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
+  end
+
+  push!(p.energy, E)
+  push!(p.forces, F)
+
+end
+
 function SCMEf(F, G, y0, p)
 
   # initialize things
@@ -30,12 +48,14 @@ function SCMEf(F, G, y0, p)
     push!(u, y0[i:i+2])
   end
 
+  all(p.PBC) ? pbc = true : pbc = p.PBC
+
   if G != nothing
-    e, f = py"scmef_get_energy_and_forces"(u, p.potVars.lat)
+    e, f = py"scmef_get_energy_and_forces"(u, p.potVars.lat, NC=p.NC, pbc=pbc)
     E    = e
     G   .= transpose(-f) |> (x -> reshape(x, length(x)))
   else
-    E    = py"scmef_get_energy"(u, p.potVars.lat)
+    E    = py"scmef_get_energy"(u, p.potVars.lat, NC=p.NC, pbc=pbc)
   end
 
   if F != nothing
