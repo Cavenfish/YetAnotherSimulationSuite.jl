@@ -1,5 +1,4 @@
 #TODO:
-#   -Make function to get primitive cells
 #   -Make function to clean duplicates
 
 struct Cell <: MyCell
