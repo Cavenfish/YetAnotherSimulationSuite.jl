@@ -4,8 +4,7 @@ Wrapper for phonopy python api
 
 # For now supercell is fixed, can become variable if the 
 # reordering problem is solved
-function phonopy_getDisplacements(cell::MyCell, saveName, primitive; 
-                                  dist=0.02, symprec=1e-5)
+function phonopy_getDisplacements(cell::MyCell, primitive; dist=0.02, symprec=1e-5)
   # fixed supercell matrix
   supercell = [[1, 0, 0], [0, 1, 0,], [0, 0, 1]]
 
@@ -27,8 +26,6 @@ function phonopy_getDisplacements(cell::MyCell, saveName, primitive;
   )
 
   phonon.generate_displacements(distance=dist)
-
-  phonon.save(saveName)
 
   supercells = phonon.supercells_with_displacements
 
@@ -53,18 +50,17 @@ function phonopy_addForces(yamlFile, saveName, forces; symprec=1e-5)
   obj.save(saveName)
 end
 
-function phonopy_getPhonons(phonon, path, labels; N=21)
+function phonopy_getPhonons(phonon, path, labels, saveName; N=21)
 
   phonopy    = pyimport("phonopy")
   get_band_qpoints_and_path_connections = phonopy.phonon.band_structure.get_band_qpoints_and_path_connections
 
   phonon.produce_force_constants()
   phonon.symmetrize_force_constants()
-  phonon.save("params.yaml")
 
   qpoints, connections = get_band_qpoints_and_path_connections(path, npoints=N)
 
   phonon.run_band_structure(qpoints, path_connections=connections, labels=labels)
-  phonon.write_yaml_band_structure(nothing, "band.yaml")
+  phonon.write_yaml_band_structure(nothing, saveName)
 
 end
