@@ -7,11 +7,11 @@ Wrapper for phonopy python api
 function phonopy_getDisplacements(cell::MyCell, saveName, primitive; 
                                   dist=0.02, symprec=1e-5)
   # fixed supercell matrix
-  supercell = [1 0 0; 0 1 0; 0 0 1]
+  supercell = [[1, 0, 0], [0, 1, 0,], [0, 0, 1]]
 
   # Imports
   phonopy      = pyimport("phonopy")
-  PhonopyAtoms = phonopy.structure.atoms.PhonopyAtoms()
+  PhonopyAtoms = phonopy.structure.atoms.PhonopyAtoms
 
 
   unitcell = PhonopyAtoms(
