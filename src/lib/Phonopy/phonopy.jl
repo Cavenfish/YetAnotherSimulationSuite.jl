@@ -65,6 +65,6 @@ function phonopy_getPhonons(phonon, path, labels; N=21)
   qpoints, connections = get_band_qpoints_and_path_connections(path, npoints=N)
 
   phonon.run_band_structure(qpoints, path_connections=connections, labels=labels)
-  phonon.write_yaml_band_structure(None, "band.yaml")
+  phonon.write_yaml_band_structure(nothing, "band.yaml")
 
 end
