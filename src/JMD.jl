@@ -110,7 +110,7 @@ module JMD
     hitAndStick, HnS,
 
     #phonopy.jl
-    phonopy_addForces
+    phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons
   
   #end exports
 
