@@ -42,8 +42,8 @@ struct Simulation
   thermoInps
 end
 
-function run(EoM, bdys::Vector{MyAtoms}, NVT::Bool, tspan::Tuple{Float64, Float64},
-             dt::Float64; save="full", kwargs...)
+function runMD(EoM, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
+               dt::Float64; save="full", thermostat=nothing, thermoinps=nothing, kwargs...)
              
   NC         = [0,0,0]
   PBC        = repeat([false], 3)
@@ -54,12 +54,10 @@ function run(EoM, bdys::Vector{MyAtoms}, NVT::Bool, tspan::Tuple{Float64, Float6
   pos        = [SVector{3}(i.r) for i in bdys]
   vel        = [SVector{3}(i.v) for i in bdys]
 
-  if NVT
-    tFunc = kwargs[:thermostat]
-    tInps = kwargs[:thermoinps]
+  if thermoinps != nothing && thermostat != nothing
+    NVT = true
   else
-    tFunc = nothing
-    tInps = nothing
+    NVT = false
   end
 
   simu = Simulation(
@@ -73,27 +71,25 @@ function run(EoM, bdys::Vector{MyAtoms}, NVT::Bool, tspan::Tuple{Float64, Float6
   solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
 end
 
-function run(EoM, cell::MyCell, NVT::Bool, tspan::Tuple{Float64, Float64},
-             dt::Float64; save="full", kwargs...)
+function runMD(EoM, cell::MyCell, tspan::Tuple{Float64, Float64}, dt::Float64; 
+               save="full", thermostat=nothing, thermoinps=nothing, kwargs...)
 
   bdys       = makeBdys(cell)
-  potVars    = EoM(bdys)
+  potVars    = EoM(cell)
   pars, mols = getPairs(bdys)
   pos        = [SVector{3}(i.r) for i in bdys]
   vel        = [SVector{3}(i.v) for i in bdys]
 
-  if NVT
-    tFunc = kwargs[:thermostat]
-    tInps = kwargs[:thermoinps]
+  if thermoinps != nothing && thermostat != nothing
+    NVT = true
   else
-    tFunc = nothing
-    tInps = nothing
+    NVT = false
   end
 
   simu = Simulation(
     bdys, pars, mols, [], [], [],
     save, cell.PBC, cell.NC, cell.lattice, cell.masses, potVars,
-    NVT, tFunc, tInps
+    NVT, thermostat, thermoinps
   )
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
