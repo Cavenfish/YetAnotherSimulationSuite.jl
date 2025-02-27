@@ -32,7 +32,7 @@ function SCMEf(dv, v, u, p, t)
   F    = eachrow(f) |> (x -> convert(Vector{Vector{Float64}}, x))
 
   dv .= F ./ p.m
-  if typeof(p) == NVTsimu
+  if p.NVT
     p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
   end
 
