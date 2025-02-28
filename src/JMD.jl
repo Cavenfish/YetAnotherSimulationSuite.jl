@@ -67,8 +67,10 @@ module JMD
     Berendsen, Berendsen!, Langevin, Langevin!, BDP, BDP!, BDPnT, BDPnT!,
 
     #post-processing.jl
-    processDynamics, processDynamics!, processTmpFiles, trackVACF,
-    trackEnergyDissipation, trackAllVibEnergy, trackRadialEnergy,
+    processDynamics, processDynamics!, processTmpFiles, 
+    
+    #tracking.jl
+    trackVACF, trackEnergyDissipation, trackAllVibEnergy, trackRadialEnergy,
 
     #vacf.jl
     vacfInps, VDOS, getVelMas,
@@ -163,6 +165,7 @@ module JMD
   include("./analysis/participationRatio.jl")
   include("./analysis/vibCoup.jl")
   include("./analysis/energetics.jl")
+  include("./analysis/trajectories/tracking.jl")
 
   include("./structural/distributions.jl")
   include("./structural/molsAndPairs.jl")
