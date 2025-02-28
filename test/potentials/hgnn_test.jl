@@ -1,7 +1,3 @@
-using Test
-using LinearAlgebra
-
-include("../src/JMD.jl")
 
 @testset "HGNN Test" begin
 
@@ -21,8 +17,13 @@ include("../src/JMD.jl")
 
   JMD.getUnitVectors!(hats, r[1],r[2],r[3],r[4])
 
-  vco1   = JMD.molPot!(F, r, [1,2], JMD.hgnnMolVars)
-  vco2   = JMD.molPot!(F, r, [3,4], JMD.hgnnMolVars)
+  f        = JMD.jldopen(
+    joinpath(@__DIR__, "../../src/md/potentials/params/hgnn.jld2"))
+  molVars  = f["molVars"]
+  pairVars = f["pairVars"]
+
+  vco1   = JMD.molPot!(F, r, [1,2], molVars)
+  vco2   = JMD.molPot!(F, r, [3,4], molVars)
 
   # pull magnitude of force
   diff   = r[2] .- r[1]
@@ -37,7 +38,7 @@ include("../src/JMD.jl")
   dvco2  = dot(F[3], v)
 
   # pull magnitude of forces
-  vint   = JMD.pairPot!(F, r, [1,2] => [3,4], JMD.hgnnPairVars, rhats, dPdr, P, A)
+  vint   = JMD.pairPot!(F, r, [1,2] => [3,4], pairVars, rhats, dPdr, P, A)
   for i in 1:6
     dv[i] = dot(rhats[i,:], hats[i,:])
   end
