@@ -4,6 +4,7 @@
 struct Cell <: MyCell
   lattice::Matrix{Float64}
   scaled_pos::Vector{Vector{Float64}}
+  velocity::Vector{Vector{Float64}}
   masses::Vector{Float64}
   symbols::Vector{Char}
   PBC::Vector{Bool}
@@ -15,6 +16,7 @@ function makeCell(bdys::Vector{MyAtoms}, lattice; PBC=repeat([true], 3), NC=[1,1
   Cell(
     lattice,
     getScaledPos(bdys, lattice),
+    [i.v for i in bdys],
     [i.m for i in bdys],
     [i.s for i in bdys],
     PBC, NC
@@ -23,7 +25,7 @@ end
 
 function makeBdys(cell)::Vector{MyAtoms}
   pos  = getPos(cell)
-  vel  = [zeros(3) for i in pos]
+  vel  = [i for i in cell.velocity]
 
   [Atom(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
 end
@@ -170,7 +172,7 @@ function getPrimitiveCell(cell, symprec)
   mas  = [ amu[i] for i in syms]
   L    = transpose(stan.lattice)
 
-  Cell(L, stan.positions, mas, only.(syms), cell.PBC, cell.NC)
+  Cell(L, stan.positions, cell.velocity, mas, only.(syms), cell.PBC, cell.NC)
 end
 
 function getMols(cell::MyCell, rmax; D=3)

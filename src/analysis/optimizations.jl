@@ -85,7 +85,7 @@ function opt(EoM, algo, cell::MyCell; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
 
-  Cell(cell.lattice, spos, cell.masses, cell.symbols, cell.PBC, cell.NC)
+  Cell(cell.lattice, spos, cell.velocity, cell.masses, cell.symbols, cell.PBC, cell.NC)
 end
 
 function optCell(EoM, algo, cell::MyCell; kwargs...)
