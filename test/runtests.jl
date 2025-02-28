@@ -1,5 +1,5 @@
-using Test
+using Test, JMD
 
-x = 2^2
-
-@test x == 4
+@testset "IO" begin
+  include("./io_test.jl")
+end
