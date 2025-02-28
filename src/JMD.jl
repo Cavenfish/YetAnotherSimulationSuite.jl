@@ -56,7 +56,7 @@ module JMD
     COCO, HGNN, MBX, SPCF, TIP4P, SCMEf,
 
     #simulation.jl
-    runNVE, runNVT,
+    runNVE, runNVT, runMD,
 
     #thermostats.jl
     Berendsen, Berendsen!, Langevin, Langevin!, BDP, BDP!, BDPnT, BDPnT!,
