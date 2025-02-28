@@ -1,19 +1,34 @@
+using SHA
 
 function bdysTesting(file, N, s, m, r, v)
   bdys = readXyz(file)
+  og   = read(file) |> sha256
 
   @test length(bdys) == N
   @test [i.s for i in bdys] == s
   @test [i.m for i in bdys] == m
   @test [i.r for i in bdys] == r
   @test [i.v for i in bdys] == v
+
+  writeXyz("./tmp.xyz", bdys)
+  new = read("./tmp.xyz") |> sha256
+  rm("./tmp.xyz")
+
+  @test new == og
 end
 
 function cellTesting(file, N, lat)
   cell = readCell(file)
+  og   = read(file) |> sha256
 
   @test length(cell.masses) == N
   @test cell.lattice == lat
+
+  writeCell("./tmp.xyz", cell)
+  new = read("./tmp.xyz") |> sha256
+  rm("./tmp.xyz")
+
+  @test new == og
 end
 
 @testset "Reading files" begin
