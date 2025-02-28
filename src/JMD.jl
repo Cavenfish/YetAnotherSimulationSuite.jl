@@ -41,12 +41,17 @@ module JMD
     readASExyz, readXyz, writeXyz, readCell, writeCell, writeXyzTraj,
 
     #helpers.jl
-    CoM, vCoM, zeroVCoM!, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
-    getFrame, getFrame!, getLastFrame, getLastFrame!, getPotEnergy, getForces,
-    centerBdys!,
+    CoM, vCoM, zeroVCoM!, getFrame, getFrame!, getLastFrame, getLastFrame!,
+    getForces,
+
+    #energetics.jl
+    vibExcite!, transExcite!, getPotEnergy,
+
+    #molsAndPairs.jl
+    getMols, getPairs,
 
     #bodies.jl
-    getMols, getPairs,
+    swapIso!, pickRandomMol, centerBdys!,
 
     #cells.jl
     makeCell, makeBdys, getScaledPos, getPos, wrap!, replicate, makeSuperCell,
@@ -56,7 +61,7 @@ module JMD
     COCO, HGNN, MBX, SPCF, TIP4P, SCMEf,
 
     #simulation.jl
-    runNVE, runNVT, runMD,
+    runMD,
 
     #thermostats.jl
     Berendsen, Berendsen!, Langevin, Langevin!, BDP, BDP!, BDPnT, BDPnT!,
@@ -76,7 +81,7 @@ module JMD
     #optimizations.jl
     opt, optCell,
 
-    #structural.jl
+    #distributions.jl
     rdf, adf, density,
 
     #stress.jl
@@ -153,17 +158,21 @@ module JMD
   include("./analysis/desorb.jl")
   include("./analysis/vibrations.jl")
   include("./analysis/optimizations.jl")
-  include("./analysis/structral.jl")
   include("./analysis/decayRates.jl")
   include("./analysis/freqShifts.jl")
   include("./analysis/participationRatio.jl")
-  include("./analysis/neighbors.jl")
   include("./analysis/vibCoup.jl")
+  include("./analysis/energetics.jl")
+
+  include("./structural/distributions.jl")
+  include("./structural/molsAndPairs.jl")
+  include("./structural/neighbors.jl")
 
   include("./mathtk/alphashape.jl")
   include("./mathtk/savitzkyGolay.jl")
   include("./mathtk/peakFinding.jl")
   include("./mathtk/stress.jl")
+  include("./mathtk/basicMath.jl")
 
   include("./building/anneal.jl")
   include("./building/hitAndStick.jl")
