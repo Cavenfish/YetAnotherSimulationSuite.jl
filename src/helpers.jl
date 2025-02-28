@@ -74,7 +74,7 @@ function getLastFrame(solu)
   return new
 end
 
-function getLastFrame!(bdys, solu)
+function getLastFrame!(bdys::Vector{MyAtoms}, solu)
   N = length(bdys)
   
   for i in 1:N
@@ -83,6 +83,14 @@ function getLastFrame!(bdys, solu)
     bdys[i].m = solu.prob.p.bdys[i].m
     bdys[i].s = solu.prob.p.bdys[i].s
   end
+end
+
+function getLastFrame!(cell::MyCell, solu)
+  x0 = [j for i in solu.u[end].x[2] for j in i]
+
+  cell.velocity   .= solu.u[end].x[1]
+  cell.scaled_pos .= getScaledPos(x0, cell.lattice)
+
 end
 
 function swapAtoms!(bdys, i, j)
