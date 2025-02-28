@@ -1,5 +1,3 @@
-
-
 #Atoms in simulation
 #Needs mutable to swap masses on the fly
 mutable struct Atom <: MyAtoms
@@ -9,33 +7,64 @@ mutable struct Atom <: MyAtoms
   s::Char
 end
 
-function getMols(bdys::Vector{MyAtoms}, rmax; D=3)
-  r   = [i.r for i in bdys]
-
-  pts = hcat(r...)
-
-  ret = dbscan(pts[1:D, :], rmax)
-
-  [i.core_indices for i in ret.clusters]
+function translateBdys!(bdys, v)
+  for i in bdys
+    i.r .+= v
+  end
 end
 
-function getPairs(bdys::Vector{MyAtoms})
+function swapAtoms!(bdys, i, j)
+  a = bdys[i].r
+  b = bdys[j].r
 
-  # Get mols and N
-  mols = if length(bdys) <= 3
-    getMols(bdys, 1.5, D=length(bdys)-1) 
-  else
-    getMols(bdys, 1.5)
-  end
-  N    = size(mols)[1]
-
-  # Make all pairs
-  pars = Pair[]
-  for i in 1:N
-    for j in i+1:N
-      push!(pars, Pair(mols[i],mols[j]))
-    end
-  end
-
-  pars, mols
+  bdys[i].r = b
+  bdys[j].r = a
 end
+
+function centerBdys!(bdys)
+  com = CoM(bdys)
+  for i in bdys
+    i.r -= com
+  end
+end
+
+function swapIso!(bdys, swap, mas)
+  for i in 1:length(swap)
+    j         = swap[i]
+    bdys[j].m = mas[i]
+  end
+end
+
+function getSurfaceMolecules(bdys; α=nothing)
+  mols = getMols(bdys, 1.5)
+
+  pts  = [i.r for i in bdys]
+
+  A    = alphashape(pts; α=α)
+  
+  i = vcat(A.perimeter...) |> unique
+  j = findall.(e -> e in i, mols) |> (x -> findall(e -> !isempty(e), x))
+
+  surf = bdys[vcat(mols[j]...)]
+
+  surf
+end
+
+function pickRandomMol(bdys, loc)
+
+  surf = getSurfaceMolecules(bdys)
+  bulk = [i for i in bdys if !(i in surf)]
+
+  if loc == "surf"
+
+    mols = getMols(bdys, 1.5)
+    return surf[rand(mols)]
+
+  elseif loc == "bulk"
+
+    mols = getMols(bdys, 1.5)
+    return bulk[rand(mols)]
+
+  end
+  
+end 
