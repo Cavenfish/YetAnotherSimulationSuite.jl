@@ -1,4 +1,4 @@
-const libmbx       = dlopen(joinpath(@__DIR__, "libmbx.so"), Libdl.RTLD_GLOBAL) 
+const libmbx       = joinpath(@__DIR__, "libmbx.so")
 const E_MBX2JMD    = 0.043 # kcal/mol --> eV
 const MBX_GAS_JSON = joinpath(@__DIR__, "gas.json")
 const MBX_PBC_JSON = joinpath(@__DIR__, "pbc.json")
@@ -54,42 +54,15 @@ function mbx_get_monomer_info(at_nams)
   mon_nams, num_ats
 end
 
-function mbx_initialize_system(vars)
-  sym = dlsym(libmbx, :initialize_system_py_)
-
-  @ccall $sym(
-    vars.xyz::Ptr{Cdouble},
-    vars.num_ats::Ptr{Cint},
-    vars.at_nams::Ptr{Ptr{Cchar}},
-    vars.mon_nams::Ptr{Ptr{Cchar}},
-    vars.num_mon::Ref{Cint},
-    vars.json::Ptr{Cchar}
-  )::Cvoid
-end
-
-function mbx_initialize_system(xyz, num_ats, at_nams, mon_nams, num_mon, json)
-  sym = dlsym(libmbx, :initialize_system_py_)
-
-  @ccall $sym(
-    xyz::Ptr{Cdouble},
-    num_ats::Ptr{Cint},
-    at_nams::Ptr{Ptr{Cchar}},
-    mon_nams::Ptr{Ptr{Cchar}},
-    num_mon::Ref{Cint},
-    json::Ptr{Cchar}
-  )::Cvoid
-end
-
 function mbx_get_energy(xyz, nats)
-  sym = dlsym(libmbx, :get_energy_)
 
   E   = Ref{Cdouble}(0)
 
-  @ccall $sym(
-    xyz::Ptr{Cdouble},
-    nats::Ref{Cint},
-    E::Ref{Cdouble}
-  )::Cvoid
+  ccall(
+    (:get_energy_, libmbx), Cvoid,
+    (Ptr{Cdouble}, Ref{Cint}, Ref{Cdouble}),
+    xyz, nat, E
+  )
 
   E[] * E_MBX2JMD
 end
