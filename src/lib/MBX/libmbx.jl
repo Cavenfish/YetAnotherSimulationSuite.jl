@@ -61,23 +61,21 @@ function mbx_get_energy(xyz, nats)
   ccall(
     (:get_energy_, libmbx), Cvoid,
     (Ptr{Cdouble}, Ref{Cint}, Ref{Cdouble}),
-    xyz, nat, E
+    xyz, nats, E
   )
 
   E[] * E_MBX2JMD
 end
 
 function mbx_get_energy_grad!(G, xyz, nats)
-  sym = dlsym(libmbx, :get_energy_g_)
 
   E   = Ref{Cdouble}(0)
 
-  @ccall $sym(
-    xyz::Ptr{Cdouble}, 
-    nats::Ref{Cint}, 
-    E::Ref{Cdouble},
-    G::Ptr{Cdouble}
-  )::Cvoid
+  ccall(
+    (:get_energy_g_, libmbx), Cvoid,
+    (Ptr{Cdouble}, Ref{Cint}, Ref{Cdouble}, Ptr{Cdouble}),
+    xyz, nats, E, G
+  )
 
   G .*= E_MBX2JMD
 
@@ -85,25 +83,28 @@ function mbx_get_energy_grad!(G, xyz, nats)
 end
 
 function mbx_get_total_dipole(μ)
-  sym = dlsym(libmbx, :get_total_dipole_)
 
-  @ccall $sym(μ::Ptr{Cdouble})::Cvoid
+  ccall(
+    (:get_total_dipole_, libmbx), Cvoid,
+    (Ptr{Cdouble},), μ
+  )
+
 end
 
 function mbx_finalize_system()
-  sym = dlsym(libmbx, :finalize_system_)
 
-  @ccall $sym()::Cvoid
+  ccall(
+    (:finalize_system_, libmbx), Cvoid,
+    ()
+  )
+
 end
 
 function mbx_set_box(box)
-  sym = dlsym(libmbx, :set_box_)
 
-  l = length(box)
-
-  @ccall $sym(
-    l::Ref{Cint},
-    box::Ptr{Cdouble}
-  )::Cvoid
+  ccall(
+    (:set_box_, libmbx), Cvoid,
+    (Ref{Cint}, Ptr{Cdouble}), l, box 
+  )
 
 end
