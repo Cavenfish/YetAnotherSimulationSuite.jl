@@ -102,6 +102,8 @@ end
 
 function mbx_set_box(box)
 
+  l = length(box)
+
   ccall(
     (:set_box_, libmbx), Cvoid,
     (Ref{Cint}, Ptr{Cdouble}), l, box 
