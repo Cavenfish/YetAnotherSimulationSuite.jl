@@ -29,18 +29,24 @@ function MBX(bdys::Vector{MyAtoms})
 
   num_mon = length(mon_nams)
 
-  sym = dlsym(libmbx, :initialize_system_py_)
-
   vars = _MBX_PotVars(xyz, MBX_GAS_JSON, num_ats, at_nams, num_mon, mon_nams)
 
-  @ccall $sym(
-    vars.xyz::Ptr{Cdouble},
-    vars.num_ats::Ptr{Cint},
-    vars.at_nams::Ptr{Ptr{Cchar}},
-    vars.mon_nams::Ptr{Ptr{Cchar}},
-    vars.num_mon::Ref{Cint},
-    vars.json::Ptr{Cchar}
-  )::Cvoid
+  ccall(
+    (:initialize_system_py_, libmbx), Cvoid,
+    (Ptr{Cdouble}, 
+     Ptr{Cint}, 
+     Ptr{Ptr{Cchar}}, 
+     Ptr{Ptr{Cchar}}, 
+     Ref{Cint}, 
+     Ptr{Cchar}
+    ),
+    vars.xyz, 
+    vars.num_ats, 
+    vars.at_nams, 
+    vars.mon_nams, 
+    vars.num_mon, 
+    vars.json
+  )
 
   vars
 end
@@ -55,18 +61,24 @@ function MBX(cell::MyCell)
 
   num_mon = length(mon_nams)
 
-  sym = dlsym(libmbx, :initialize_system_py_)
-
   vars = _MBX_PotVars(xyz, MBX_PBC_JSON, num_ats, at_nams, num_mon, mon_nams)
 
-  @ccall $sym(
-    vars.xyz::Ptr{Cdouble},
-    vars.num_ats::Ptr{Cint},
-    vars.at_nams::Ptr{Ptr{Cchar}},
-    vars.mon_nams::Ptr{Ptr{Cchar}},
-    vars.num_mon::Ref{Cint},
-    vars.json::Ptr{Cchar}
-  )::Cvoid
+  ccall(
+    (:initialize_system_py_, libmbx), Cvoid,
+    (Ptr{Cdouble}, 
+     Ptr{Cint}, 
+     Ptr{Ptr{Cchar}}, 
+     Ptr{Ptr{Cchar}}, 
+     Ref{Cint}, 
+     Ptr{Cchar}
+    ),
+    vars.xyz, 
+    vars.num_ats, 
+    vars.at_nams, 
+    vars.mon_nams, 
+    vars.num_mon, 
+    vars.json
+  )
 
   if !isdiag(cell.lattice)
     @warn "Cell lattice is not diagonal.
