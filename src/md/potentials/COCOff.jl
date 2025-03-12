@@ -234,7 +234,7 @@ struct _COCO_PotVars <: PotVars
   a::UInt8
 end
 
-COCO(bdys::Vector{Atom}) = _COCO_PotVars(1)
+COCO(bdys::Vector{MyAtoms}) = _COCO_PotVars(1)
 
 function COCO(dv, v, u, p, t)
   epsilon = 11.230139012256362
@@ -303,7 +303,7 @@ function COCO(dv, v, u, p, t)
   totalE = MorseE + ExchE + DispE + CoulE
 
   dv .= totalF ./ p.m
-  if typeof(p) == NVTsimu
+  if p.NVT
     p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
   end
 
