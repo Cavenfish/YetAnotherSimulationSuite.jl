@@ -37,7 +37,7 @@ function runMD(EoM, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
   simu = Simulation(
     bdys, pars, mols, [], [], [],
     save, PBC, NC, lattice, mas, potVars,
-    NVT, tFunc, tInps
+    NVT, thermostat, thermoinps
   )
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
