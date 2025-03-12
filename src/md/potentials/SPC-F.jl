@@ -86,7 +86,7 @@ function SPCF(dv, v, u, p, t)
   end
 
   dv .= F ./ p.m
-  if typeof(p) == NVTsimu
+  if p.NVT
     p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
   end
 

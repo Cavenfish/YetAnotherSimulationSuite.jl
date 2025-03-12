@@ -91,7 +91,7 @@ function HGNN(dv, v, u, p, t)
 
   
   dv .= F ./ p.m
-  if typeof(p) == NVTsimu
+  if p.NVT
     p.thermostat!(p.temp, dv, v, p.m, p.thermoInps)
   end
 
