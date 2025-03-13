@@ -19,8 +19,8 @@ function _vdw!(F, u, i, j, ϵij, σij)
   a     = σij / r
   E     = 4ϵij * ((a)^12 - (a)^6)
   f     = 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rvec
-  F[i] -= f
-  F[j] += f
+  F[i] .-= f
+  F[j] .+= f
 
   E
 end
@@ -44,8 +44,8 @@ function _Buckingham!(F, u, i, j, Aij, Bij, Cij)
   E    = a - b
   f    = (Bij * a / r * rvec) - (6b / r^2 * rvec)
 
-  F[i] -= f
-  F[j] += f
+  F[i] .-= f
+  F[j] .+= f
 
   E
 end
@@ -64,8 +64,8 @@ function _Coulomb!(F, u, i, j, Qi, Qj)
   r     = norm(rvec)
   E     = Qi*Qj / r
   f     = Qi*Qj * rvec / r^3
-  F[i] -= f
-  F[j] += f
+  F[i] .-= f
+  F[j] .+= f
 
   E
 end
@@ -84,8 +84,8 @@ function _shortDisp!(F, u, i, j, Aij, Bij)
   r     = norm(rvec)
   E     = Aij * exp(-Bij * r)
   f     = Bij * E * rvec / r
-  F[i] -= f
-  F[j] += f
+  F[i] .-= f
+  F[j] .+= f
 
   E
 end
@@ -116,8 +116,8 @@ function _longDisp!(F, u, i, j, Cij; damp=nothing, p=nothing)
   b     = -6 * a * rvec / r^2
   E     = a * d[1]
   f     = -(d[2] * a * rvec/r .+ d[1] * b)
-  F[i] -= f
-  F[j] += f
+  F[i] .-= f
+  F[j] .+= f
 
   E
 end

@@ -318,12 +318,8 @@ function COCO(dv, v, u, p, t)
 end
 
 function COCO(F, G, y0, p)
-  x0     = Vector[]
-  forces = Vector[]
-  for i in 1:3:length(y0)
-    push!(x0, y0[i:i+2])
-    push!(forces, [0.0, 0.0, 0.0])
-  end
+  x0     = [y0[i:i+2] for i = 1:3:length(y0)]
+  forces = [zeros(3) for i = 1:3:length(y0)]
 
   epsilon = 11.230139012256362
   N       = length(x0)

@@ -12,14 +12,14 @@ function _Morse(r, rvec, D, a, req)
 end
 
 function _Morse!(F, u, i, j, D, a, req)
-  rvec  = u[j] - u[i]
+  rvec  = u[j] .- u[i]
   r     = norm(rvec)
   c     = exp(-a*(r-req))
   E     = D * (1 - c)^2
   f     = -2D * a * c * (1 - c) * rvec / r
 
-  F[i] -= f
-  F[j] += f
+  F[i] .-= f
+  F[j] .+= f
 
   E
 end
@@ -37,8 +37,8 @@ function _harmonicBond!(F, u, i, j, K, req)
   E     = 0.5 * K * (r - req)^2
   f     = - K * (r - req) * rvec / r
 
-  F[i] -= f
-  F[j] += f
+  F[i] .-= f
+  F[j] .+= f
 
   E
 end
@@ -62,9 +62,9 @@ function _harmonicBondAngle!(F, u, i, o, j, K, θeq)
   pre   = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * norm(ri) * norm(rj))
   Fi    = pre * (rj - (ri * (dot(ri, rj) / dot(ri,ri))))
   Fj    = pre * (ri - (rj * (dot(ri, rj) / dot(rj,rj))))
-  F[i] += Fi
-  F[j] += Fj
-  F[o] -= (Fi + Fj)
+  F[i] .+= Fi
+  F[j] .+= Fj
+  F[o] .-= (Fi + Fj)
 
   E
 end

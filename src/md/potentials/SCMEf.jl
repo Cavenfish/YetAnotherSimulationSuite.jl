@@ -45,10 +45,7 @@ function SCMEf(F, G, y0, p)
 
   # initialize things
   E = 0.0
-  u = Vector[]
-  for i in 1:3:length(y0)
-    push!(u, y0[i:i+2])
-  end
+  u = [y0[i:i+2] for i = 1:3:length(y0)]
 
   all(p.PBC) ? pbc = true : pbc = p.PBC
 

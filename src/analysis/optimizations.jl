@@ -12,16 +12,14 @@ end
 
 function prepX0(bdys::Vector{MyAtoms})
   r  = [i.r for i in bdys]
-  x0 = [j for i in r for j in i]
   
-  x0
+  [j for i in r for j in i]
 end
 
 function prepX0(cell::MyCell)
   r  = getPos(cell)
-  x0 = [j for i in r for j in i]
   
-  x0
+  [j for i in r for j in i]
 end
 
 function prep4pot(EoM, bdys::Vector{MyAtoms})
