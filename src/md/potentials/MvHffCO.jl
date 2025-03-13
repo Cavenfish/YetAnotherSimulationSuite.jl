@@ -2,7 +2,7 @@
 CO-CO Potential from van Hemert et al. 2015
 """
 
-struct _MvHffCO_PotVars{F<:Float64} <: PotVars
+struct _MvHff_PotVars{F<:Float64} <: PotVars
   D::F
   a::F
   req::F
@@ -21,7 +21,7 @@ struct _MvHffCO_PotVars{F<:Float64} <: PotVars
   αo::F
 end
 
-MvHffCO(bdys) = _MvHffCO_PotVars(
+MvHff(bdys) = _MvHff_PotVars(
   11.230139012256362,
   2.3281,
   1.1282058129221093,
@@ -40,7 +40,7 @@ MvHffCO(bdys) = _MvHffCO_PotVars(
   2.131611069944055
 )
 
-function MvHffCO(dv, v, u, p, t)
+function MvHff(dv, v, u, p, t)
 
   # initialize things
   E = 0.0
@@ -82,7 +82,7 @@ function MvHffCO(dv, v, u, p, t)
 
 end
 
-function MvHffCO(F, G, y0, p)
+function MvHff(F, G, y0, p)
 
   # initialize things
   P      = p.potVars

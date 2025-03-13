@@ -58,7 +58,7 @@ module JMD
     getMIC, center!, getPrimitiveCell, getVolume,
 
     #potentials
-    COCO, HGNN, MBX, SPCF, TIP4P, SCMEf,
+    MvHff, HGNN, MBX, SPCF, TIP4P, SCMEf,
 
     #simulation.jl
     runMD,
