@@ -103,16 +103,14 @@ function HGNN(F, G, y0, p)
 
   # initialize things
   P      = p.potVars
-  x0     = Vector[]
-  forces = Vector[]
-  for i in 1:3:length(y0)
-    push!(x0, y0[i:i+2])
-    push!(forces, [0.0, 0.0, 0.0])
-  end
-
-  # initialize things
   energy = 0.0
-  r      = x0 ./ 0.5291772083 # to Bohr
+  r      = [y0[i:i+2] for i = 1:3:length(y0)]
+  forces = [zeros(3) for i = 1:3:length(y0)]
+
+  # convert Angstrom to Bohr without allocating
+  for i = 1:length(r)
+    r[i] ./= 5291772083
+  end
 
   for i in p.mols
     energy += molPot!(forces, r, i, P.molVars)
@@ -123,7 +121,12 @@ function HGNN(F, G, y0, p)
   end
   
   energy  *= 0.000124 # cm-1 to eV
-  forces .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
+  
+  # Because of shape of forces we need loop to properly
+  # multiply without allocating
+  for i = 1:length(forces) 
+    forces[i] .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
+  end
 
   if G != nothing
     tmp = [j for i in forces for j in i]
@@ -165,9 +168,9 @@ function getPIPs!(P,dPdr,c1,o1,c2,o2)
   P[7] = g6
 
   #This part is in their code but not the paper
-  @views P[3] = sqrt(P[3])
-  @views P[4] = sqrt(P[4])
-  @views P[5] = sqrt(P[5])
+  P[3] = sqrt(P[3])
+  P[4] = sqrt(P[4])
+  P[5] = sqrt(P[5])
 
   # Note: ita = 0.3
   dPdr[1,1] = -0.3*g1 # dp1/dr1
@@ -200,7 +203,7 @@ function pairPot!(F, u, i, vars, rhats, dPdr, P, A)
   w1,b1,w2,b2,w3,b3,rg,rgg,vg,vgg = vars
 
   # Map min-max
-  @views P .= 2 * (P[:]-rg[1,:]) ./ rgg[:] .- 1
+  @views P .= 2 * (P[:] - rg[1,:]) ./ rgg[:] .- 1
 
   # 1st layer
   y = b1 + transpose(w1) * P
@@ -226,30 +229,30 @@ function pairPot!(F, u, i, vars, rhats, dPdr, P, A)
   rhats .*= transpose(dPdr) * dv
 
   # rhat: o1 --> c1
-  @views F[o1] += rhats[1,:]
-  @views F[c1] -= rhats[1,:]
+  F[o1] .+= rhats[1,:]
+  F[c1] .-= rhats[1,:]
   
   # rhat: o2 --> c2
-  @views F[o2] += rhats[2,:]
-  @views F[c2] -= rhats[2,:]
+  F[o2] .+= rhats[2,:]
+  F[c2] .-= rhats[2,:]
 
   # rhat: o1 --> c2
-  @views F[o1] += rhats[3,:]
-  @views F[c2] -= rhats[3,:]
+  F[o1] .+= rhats[3,:]
+  F[c2] .-= rhats[3,:]
 
   # rhat: c1 --> o2
-  @views F[c1] += rhats[4,:]
-  @views F[o2] -= rhats[4,:]
+  F[c1] .+= rhats[4,:]
+  F[o2] .-= rhats[4,:]
 
   # rhat: o2 --> o1
-  @views F[o2] += rhats[5,:]
-  @views F[o1] -= rhats[5,:]
+  F[o2] .+= rhats[5,:]
+  F[o1] .-= rhats[5,:]
 
   # rhat: c2 --> c1
-  @views F[c2] += rhats[6,:]
-  @views F[c1] -= rhats[6,:]
+  F[c2] .+= rhats[6,:]
+  F[c1] .-= rhats[6,:]
 
-  return v
+  v
 end
 
 function molPot!(F, u, i, vars)
@@ -278,21 +281,21 @@ function molPot!(F, u, i, vars)
   dv *= (vb-va) / (rb-ra)
 
   # Inplace update forces
-  F[i[1]] += dv * rhat
-  F[i[2]] -= dv * rhat
+  @. F[i[1]] += dv * rhat
+  @. F[i[2]] -= dv * rhat
 
-  return v
+  v
 end
 
 function getUnitVectors!(r, c1, o1, c2, o2)
   rhat(v) = v / sqrt(dot(v,v))
 
-  r[1,:] = rhat(c1 - o1)
-  r[2,:] = rhat(c2 - o2)
-  r[3,:] = rhat(c2 - o1)
-  r[4,:] = rhat(o2 - c1)
-  r[5,:] = rhat(o1 - o2)
-  r[6,:] = rhat(c1 - c2)
+  @. r[1,:] = rhat(c1 - o1)
+  @. r[2,:] = rhat(c2 - o2)
+  @. r[3,:] = rhat(c2 - o1)
+  @. r[4,:] = rhat(o2 - c1)
+  @. r[5,:] = rhat(o1 - o2)
+  @. r[6,:] = rhat(c1 - c2)
 end
 
 function multiHGNN(a, du, u, p, t)
