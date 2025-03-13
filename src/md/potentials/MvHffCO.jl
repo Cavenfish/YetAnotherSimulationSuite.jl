@@ -149,8 +149,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   wc = 0.42865
 
   #X locations
-  x1 = (wc*c1) + (wo*o1)
-  x2 = (wc*c2) + (wo*o2)
+  x1 = @. (wc*c1) + (wo*o1)
+  x2 = @. (wc*c2) + (wo*o2)
 
   #Variable charges
   Qc1 = Qc * exp(-αc*(r1 - req))
@@ -166,8 +166,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   #C--C
   ϵ, f   = _Coulomb(c1, c2, Qc1, Qc2)
   E      = ϵ
-  F_Q1   = αc * ϵ * R1 / r1
-  F_Q2   = αc * ϵ * R2 / r2
+  F_Q1   = @. αc * ϵ * R1 / r1
+  F_Q2   = @. αc * ϵ * R2 / r2
   @. F[C1] -= (f + F_Q1)
   @. F[O1] += F_Q1
   @. F[C2] +=  f - F_Q2
@@ -176,8 +176,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
 # C-X
   ϵ, f   = _Coulomb(c1, x2, Qc1, Qx2)
   E     += ϵ
-  F_Q1   = αc * ϵ * R1 / r1
-  F_Q2   = - (αc * Qc2 + αo * Qo2) * ϵ/Qx2 * R2 / r2
+  F_Q1   = @. αc * ϵ * R1 / r1
+  F_Q2   = @. - (αc * Qc2 + αo * Qo2) * ϵ/Qx2 * R2 / r2
   @. F[C1] -= (f + F_Q1)
   @. F[O1] += F_Q1
   @. F[C2] += (wc * f) - F_Q2
@@ -186,8 +186,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   # C-O
   ϵ, f   = _Coulomb(c1, o2, Qc1, Qo2)
   E     += ϵ
-  F_Q1   = αc * ϵ * R1 / r1
-  F_Q2   = αo * ϵ * R2 / r2
+  F_Q1   = @. αc * ϵ * R1 / r1
+  F_Q2   = @. αo * ϵ * R2 / r2
   @. F[C1] -= (f + F_Q1)
   @. F[O1] += F_Q1
   @. F[C2] -= F_Q2
@@ -196,8 +196,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   # X-C
   ϵ, f   = _Coulomb(x1, c2, Qx1, Qc2)
   E     += ϵ
-  F_Q1   = - (αc * Qc1 + αo * Qo1) * ϵ/Qx1 * R1 / r1
-  F_Q2   = αc * ϵ * R2 / r2
+  F_Q1   = @. - (αc * Qc1 + αo * Qo1) * ϵ/Qx1 * R1 / r1
+  F_Q2   = @. αc * ϵ * R2 / r2
   @. F[C1] -= ((wc * f) + F_Q1)
   @. F[O1] += F_Q1 - (wo * f)
   @. F[C2] += (f - F_Q2)
@@ -206,8 +206,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   # X-X
   ϵ, f   = _Coulomb(x1, x2, Qx1, Qx2)
   E     += ϵ
-  F_Q1   = - (αc * Qc1 + αo * Qo1) * ϵ/Qx1 * R1 / r1
-  F_Q2   = - (αc * Qc2 + αo * Qo2) * ϵ/Qx2 * R2 / r2
+  F_Q1   = @. - (αc * Qc1 + αo * Qo1) * ϵ/Qx1 * R1 / r1
+  F_Q2   = @. - (αc * Qc2 + αo * Qo2) * ϵ/Qx2 * R2 / r2
   @. F[C1] += ((-wc * f) - F_Q1)
   @. F[O1] += ((-wo * f) + F_Q1)
   @. F[C2] += (( wc * f) - F_Q2)
@@ -217,8 +217,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   # X-O
   ϵ, f   = _Coulomb(x1, o2, Qx1, Qo2)
   E     += ϵ
-  F_Q1   = - (αc * Qc1 + αo * Qo1) * ϵ/Qx1 * R1 / r1
-  F_Q2   = αo * ϵ * R2 / r2
+  F_Q1   = @. - (αc * Qc1 + αo * Qo1) * ϵ/Qx1 * R1 / r1
+  F_Q2   = @. αo * ϵ * R2 / r2
   @. F[C1] -= ((wc * f) + F_Q1)
   @. F[O1] += (F_Q1 - (wo * f))
   @. F[C2] -= F_Q2
@@ -227,8 +227,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   # O-C
   ϵ, f   = _Coulomb(o1, c2, Qo1, Qc2)
   E     += ϵ
-  F_Q1   = αo * ϵ * R1 / r1
-  F_Q2   = αc * ϵ * R2 / r2
+  F_Q1   = @. αo * ϵ * R1 / r1
+  F_Q2   = @. αc * ϵ * R2 / r2
   @. F[C1] -= F_Q1
   @. F[O1] += (F_Q1 - f)
   @. F[C2] += (f - F_Q2)
@@ -237,8 +237,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   # O-X
   ϵ, f   = _Coulomb(o1, x2, Qo1, Qx2)
   E     += ϵ
-  F_Q1   = αo * ϵ * R1 / r1
-  F_Q2   = - (αc * Qc2 + αo * Qo2) * ϵ/Qx2 * R2 / r2
+  F_Q1   = @. αo * ϵ * R1 / r1
+  F_Q2   = @. - (αc * Qc2 + αo * Qo2) * ϵ/Qx2 * R2 / r2
   @. F[C1] -= F_Q1
   @. F[O1] += (F_Q1 - f)
   @. F[C2] += ((wc * f) - F_Q2)
@@ -247,8 +247,8 @@ function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
   # O-O
   ϵ, f   = _Coulomb(o1, o2, Qo1, Qo2)
   E     += ϵ
-  F_Q1   = αo * ϵ * R1 / r1
-  F_Q2   = αo * ϵ * R2 / r2
+  F_Q1   = @. αo * ϵ * R1 / r1
+  F_Q2   = @. αo * ϵ * R2 / r2
   @. F[C1] -= F_Q1
   @. F[O1] += (F_Q1 - f)
   @. F[C2] -= F_Q2
