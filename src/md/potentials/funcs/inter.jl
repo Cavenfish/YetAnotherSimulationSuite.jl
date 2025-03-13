@@ -3,7 +3,7 @@ Intermolecular Potential Functions
 """
 
 
-function _vdw(ri, rj, ϵij, σij)
+function _vdw(ri::Vector{Float64}, rj::Vector{Float64}, ϵij::Float64, σij::Float64)
   rvec = rj - ri
   r    = norm(rvec)
   a    = σij / (r)
@@ -13,7 +13,8 @@ function _vdw(ri, rj, ϵij, σij)
   E,F
 end
 
-function _vdw!(F, u, i, j, ϵij, σij)
+function _vdw!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},
+               i::Int64, j::Int64, ϵij::Float64, σij::Float64)
   rvec  = u[j] - u[i]
   r     = norm(rvec)
   a     = σij / r
@@ -25,7 +26,8 @@ function _vdw!(F, u, i, j, ϵij, σij)
   E
 end
 
-function _Buckingham(ri, rj, Aij, Bij, Cij)
+function _Buckingham(ri::Vector{Float64}, rj::Vector{Float64},
+                     Aij::Float64, Bij::Float64, Cij::Float64)
   rvec = rj - ri
   r    = norm(rvec)
   a    = Aij * exp(-Bij * r)
@@ -36,7 +38,8 @@ function _Buckingham(ri, rj, Aij, Bij, Cij)
   E,F
 end
 
-function _Buckingham!(F, u, i, j, Aij, Bij, Cij)
+function _Buckingham!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},
+                      i::Int64, j::Int64, Aij::Float64, Bij::Float64, Cij::Float64)
   rvec = u[j] - u[i]
   r    = norm(rvec)
   a    = Aij * exp(-Bij * r)
@@ -50,7 +53,7 @@ function _Buckingham!(F, u, i, j, Aij, Bij, Cij)
   E
 end
 
-function _Coulomb(ri, rj, Qi, Qj)
+function _Coulomb(ri::Vector{Float64}, rj::Vector{Float64}, Qi::Float64, Qj::Float64)
   rvec = rj - ri
   r    = norm(rvec)
   E    = Qi*Qj / r
@@ -59,7 +62,8 @@ function _Coulomb(ri, rj, Qi, Qj)
   E,F
 end
 
-function _Coulomb!(F, u, i, j, Qi, Qj)
+function _Coulomb!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}}, 
+                   i::Int64, j::Int64, Qi::Float64, Qj::Float64)
   rvec  = u[j] - u[i]
   r     = norm(rvec)
   E     = Qi*Qj / r
@@ -70,7 +74,8 @@ function _Coulomb!(F, u, i, j, Qi, Qj)
   E
 end
 
-function _shortDisp(ri, rj, Aij, Bij)
+function _shortDisp(ri::Vector{Float64}, rj::Vector{Float64}, 
+                    Aij::Float64, Bij::Float64)
   rvec = rj - ri
   r    = norm(rvec)
   E    = Aij * exp(-Bij * r)
@@ -79,7 +84,8 @@ function _shortDisp(ri, rj, Aij, Bij)
   E,F
 end
 
-function _shortDisp!(F, u, i, j, Aij, Bij)
+function _shortDisp!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}}, 
+                     i::Int64, j::Int64, Aij::Float64, Bij::Float64)
   rvec  = u[j] - u[i]
   r     = norm(rvec)
   E     = Aij * exp(-Bij * r)
@@ -90,7 +96,8 @@ function _shortDisp!(F, u, i, j, Aij, Bij)
   E
 end
 
-function _longDisp(ri, rj, Cij; damp=nothing, p=nothing)
+function _longDisp(ri::Vector{Float64}, rj::Vector{Float64}, 
+                   Cij::Float64; damp=nothing, p=nothing)
   rvec = rj - ri
   r    = norm(rvec)
   
@@ -105,7 +112,8 @@ function _longDisp(ri, rj, Cij; damp=nothing, p=nothing)
   E,F
 end
 
-function _longDisp!(F, u, i, j, Cij; damp=nothing, p=nothing)
+function _longDisp!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},  
+                    i::Int64, j::Int64, Cij::Float64; damp=nothing, p=nothing)
   rvec  = u[j] - u[i]
   r     = norm(rvec)
 
