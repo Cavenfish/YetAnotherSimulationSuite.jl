@@ -30,13 +30,6 @@ function makeBdys(cell)::Vector{MyAtoms}
   [Atom(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
 end
 
-function getScaledPos(bdys::Vector{MyAtoms}, lattice)
-
-  T    = inv(lattice)
-  
-  [T * i.r for i in bdys]
-end
-
 function getScaledPos(x0, lattice)
 
   T    = inv(lattice)
@@ -67,16 +60,6 @@ function wrap!(cell)
 
   for i = 1:length(r)
     cell.scaled_pos[i] .= T * r[i]
-  end
-
-end
-
-function wrap!(bdys, lattice)
-
-  f = [floor.(transpose(lattice) \ i.r) for i in bdys]
-  
-  for i = 1:length(bdys)
-    bdys[i].r .-= transpose(lattice) * f[i]
   end
 
 end
@@ -126,11 +109,12 @@ function replicate(cell, N)
   Cell(newLat, newScaledPos, newM, newS, cell.PBC, cell.NC)
 end
 
-function getMIC(bdys, lattice)
-  a,b,c  = eachrow(lattice)
+function getMIC(cell::MyCell)
+  a,b,c  = eachrow(cell.lattice)
   new    = MyAtoms[]
   s      = repeat([i.s for i in bdys], 27)
   m      = repeat([i.m for i in bdys], 27)
+  v      = repeat([i.v for i in bdys], 27)
 
   # I think it is
   f = [i*a + j*b + k*c + bdys[q].r
@@ -140,10 +124,10 @@ function getMIC(bdys, lattice)
               for q = 1:length(bdys)]
 
   for i = 1:length(f)
-    push!(new, Atom(f[i], zeros(3), m[i], s[i]))
+    push!(new, Atom(f[i], v[i], m[i], s[i]))
   end
 
-  new
+  makeCell(new, cell.lattice*3, PBC=cell.PBC, NC=cell.NC)
 end
 
 function makeSuperCell(cell, T)

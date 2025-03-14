@@ -7,13 +7,13 @@ mutable struct Atom <: MyAtoms
   s::Char
 end
 
-function translateBdys!(bdys, v)
+function translateBdys!(bdys::Vector{MyAtoms}, v)
   for i in bdys
     i.r .+= v
   end
 end
 
-function swapAtoms!(bdys, i, j)
+function swapAtoms!(bdys::Vector{MyAtoms}, i, j)
   a = bdys[i].r
   b = bdys[j].r
 
@@ -21,21 +21,21 @@ function swapAtoms!(bdys, i, j)
   bdys[j].r = a
 end
 
-function centerBdys!(bdys)
+function centerBdys!(bdys::Vector{MyAtoms})
   com = CoM(bdys)
   for i in bdys
     i.r -= com
   end
 end
 
-function swapIso!(bdys, swap, mas)
+function swapIso!(bdys::Vector{MyAtoms}, swap, mas)
   for i in 1:length(swap)
     j         = swap[i]
     bdys[j].m = mas[i]
   end
 end
 
-function getSurfaceMolecules(bdys; α=nothing)
+function getSurfaceMolecules(bdys::Vector{MyAtoms}; α=nothing)
   mols = getMols(bdys, 1.5)
 
   pts  = [i.r for i in bdys]
@@ -50,7 +50,7 @@ function getSurfaceMolecules(bdys; α=nothing)
   surf
 end
 
-function pickRandomMol(bdys, loc)
+function pickRandomMol(bdys::Vector{MyAtoms}, loc)
 
   surf = getSurfaceMolecules(bdys)
   bulk = [i for i in bdys if !(i in surf)]
@@ -67,4 +67,42 @@ function pickRandomMol(bdys, loc)
 
   end
   
-end 
+end
+
+function getScaledPos(bdys::Vector{MyAtoms}, lattice)
+
+  T    = inv(lattice)
+  
+  [T * i.r for i in bdys]
+end
+
+function getMIC(bdys::Vector{MyAtoms}, lattice)
+  a,b,c  = eachrow(lattice)
+  new    = MyAtoms[]
+  s      = repeat([i.s for i in bdys], 27)
+  m      = repeat([i.m for i in bdys], 27)
+  v      = repeat([i.v for i in bdys], 27)
+
+  # I think it is
+  f = [i*a + j*b + k*c + bdys[q].r
+        for i = -1:1 
+          for j = -1:1 
+            for k = -1:1 
+              for q = 1:length(bdys)]
+
+  for i = 1:length(f)
+    push!(new, Atom(f[i], v[i], m[i], s[i]))
+  end
+
+  new
+end
+
+function wrap!(bdys::Vector{MyAtoms}, lattice)
+
+  f = [floor.(transpose(lattice) \ i.r) for i in bdys]
+  
+  for i = 1:length(bdys)
+    bdys[i].r .-= transpose(lattice) * f[i]
+  end
+
+end
