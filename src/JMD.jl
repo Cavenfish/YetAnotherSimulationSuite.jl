@@ -142,7 +142,6 @@ module JMD
   include("./md/post-processing.jl")
 
   include("./md/potentials/MvHff.jl")
-  include("./md/potentials/COCOff.jl")
   include("./md/potentials/HGNN.jl")
   include("./md/potentials/TIP4P.jl")
   include("./md/potentials/SPC-F.jl")
