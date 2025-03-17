@@ -90,6 +90,7 @@ function replicate(cell, N)
   a,b,c  = eachrow(cell.lattice)
   m      = length(cell.symbols)
   n      = prod(N)
+  newV   = repeat(cell.velocity, n)
   newS   = repeat(cell.symbols, n)
   newM   = repeat(cell.masses, n)
   newLat = cell.lattice * Diagonal(N)
@@ -106,7 +107,7 @@ function replicate(cell, N)
 
   newScaledPos = [inv(newLat) * r for r in newPos]
 
-  Cell(newLat, newScaledPos, newM, newS, cell.PBC, cell.NC)
+  Cell(newLat, newScaledPos, newV, newM, newS, cell.PBC, cell.NC)
 end
 
 function getMIC(cell::MyCell)
