@@ -139,19 +139,24 @@ function writeCell(fileName::String, cell)
   close(f)
 end
 
-function writeXyzTraj(fileName::String, solu; dt=1)
+function writeXyzTraj(fileName::String, solu; dt=1, lat=nothing)
   f    = open(fileName, "w")
   bdys = solu.prob.p.bdys
   N    = length(bdys)
   T    = length(solu.t)
-
 
   for i in 1:dt:T
     t = solu.t[i]
     u = solu.u[i].x[2] # x[1] -> vel || x[2] -> pos
 
     println(f, N)
-    println(f, "i=$i, time=$t")
+
+    if lat != nothing
+      l = replace("$(lat)", [';', '[', ']'] => "")
+      println(f, "i=$i, time=$t, Lattice=\"$l\"")
+    else
+      println(f, "i=$i, time=$t")
+    end
 
     for j in 1:N
 
@@ -166,7 +171,7 @@ function writeXyzTraj(fileName::String, solu; dt=1)
   close(f)
 end 
 
-function writeXyzTraj(fileName::String, tj::MyTraj; dt=1)
+function writeXyzTraj(fileName::String, tj::MyTraj; dt=1, lat=nothing)
   f = open(fileName, "w")
   T = length(tj.t)
   N = length(tj.m)
@@ -176,7 +181,13 @@ function writeXyzTraj(fileName::String, tj::MyTraj; dt=1)
     u = tj.r[i]
 
     println(f, N)
-    println(f, "i=$i, time=$t")
+
+    if lat != nothing
+      l = replace("$(lat)", [';', '[', ']'] => "")
+      println(f, "i=$i, time=$t, Lattice=\"$l\"")
+    else
+      println(f, "i=$i, time=$t")
+    end
 
     for j in 1:N
 
