@@ -1,55 +1,108 @@
-
-
 #Atoms in simulation
 #Needs mutable to swap masses on the fly
-mutable struct Atom 
+mutable struct Atom <: MyAtoms
   r::Vector{Float64}
   v::Vector{Float64}
   m::Float64
   s::Char
 end
 
-function getMols(bdys, rmax; D=3)
-  r   = [i.r for i in bdys]
-
-  pts = hcat(r...)
-
-  ret = dbscan(pts[1:D, :], rmax)
-
-  [i.core_indices for i in ret.clusters]
+function translateBdys!(bdys::Vector{MyAtoms}, v)
+  for i in bdys
+    i.r .+= v
+  end
 end
 
-function getPairs(bdys)
+function swapAtoms!(bdys::Vector{MyAtoms}, i, j)
+  a = bdys[i].r
+  b = bdys[j].r
 
-  # Get mols and N
-  mols = if length(bdys) <= 3
-    getMols(bdys, 1.5, D=length(bdys)-1) 
-  else
-    getMols(bdys, 1.5)
-  end
-  N    = size(mols)[1]
-
-  # Make all pairs
-  pars = Pair[]
-  for i in 1:N
-    for j in i+1:N
-      push!(pars, Pair(mols[i],mols[j]))
-    end
-  end
-
-  return pars, mols
+  bdys[i].r = b
+  bdys[j].r = a
 end
 
-# Only works with orthorombic 
-function getScaledPos(bdys, box)
+function centerBdys!(bdys::Vector{MyAtoms})
+  com = CoM(bdys)
+  for i in bdys
+    i.r -= com
+  end
+end
 
-  scaledPos = [i.r for i in bdys]
+function swapIso!(bdys::Vector{MyAtoms}, swap, mas)
+  for i in 1:length(swap)
+    j         = swap[i]
+    bdys[j].m = mas[i]
+  end
+end
 
-  for i = 1:length(scaledPos)
-    for j = 1:3
-      scaledPos[i][j] /= box[j]
-    end
+function getSurfaceMolecules(bdys::Vector{MyAtoms}; α=nothing)
+  mols = getMols(bdys, 1.5)
+
+  pts  = [i.r for i in bdys]
+
+  A    = alphashape(pts; α=α)
+  
+  i = vcat(A.perimeter...) |> unique
+  j = findall.(e -> e in i, mols) |> (x -> findall(e -> !isempty(e), x))
+
+  surf = bdys[vcat(mols[j]...)]
+
+  surf
+end
+
+function pickRandomMol(bdys::Vector{MyAtoms}, loc)
+
+  surf = getSurfaceMolecules(bdys)
+  bulk = [i for i in bdys if !(i in surf)]
+
+  if loc == "surf"
+
+    mols = getMols(bdys, 1.5)
+    return surf[rand(mols)]
+
+  elseif loc == "bulk"
+
+    mols = getMols(bdys, 1.5)
+    return bulk[rand(mols)]
+
   end
   
-  scaledPos
+end
+
+function getScaledPos(bdys::Vector{MyAtoms}, lattice)
+
+  T    = inv(lattice)
+  
+  [T * i.r for i in bdys]
+end
+
+function getMIC(bdys::Vector{MyAtoms}, lattice)
+  a,b,c  = eachrow(lattice)
+  new    = MyAtoms[]
+  s      = repeat([i.s for i in bdys], 27)
+  m      = repeat([i.m for i in bdys], 27)
+  v      = repeat([i.v for i in bdys], 27)
+
+  # I think it is
+  f = [i*a + j*b + k*c + bdys[q].r
+        for i = -1:1 
+          for j = -1:1 
+            for k = -1:1 
+              for q = 1:length(bdys)]
+
+  for i = 1:length(f)
+    push!(new, Atom(f[i], v[i], m[i], s[i]))
+  end
+
+  new
+end
+
+function wrap!(bdys::Vector{MyAtoms}, lattice)
+
+  f = [floor.(transpose(lattice) \ i.r) for i in bdys]
+  
+  for i = 1:length(bdys)
+    bdys[i].r .-= transpose(lattice) * f[i]
+  end
+
 end

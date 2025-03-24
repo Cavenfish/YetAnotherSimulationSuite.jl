@@ -19,72 +19,98 @@ struct _MBX_PotVars <: PotVars
   mon_nams
 end
 
-function MBX(bdys)
-  monomers = Dict()
-  monomers["nh4+"] = ["N","H","H","H","H"]
-  monomers["nh3"] = ["N","H","H","H"]
-  monomers["ch4"] = ["C","H","H","H","H"]
-  monomers["pf6-"] = ["P","F","F","F","F","F","F"]
-  monomers["co2"] = ["C","O","O"]
-  monomers["li"] = ["Li"]
-  monomers["na"] = ["Na"]
-  monomers["k"] = ["K"]
-  monomers["rb"] = ["Rb"]
-  monomers["cs"] = ["Cs"]
-  monomers["f"] = ["F"]
-  monomers["cl"] = ["Cl"]
-  monomers["br"] = ["Br"]
-  monomers["i"] = ["I"]
-  monomers["ar"] = ["Ar"]
-  monomers["he"] = ["He"]
-  monomers["h2"] = ["H","H"]
-  monomers["h2o"] = ["O","H","H"]
-  monomers["n2o5"] = ["O","N","N","O","O","O","O"]
+function MBX(bdys::Vector{MyAtoms})
 
   xyz = [j for i in bdys for j in i.r]
 
   at_nams = [string(i.s) for i in bdys]
 
-  mon_nams = String[]
-  num_ats  = Int32[]
-
-  tmp = values(monomers) |> (x -> length.(x)) |> unique |> sort |> reverse
-
-  a = 1
-  b = 0
-  while a <= length(at_nams)
-    for i in tmp
-      a+i-1 > length(at_nams) && continue
-      cur_ats = at_nams[a:a+i-1]
-      for j in keys(monomers)
-        if monomers[j] == cur_ats
-          push!(mon_nams, j)
-          push!(num_ats, length(monomers[j]))
-          a += length(monomers[j])
-          break
-        end
-      end
-    end
-    b += 1
-    if b > length(at_nams)
-      @error "Check xyz file"
-    end
-  end
+  mon_nams, num_ats = mbx_get_monomer_info(at_nams)
 
   num_mon = length(mon_nams)
 
-  sym = dlsym(libmbx, :initialize_system_py_)
+  vars = if isdefined(MBX_USER_JSON)
+    _MBX_PotVars(
+      xyz, MBX_USER_JSON, num_ats, 
+      at_nams, num_mon, mon_nams
+    )
+  else
+    _MBX_PotVars(
+      xyz, MBX_GAS_JSON, num_ats, 
+      at_nams, num_mon, mon_nams
+    )
+  end
 
-  vars = _MBX_PotVars(xyz, MBXjson, num_ats, at_nams, num_mon, mon_nams)
+  ccall(
+    (:initialize_system_py_, libmbx), Cvoid,
+    (Ptr{Cdouble}, 
+     Ptr{Cint}, 
+     Ptr{Ptr{Cchar}}, 
+     Ptr{Ptr{Cchar}}, 
+     Ref{Cint}, 
+     Ptr{Cchar}
+    ),
+    vars.xyz, 
+    vars.num_ats, 
+    vars.at_nams, 
+    vars.mon_nams, 
+    vars.num_mon, 
+    vars.json
+  )
 
-  @ccall $sym(
-    vars.xyz::Ptr{Cdouble},
-    vars.num_ats::Ptr{Cint},
-    vars.at_nams::Ptr{Ptr{Cchar}},
-    vars.mon_nams::Ptr{Ptr{Cchar}},
-    vars.num_mon::Ref{Cint},
-    vars.json::Ptr{Cchar}
-  )::Cvoid
+  vars
+end
+
+function MBX(cell::MyCell)
+
+  xyz = getPos(cell)
+
+  at_nams = [string(i) for i in cell.symbols]
+
+  mon_nams, num_ats = mbx_get_monomer_info(at_nams)
+
+  num_mon = length(mon_nams)
+
+  vars = if isdefined(MBX_USER_JSON)
+    _MBX_PotVars(
+      xyz, MBX_USER_JSON, num_ats, 
+      at_nams, num_mon, mon_nams
+    )
+  else
+    _MBX_PotVars(
+      xyz, MBX_PBC_JSON, num_ats, 
+      at_nams, num_mon, mon_nams
+    )
+  end
+  
+  ccall(
+    (:initialize_system_py_, libmbx), Cvoid,
+    (Ptr{Cdouble}, 
+     Ptr{Cint}, 
+     Ptr{Ptr{Cchar}}, 
+     Ptr{Ptr{Cchar}}, 
+     Ref{Cint}, 
+     Ptr{Cchar}
+    ),
+    vars.xyz, 
+    vars.num_ats, 
+    vars.at_nams, 
+    vars.mon_nams, 
+    vars.num_mon, 
+    vars.json
+  )
+
+  if !isdiag(cell.lattice)
+    @warn "Cell lattice is not diagonal.
+    MBX requires a diagonal lattice.
+    Current lattice will be cast as diagonal 
+      --> cell.lattice .= Diagonal(cell.lattice)"
+
+    cell.lattice .= Diagonal(cell.lattice)
+  end
+
+  box  = reshape(cell.lattice, 9) |> (x -> convert(Vector{Float64}, x))
+  mbx_set_box(box)
 
   vars
 end
@@ -104,7 +130,7 @@ function MBX(dv, v, u, p, t)
   end
 
   dv .= F ./ p.m
-  if typeof(p) == NVTsimu
+  if p.NVT
     p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
   end
 
@@ -129,19 +155,34 @@ function MBX(F, G, y0, p)
 
 end
 
-function MBX(box, scaled_pos)
+function MBX(F, G, cell::MyCell, lat)
+  tmp          = deepcopy(cell)
+  tmp.lattice .= reshape(lat, (3,3))
 
-  y0 = zeros(length(scaled_pos))
+  # Force all bond lengths to be 0.975 to prevent bias
+  pos  = getPos(cell)
+  for i = 1:3:length(pos)
+    ro, rh1, rh2 = pos[[i, i+1, i+2]]
+    
+    rvec  = ro - rh1
+    r     = norm(rvec)
+    x     = 0.975 - r
+    rh1 .-= x * (rvec / r)
 
-  for i = 1:3:length(y0)
-    y0[i]   = scaled_pos[i]   * box[1]
-    y0[i+1] = scaled_pos[i+1] * box[2]
-    y0[i+2] = scaled_pos[i+2] * box[3]
+    rvec  = ro - rh2
+    r     = norm(rvec)
+    x     = 0.975 - r
+    rh2 .-= x * (rvec / r)
+
+    #Maybe I can condense this somehow
   end
 
-  nats = convert(Int32, length(y0)/3)
-  tmp  = [box[1], 0,0,0, box[2], 0,0,0, box[3]]
-  
-  mbx_set_box(tmp)
-  mbx_get_energy(y0, nats)
+  # Orthogonal stress because MBX only does orthogonal
+  if G != nothing
+    G .= getNumericalStressOrthogonal(MBX, tmp) |> (x -> reshape(x, 9))
+  end
+
+  if F != nothing
+    return getPotEnergy(MBX, tmp)
+  end
 end

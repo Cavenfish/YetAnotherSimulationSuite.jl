@@ -14,6 +14,7 @@ module JMD
   using Optim
   using PyCall
   using LsqFit
+  using Spglib
   using MiniQhull
   using DataFrames
   using Statistics#might not be used
@@ -27,34 +28,49 @@ module JMD
   using SpecialFunctions#might not be used
   using FiniteDifferences
 
+  # Wrapper for ASE calculator with SCME/f potential
+  function __init__()
+    @pyinclude(joinpath(@__DIR__, "lib/SCMEf/libscmef.py"))
+  end
 
   export
     #constants
     fs, ps, ns, kB,
 
     #io.jl
-    readASExyz, readXyz, writeXyz, writeXyzTraj,
+    readASExyz, readXyz, writeXyz, readCell, writeCell, writeXyzTraj,
 
     #helpers.jl
-    CoM, vCoM, zeroVCoM!, swapIso!, vibExcite!, transExcite!, pickRandomMol, 
-    getFrame, getFrame!, getLastFrame, getLastFrame!, getPotEnergy, getForces,
-    centerBdys!,
+    CoM, vCoM, zeroVCoM!, getFrame, getFrame!, getLastFrame, getLastFrame!,
+    getForces,
 
-    #bodies.jl
+    #energetics.jl
+    vibExcite!, transExcite!, getPotEnergy,
+
+    #molsAndPairs.jl
     getMols, getPairs,
 
+    #bodies.jl
+    swapIso!, pickRandomMol, centerBdys!,
+
+    #cells.jl
+    makeCell, makeBdys, getScaledPos, getPos, wrap!, replicate, makeSuperCell,
+    getMIC, center!, getPrimitiveCell, getVolume,
+
     #potentials
-    COCO, HGNN, MBX, SPCF, TIP4P,
+    MvHff, HGNN, MBX, SPCF, TIP4P, SCMEf,
 
     #simulation.jl
-    runNVE, runNVT,
+    runMD,
 
     #thermostats.jl
     Berendsen, Berendsen!, Langevin, Langevin!, BDP, BDP!, BDPnT, BDPnT!,
 
     #post-processing.jl
-    processDynamics, processDynamics!, processTmpFiles, trackVACF,
-    trackEnergyDissipation, trackAllVibEnergy, trackRadialEnergy,
+    processDynamics, processDynamics!, processTmpFiles, 
+    
+    #tracking.jl
+    trackVACF, trackEnergyDissipation, trackAllVibEnergy, trackRadialEnergy,
 
     #vacf.jl
     vacfInps, VDOS, getVelMas,
@@ -67,10 +83,11 @@ module JMD
     #optimizations.jl
     opt, optCell,
 
-    #structural.jl
+    #distributions.jl
     rdf, adf, density,
 
-    #decayRates.jl
+    #stress.jl
+    getNumericalStress, getNumericalStressOrthogonal,
 
     #freqShifts.jl
     getINM, getMolFreq, getAllFreqs, getFvE, getFreqCoupling,
@@ -100,7 +117,7 @@ module JMD
     hitAndStick, HnS,
 
     #phonopy.jl
-    phonopy_addForces
+    phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons
   
   #end exports
 
@@ -118,17 +135,21 @@ module JMD
   include("./lib/MBX/libmbx.jl")
   include("./lib/Phonopy/phonopy.jl")
 
+  include("./md/cells.jl")
   include("./md/bodies.jl")
-  include("./md/potentials/MvHffCO.jl")
-  include("./md/potentials/COCOff.jl")
+  include("./md/simulation.jl")
+  include("./md/thermostats.jl")
+  include("./md/post-processing.jl")
+
+  include("./md/potentials/MvHff.jl")
   include("./md/potentials/HGNN.jl")
   include("./md/potentials/TIP4P.jl")
   include("./md/potentials/SPC-F.jl")
   include("./md/potentials/CH4.jl")
   include("./md/potentials/MBX.jl")
-  include("./md/simulation.jl")
-  include("./md/thermostats.jl")
-  include("./md/post-processing.jl")
+  include("./md/potentials/SCMEf.jl")
+
+  include("./md/potentials/funcs/PBC.jl")
   include("./md/potentials/funcs/intra.jl")
   include("./md/potentials/funcs/inter.jl")
   include("./md/potentials/funcs/damping.jl")
@@ -138,16 +159,22 @@ module JMD
   include("./analysis/desorb.jl")
   include("./analysis/vibrations.jl")
   include("./analysis/optimizations.jl")
-  include("./analysis/structral.jl")
   include("./analysis/decayRates.jl")
   include("./analysis/freqShifts.jl")
   include("./analysis/participationRatio.jl")
-  include("./analysis/neighbors.jl")
   include("./analysis/vibCoup.jl")
+  include("./analysis/energetics.jl")
+  include("./analysis/trajectories/tracking.jl")
+
+  include("./structural/distributions.jl")
+  include("./structural/molsAndPairs.jl")
+  include("./structural/neighbors.jl")
 
   include("./mathtk/alphashape.jl")
   include("./mathtk/savitzkyGolay.jl")
   include("./mathtk/peakFinding.jl")
+  include("./mathtk/stress.jl")
+  include("./mathtk/basicMath.jl")
 
   include("./building/anneal.jl")
   include("./building/hitAndStick.jl")

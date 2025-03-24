@@ -1,16 +1,4 @@
-
-struct NVEsimu
-  bdys::Vector
-  pars::Vector
-  mols::Vector
-  energy::Vector
-  forces::Vector
-  save::String
-  m::Vector
-  potVars::PotVars
-end
-
-struct NVTsimu
+struct Simulation
   bdys::Vector
   pars::Vector
   mols::Vector
@@ -18,54 +6,67 @@ struct NVTsimu
   forces::Vector
   temp::Vector
   save::String
+  PBC::Vector{Bool}
+  NC::Vector{Int32}
+  lattice::Matrix
   m::Vector
   potVars::PotVars
-  thermostat!::Function
+  NVT::Bool
+  thermostat!
   thermoInps
 end
 
-function runNVE(EoM, tspan, dt, bdys; save="full", kwargs...)
-  pos   = [SVector{3}(i.r) for i in bdys]
-  vel   = [SVector{3}(i.v) for i in bdys]
-  mas   = [i.m for i in bdys]
+function runMD(EoM, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
+               dt::Float64; save="full", thermostat=nothing, thermoinps=nothing, kwargs...)
+             
+  NC         = [0,0,0]
+  PBC        = repeat([false], 3)
+  lattice    = zeros(3,3)
+  mas        = [i.m for i in bdys]
+  potVars    = EoM(bdys)
+  pars, mols = getPairs(bdys)
+  pos        = [SVector{3}(i.r) for i in bdys]
+  vel        = [SVector{3}(i.v) for i in bdys]
+
+  if thermoinps != nothing && thermostat != nothing
+    NVT = true
+  else
+    NVT = false
+  end
+
+  simu = Simulation(
+    bdys, pars, mols, [], [], [],
+    save, PBC, NC, lattice, mas, potVars,
+    NVT, thermostat, thermoinps
+  )
+
+  prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   
-  potVars    = EoM(bdys)
-  pars, mols = getPairs(bdys)
-  simu       = NVEsimu(bdys, pars, mols, [], [], save, mas, potVars)
-
-  prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
-  solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
-
-  return solu
+  solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
 end
 
-function runNVE(EoM, t1, t2, dt, bdys; save="full", kwargs...)
-  pos   = [SVector{3}(i.r) for i in bdys]
-  vel   = [SVector{3}(i.v) for i in bdys]
-  mas   = [i.m for i in bdys]
-  tspan = (t1,t2)
+function runMD(EoM, cell::MyCell, tspan::Tuple{Float64, Float64}, dt::Float64; 
+               save="full", thermostat=nothing, thermoinps=nothing, kwargs...)
 
-  potVars    = EoM(bdys)
+  bdys       = makeBdys(cell)
+  potVars    = EoM(cell)
   pars, mols = getPairs(bdys)
-  simu       = NVEsimu(bdys, pars, mols, [], [], save, mas, potVars)
+  pos        = [SVector{3}(i.r) for i in bdys]
+  vel        = [SVector{3}(i.v) for i in bdys]
+
+  if thermoinps != nothing && thermostat != nothing
+    NVT = true
+  else
+    NVT = false
+  end
+
+  simu = Simulation(
+    bdys, pars, mols, [], [], [],
+    save, cell.PBC, cell.NC, cell.lattice, cell.masses, potVars,
+    NVT, thermostat, thermoinps
+  )
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
-  solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false, save_start=false)
-
-  return solu
-end
-
-function runNVT(EoM, tspan, dt, bdys, thermostat, thermoInps; save="full", kwargs...)
-  pos   = [SVector{3}(i.r) for i in bdys]
-  vel   = [SVector{3}(i.v) for i in bdys]
-  mas   = [i.m for i in bdys]
-
-  potVars    = EoM(bdys)
-  pars, mols = getPairs(bdys)
-  simu       = NVTsimu(bdys, pars, mols, [], [], [], save, mas, potVars, thermostat, thermoInps)
-
-  prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
-  solu  = solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
-
-  return solu
+  
+  solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
 end
