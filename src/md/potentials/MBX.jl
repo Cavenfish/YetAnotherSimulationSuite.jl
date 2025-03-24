@@ -29,9 +29,9 @@ function MBX(bdys::Vector{MyAtoms})
 
   num_mon = length(mon_nams)
 
-  vars = if isdefined(MBX_USER_JSON)
+  vars = if isdefined(Main, :MBX_USER_JSON)
     _MBX_PotVars(
-      xyz, MBX_USER_JSON, num_ats, 
+      xyz, Main.MBX_USER_JSON, num_ats, 
       at_nams, num_mon, mon_nams
     )
   else
@@ -71,9 +71,9 @@ function MBX(cell::MyCell)
 
   num_mon = length(mon_nams)
 
-  vars = if isdefined(MBX_USER_JSON)
+  vars = if isdefined(Main, :MBX_USER_JSON)
     _MBX_PotVars(
-      xyz, MBX_USER_JSON, num_ats, 
+      xyz, Main.MBX_USER_JSON, num_ats, 
       at_nams, num_mon, mon_nams
     )
   else
