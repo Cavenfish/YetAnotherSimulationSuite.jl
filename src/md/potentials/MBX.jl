@@ -29,7 +29,17 @@ function MBX(bdys::Vector{MyAtoms})
 
   num_mon = length(mon_nams)
 
-  vars = _MBX_PotVars(xyz, MBX_GAS_JSON, num_ats, at_nams, num_mon, mon_nams)
+  vars = if isdefined(MBX_USER_JSON)
+    _MBX_PotVars(
+      xyz, MBX_USER_JSON, num_ats, 
+      at_nams, num_mon, mon_nams
+    )
+  else
+    _MBX_PotVars(
+      xyz, MBX_GAS_JSON, num_ats, 
+      at_nams, num_mon, mon_nams
+    )
+  end
 
   ccall(
     (:initialize_system_py_, libmbx), Cvoid,
@@ -61,8 +71,18 @@ function MBX(cell::MyCell)
 
   num_mon = length(mon_nams)
 
-  vars = _MBX_PotVars(xyz, MBX_PBC_JSON, num_ats, at_nams, num_mon, mon_nams)
-
+  vars = if isdefined(MBX_USER_JSON)
+    _MBX_PotVars(
+      xyz, MBX_USER_JSON, num_ats, 
+      at_nams, num_mon, mon_nams
+    )
+  else
+    _MBX_PotVars(
+      xyz, MBX_PBC_JSON, num_ats, 
+      at_nams, num_mon, mon_nams
+    )
+  end
+  
   ccall(
     (:initialize_system_py_, libmbx), Cvoid,
     (Ptr{Cdouble}, 
