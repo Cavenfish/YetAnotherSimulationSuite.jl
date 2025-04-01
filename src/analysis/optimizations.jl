@@ -98,3 +98,42 @@ function optCell(EoM, algo, cell::MyCell; kwargs...)
 
   ret
 end
+
+
+# optSuper and potPBC are good first run functions 
+# however, they are not efficient and NEED to be redone.
+
+# Should be done without reallocating cells/potVars at
+# every iteration.
+
+function optSuper(EoM, algo, cell, T; kwargs...)
+
+  x0       = getPos(cell) |> (x -> vcat(x...))
+  tmp      = deepcopy(cell)
+  optFunc  = Optim.only_fg!((F,G,x) -> potPBC(F,G, EoM, tmp, T, x))
+  convCrit = Optim.Options(; kwargs...)
+  res      = optimize(optFunc, x0, algo, convCrit)
+  spos     = getScaledPos(res.minimizer, cell.lattice)
+
+  Cell(cell.lattice, spos, cell.velocity, cell.masses, cell.symbols, cell.PBC, cell.NC)  
+end
+
+function potPBC(F, G, EoM, cell, T, x0)
+  spos = getScaledPos(x0, cell.lattice)
+
+  for i in 1:length(cell.scaled_pos)
+    cell.scaled_pos[i] .= spos[i]
+  end
+
+  N     = length(x0)
+  super = makeSuperCell(cell, T)
+
+  if G != nothing
+    G .= - getForces(EoM, super) |> (x -> vcat(x...)[1:N])
+  end
+  
+  if F != nothing
+    return getPotEnergy(EoM, super) / det(T)
+  end
+
+end

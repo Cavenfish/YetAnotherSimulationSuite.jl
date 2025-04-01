@@ -1,23 +1,46 @@
 """
 Wrapper for phonopy python api
+
+Notes
+-------
+Phonopy has strange ways of doing matrix/vector math.
+
+To calculate the positions of atoms they do:
+  [    ] |    |
+   ^spos |    |
+          ^lattice
+
+Then to calculate the primitive or supercell they do:
+  T * Lat
+
+Since JMD does primitive and supercell transforms identically,
+but does column vectors for spos; we cannot pass spos between
+phonopy and JMD.
 """
 
-# For now supercell is fixed, can become variable if the 
-# reordering problem is solved
-function phonopy_getDisplacements(cell::MyCell, primitive; dist=0.02, symprec=1e-5)
-  # fixed supercell matrix
-  supercell = [[1, 0, 0], [0, 1, 0,], [0, 0, 1]]
+function reorderPhononpySupercell!(pos, n)
+  N = length(pos)
+  I = [j for i = 1:n for j = i:n:N]
+
+  pos .= pos[I]
+end
+
+
+function phonopy_getDisplacements(
+  cell::MyCell, primitive, supercell; dist=0.02, symprec=1e-5)
+
+  sFlag = sum.(supercell) |> prod
 
   # Imports
   phonopy      = pyimport("phonopy")
   PhonopyAtoms = phonopy.structure.atoms.PhonopyAtoms
 
-
   unitcell = PhonopyAtoms(
-    symbols          = string(cell.symbols...), 
-    cell             = cell.lattice, 
-    scaled_positions = cell.scaled_pos
+    symbols   = string(cell.symbols...), 
+    cell      = cell.lattice, 
+    positions = getPos(cell)
   )
+
   phonon   = phonopy.Phonopy(unitcell, 
     supercell_matrix = supercell, 
     primitive_matrix = primitive,
@@ -29,13 +52,24 @@ function phonopy_getDisplacements(cell::MyCell, primitive; dist=0.02, symprec=1e
 
   supercells = phonon.supercells_with_displacements
 
+  T        = hcat(supercell...)
+  n::Int64 = det(T)
+  lat      = T * cell.lattice
+  mas      = repeat(cell.masses,  n)
+  sym      = repeat(cell.symbols, n)
+
   cells = MyCell[]
   for dcell in supercells
-    tmp = deepcopy(cell)
+    N   = size(dcell.positions)[1]
+    pos = [dcell.positions[i, :] for i = 1:N]
 
-    for i = 1:length(tmp.scaled_pos)
-      tmp.scaled_pos[i] .= dcell.scaled_positions[i, :]
+    if sFlag != 1
+      reorderPhononpySupercell!(pos, n)
     end
+
+    spos = getScaledPos(vcat(pos...), lat)
+    vels = zero(spos)
+    tmp  = Cell(lat, spos, vels, mas, sym, cell.PBC, cell.NC)
 
     push!(cells, tmp)
   end

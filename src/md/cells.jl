@@ -135,7 +135,14 @@ function makeSuperCell(cell, T)
 
   lattice = T * cell.lattice
   N       = [T[1,1], T[2,2], T[3,3]]
-  
+
+  # Clean up machine precision noise
+  for i = 1:9
+    if lattice[i] < 1e-8
+      lattice[i] = 0.0
+    end 
+  end
+    
   super   = replicate(cell, N)
   bdys    = makeBdys(super)
   wrap!(bdys, lattice)
