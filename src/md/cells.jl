@@ -138,7 +138,7 @@ function makeSuperCell(cell, T)
 
   # Clean up machine precision noise
   for i = 1:9
-    if lattice[i] < 1e-8
+    if abs(lattice[i]) < 1e-8
       lattice[i] = 0.0
     end 
   end
