@@ -18,13 +18,27 @@ but does column vectors for spos; we cannot pass spos between
 phonopy and JMD.
 """
 
-function reorderPhononpySupercell!(pos, n)
+function reorderPhonopySupercell!(pos, n)
   N = length(pos)
   I = [j for i = 1:n for j = i:n:N]
 
   pos .= pos[I]
 end
 
+function reorderPhonopyForces!(forces, n)
+  N = length(forces[1])
+  I = [j for i = 1:n for j = i:n:N]
+  J = [j for i = 1:n for j = i:n:N]
+
+  for i = 1:length(I)
+    J[i] = findfirst(e -> e == i, I)
+  end
+
+  for f in forces
+    f .= f[J]
+  end
+  
+end
 
 function phonopy_getDisplacements(
   cell::MyCell, primitive, supercell; dist=0.02, symprec=1e-5)
@@ -64,7 +78,7 @@ function phonopy_getDisplacements(
     pos = [dcell.positions[i, :] for i = 1:N]
 
     if sFlag != 1
-      reorderPhononpySupercell!(pos, n)
+      reorderPhonopySupercell!(pos, n)
     end
 
     spos = getScaledPos(vcat(pos...), lat)
@@ -80,6 +94,9 @@ end
 function phonopy_addForces(yamlFile, saveName, forces; symprec=1e-5)
   phonopy    = pyimport("phonopy")
   obj        = phonopy.load(yamlFile, symprec=symprec)
+  n::Int64   = det(obj.supercell_matrix)
+
+  reorderPhonopyForces!(forces, n)
   obj.forces = forces
   obj.save(saveName)
 end
