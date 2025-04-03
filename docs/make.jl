@@ -1,3 +1,3 @@
 using Documenter
 
-makedocs(sitename="My Documentation")
+makedocs(sitename="JMD.jl")
