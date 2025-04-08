@@ -15,7 +15,7 @@ def scmef_get_energy(pos, cell, NC=[1,1,1], pbc=True):
     from pyscme.scme_calculator import SCMECalculator
 
     from ase import Atoms
-    from ase.units import Bohr, fs, Hartree
+    from ase.units import Bohr, Hartree
 
     # SCME params
     para_dict = {
@@ -61,7 +61,7 @@ def scmef_get_energy_and_forces(pos, cell, NC=[1,1,1], pbc=True):
     from pyscme.scme_calculator import SCMECalculator
 
     from ase import Atoms
-    from ase.units import Bohr, fs, Hartree
+    from ase.units import Bohr, Hartree
 
     # SCME params
     para_dict = {
