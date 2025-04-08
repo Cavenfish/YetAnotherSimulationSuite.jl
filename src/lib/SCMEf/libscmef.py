@@ -41,10 +41,9 @@ def scmef_get_energy(pos, cell, NC=[1,1,1], pbc=True):
         "qms": True
     }
 
-    symbols = ["O", "H", "H"] * int(len(pos)/3)
-
-    bdys = Atoms(symbols, pos, cell=cell)
-
+    # Define system
+    symbols  = ["O", "H", "H"] * int(len(pos)/3)
+    bdys     = Atoms(symbols, pos, cell=cell)
     bdys.pbc = pbc
 
     # Set SCME calc
@@ -87,10 +86,9 @@ def scmef_get_energy_and_forces(pos, cell, NC=[1,1,1], pbc=True):
         "qms": True
     }
 
-    symbols = ["O", "H", "H"] * int(len(pos)/3)
-
-    bdys = Atoms(symbols, pos, cell=cell)
-
+    # Define system
+    symbols  = ["O", "H", "H"] * int(len(pos)/3)
+    bdys     = Atoms(symbols, pos, cell=cell)
     bdys.pbc = pbc
 
     # Set SCME calc
