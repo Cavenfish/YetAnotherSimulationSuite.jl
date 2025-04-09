@@ -1,5 +1,5 @@
 
-@testset "HGNN Test" begin
+@testset "Original Code Test" begin
 
   o1   =  [ 0.507464,   -5.559636,    0.000000] ./ 0.5291772083
   c1   =  [-0.676403,   -4.827579,    0.000000] ./ 0.5291772083
@@ -18,7 +18,8 @@
   JMD.getUnitVectors!(hats, r[1],r[2],r[3],r[4])
 
   f        = JMD.jldopen(
-    joinpath(@__DIR__, "../../src/md/potentials/params/hgnn.jld2"))
+    joinpath(@__DIR__, "../../src/md/potentials/params/hgnn.jld2")
+  )
   molVars  = f["molVars"]
   pairVars = f["pairVars"]
 
@@ -56,5 +57,13 @@
   @test dv[4] ≈ -26.8 atol=1e-1
   @test dv[5] ≈ -21.9 atol=1e-1
   @test dv[6] ≈ 50.9 atol=1e-1
+
+end
+
+@testset "Test Opt" begin
+
+end
+
+@testset "Test Freqs" begin
 
 end
