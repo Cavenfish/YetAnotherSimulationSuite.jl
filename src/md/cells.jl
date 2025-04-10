@@ -64,24 +64,24 @@ function wrap!(cell)
 
 end
 
-# Only works for orthogonal cells 
-#  TODO: make work for all cells
 function center!(cell)
-  #Maybe a way to consolodate the following segment would be nice?
-  amax = [i[1] for i in cell.scaled_pos] |> maximum
-  amin = [i[1] for i in cell.scaled_pos] |> minimum
-  bmax = [i[2] for i in cell.scaled_pos] |> maximum
-  bmin = [i[2] for i in cell.scaled_pos] |> minimum
-  cmax = [i[3] for i in cell.scaled_pos] |> maximum
-  cmin = [i[3] for i in cell.scaled_pos] |> minimum
+  r  = getPos(cell)
+  r0 = sum(r) ./ length(r)
+  μ  = sum(0.5 * cell.lattice, dims=1) |> (x -> reshape(x, 3))
+  x  = μ - r0
   
-  A = (1 - amax - amin) / 2
-  B = (1 - bmax - bmin) / 2
-  C = (1 - cmax - cmin) / 2
-
-  for i in cell.scaled_pos
-    i .+= [A, B, C]
+  # Translate positions
+  for i in r
+    i .+= x
   end
+  
+  # Get scaled positions
+  spos = vcat(r...) |> (x -> getScaledPos(x, cell.lattice))
+
+  # Update scaled positions
+  for i in 1:length(spos)
+    cell.scaled_pos[i] .= spos[i]
+  end 
 
 end
 
