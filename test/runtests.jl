@@ -15,3 +15,11 @@ end
   end
 
 end
+
+@testset "Math Toolkit" begin
+
+  @testset "Peak Finding" begin
+    include("./mathtk/peakFinding_test.jl")
+  end
+
+end
