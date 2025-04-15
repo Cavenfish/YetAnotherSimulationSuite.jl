@@ -51,7 +51,7 @@ module JMD
     getMols, getPairs,
 
     #bodies.jl
-    swapIso!, pickRandomMol, centerBdys!,
+    swapIso!, pickRandomMol, centerBdys!, translateBdys!, swapAtoms!,
 
     #cells.jl
     makeCell, makeBdys, getScaledPos, getPos, wrap!, replicate, makeSuperCell,
