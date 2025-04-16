@@ -1,4 +1,9 @@
+[ci-img]: https://github.com/Cavenfish/JMD/actions/workflows/CI.yml/badge.svg
+[ci-url]: https://github.com/Cavenfish/JMD/actions/workflows/CI.yml
+
 # JMD.jl
+
+[![][ci-img]][ci-url] 
 
 Julia Molecular Dynamics (JMD)
 

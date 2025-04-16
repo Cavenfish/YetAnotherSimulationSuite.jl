@@ -1,4 +1,4 @@
-using Test, JMD
+using Test, JMD, LinearAlgebra
 
 @testset "IO" begin
   include("./io_test.jl")
@@ -10,8 +10,16 @@ end
     include("./potentials/hgnn_test.jl")
   end
 
-  @testset "COCO" begin
+  @testset "MvHff" begin
     include("./potentials/cocoff_test.jl")
+  end
+
+end
+
+@testset "Math Toolkit" begin
+
+  @testset "Peak Finding" begin
+    include("./mathtk/peakFinding_test.jl")
   end
 
 end

@@ -109,7 +109,7 @@ function HGNN(F, G, y0, p)
 
   # convert Angstrom to Bohr without allocating
   for i = 1:length(r)
-    r[i] ./= 5291772083
+    r[i] ./= 0.5291772083
   end
 
   for i in p.mols
@@ -290,12 +290,12 @@ end
 function getUnitVectors!(r, c1, o1, c2, o2)
   rhat(v) = v / sqrt(dot(v,v))
 
-  @. r[1,:] = rhat(c1 - o1)
-  @. r[2,:] = rhat(c2 - o2)
-  @. r[3,:] = rhat(c2 - o1)
-  @. r[4,:] = rhat(o2 - c1)
-  @. r[5,:] = rhat(o1 - o2)
-  @. r[6,:] = rhat(c1 - c2)
+  r[1,:] = rhat(c1 - o1)
+  r[2,:] = rhat(c2 - o2)
+  r[3,:] = rhat(c2 - o1)
+  r[4,:] = rhat(o2 - c1)
+  r[5,:] = rhat(o1 - o2)
+  r[6,:] = rhat(c1 - c2)
 end
 
 function multiHGNN(a, du, u, p, t)
