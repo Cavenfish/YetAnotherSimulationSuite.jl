@@ -7,7 +7,6 @@ using LinearAlgebra
   Aqua.test_all(JMD)
 end
 
-
 @testset "IO" begin
   include("./io_test.jl")
 end
