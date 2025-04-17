@@ -1,9 +1,12 @@
 [ci-img]: https://github.com/Cavenfish/JMD/actions/workflows/CI.yml/badge.svg
 [ci-url]: https://github.com/Cavenfish/JMD/actions/workflows/CI.yml
 
+[aqua-img]: https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg
+[aqua-url]: https://github.com/JuliaTesting/Aqua.jl
+
 # JMD.jl
 
-[![][ci-img]][ci-url] 
+[![][ci-img]][ci-url] [![][aqua-img]][aqua-url] 
 
 Julia Molecular Dynamics (JMD)
 

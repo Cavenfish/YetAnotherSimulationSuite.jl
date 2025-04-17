@@ -1,4 +1,11 @@
-using Test, JMD, LinearAlgebra
+using Aqua
+using Test
+using JMD
+using LinearAlgebra
+
+@testset "Aqua.jl" begin
+  Aqua.test_all(JMD)
+end
 
 @testset "IO" begin
   include("./io_test.jl")
