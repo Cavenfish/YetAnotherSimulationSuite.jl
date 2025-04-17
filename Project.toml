@@ -32,3 +32,13 @@ TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 PyCall = "1.96.4"
 Serialization = "1.11.0"
 Spglib = "0.9.4"
+
+[extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+
+[targets]
+test = ["Aqua", "JET", "Test", "SHA", "LinearAlgebra"]
