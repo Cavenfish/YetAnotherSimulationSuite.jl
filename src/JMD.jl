@@ -117,7 +117,10 @@ module JMD
     hitAndStick, HnS,
 
     #phonopy.jl
-    phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons
+    phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons,
+
+    #libscmef.jl
+    scmef_get_dipole
   
   #end exports
 
@@ -133,6 +136,7 @@ module JMD
   include("./helpers.jl")
 
   include("./lib/MBX/libmbx.jl")
+  include("./lib/SCMEf/libscmef.jl")
   include("./lib/Phonopy/phonopy.jl")
 
   include("./md/cells.jl")
