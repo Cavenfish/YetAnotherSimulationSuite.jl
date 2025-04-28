@@ -25,6 +25,14 @@ function makeCell(bdys::Vector{MyAtoms}, lattice;
   )
 end
 
+function trim!(cell::MyCell, iter)
+  deleteat!(cell.scaled_pos, iter)
+  deleteat!(cell.velocity, iter)
+  deleteat!(cell.masses, iter)
+  deleteat!(cell.symbols, iter)
+  deleteat!(cell.mask, iter)
+end
+
 function makeBdys(cell)::Vector{MyAtoms}
   pos  = getPos(cell)
   vel  = [i for i in cell.velocity]
@@ -120,20 +128,19 @@ function replicate!(super, cell, N)
 
   a,b,c  = eachrow(cell.lattice)
   m      = length(cell.symbols)
-  n      = prod(N)
+  n      = prod(N) * m
 
-  # Inplace update super scaled pos for non-replica atoms
-  for i = 1:m
-    super.scaled_pos[i] .= inv(super.lattice) * (cell.lattice * cell.scaled_pos[i])
+  if length(super.scaled_pos) != n*m
+    @error "super is the wrong size"
   end
 
-  x = m+1
-  for i = 1:N[1]-1
-    for j = 1:N[2]-1
-      for k = 1:N[3]-1
+  x = 1
+  for i = 0:N[1]-1
+    for j = 0:N[2]-1
+      for k = 0:N[3]-1
         for q = 1:m
-          # Skip if atom is masked
-          mask[q] || continue
+          # Skip replication if atom is masked
+          cell.mask[q] && x > m && continue
 
           # Get replicated pos
           r   = cell.lattice * cell.scaled_pos[q]
@@ -147,6 +154,11 @@ function replicate!(super, cell, N)
         end
       end
     end
+  end
+
+  # Trim super (if needed)
+  if x < n
+    trim!(super, x:n)
   end
 
 end
