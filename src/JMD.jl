@@ -120,7 +120,10 @@ module JMD
     phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons,
 
     #libscmef.jl
-    scmef_get_dipole
+    scmef_getDipole,
+
+    #libmbx.jl
+    mbx_getDipole
   
   #end exports
 
