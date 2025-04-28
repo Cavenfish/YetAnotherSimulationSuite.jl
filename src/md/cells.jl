@@ -7,11 +7,13 @@ struct Cell <: MyCell
   velocity::Vector{Vector{Float64}}
   masses::Vector{Float64}
   symbols::Vector{Char}
+  mask::Vector{Bool}
   PBC::Vector{Bool}
   NC::Vector{Int32}
 end
 
-function makeCell(bdys::Vector{MyAtoms}, lattice; PBC=repeat([true], 3), NC=[1,1,1])
+function makeCell(bdys::Vector{MyAtoms}, lattice; 
+  mask=repeat([false], length(bdys)), PBC=repeat([true], 3), NC=[1,1,1])
 
   Cell(
     lattice,
@@ -19,7 +21,7 @@ function makeCell(bdys::Vector{MyAtoms}, lattice; PBC=repeat([true], 3), NC=[1,1
     [i.v for i in bdys],
     [i.m for i in bdys],
     [i.s for i in bdys],
-    PBC, NC
+    mask, PBC, NC
   )
 end
 
@@ -93,6 +95,7 @@ function replicate(cell, N)
   newV   = repeat(cell.velocity, n)
   newS   = repeat(cell.symbols, n)
   newM   = repeat(cell.masses, n)
+  newMa  = repeat(cell.mask, n)
   newLat = cell.lattice * Diagonal(N)
   newPos = repeat(getPos(cell), n)
 
@@ -107,7 +110,45 @@ function replicate(cell, N)
 
   newScaledPos = [inv(newLat) * r for r in newPos]
 
-  Cell(newLat, newScaledPos, newV, newM, newS, cell.PBC, cell.NC)
+  Cell(
+    newLat, newScaledPos, newV, newM, newS,
+    newMa, cell.PBC, cell.NC
+  )
+end
+
+function replicate!(super, cell, N)
+
+  a,b,c  = eachrow(cell.lattice)
+  m      = length(cell.symbols)
+  n      = prod(N)
+
+  # Inplace update super scaled pos for non-replica atoms
+  for i = 1:m
+    super.scaled_pos[i] .= inv(super.lattice) * (cell.lattice * cell.scaled_pos[i])
+  end
+
+  x = m+1
+  for i = 1:N[1]-1
+    for j = 1:N[2]-1
+      for k = 1:N[3]-1
+        for q = 1:m
+          # Skip if atom is masked
+          mask[q] || continue
+
+          # Get replicated pos
+          r   = cell.lattice * cell.scaled_pos[q]
+          r .+= (i*a) + (j*b) + (k*c)
+
+          # inplace update super scaled pos
+          super.scaled_pos[x] .= inv(super.lattice) * r
+          
+          # increment x
+          x += 1
+        end
+      end
+    end
+  end
+
 end
 
 function getMIC(cell::MyCell)
@@ -128,13 +169,12 @@ function getMIC(cell::MyCell)
     push!(new, Atom(f[i], v[i], m[i], s[i]))
   end
 
-  makeCell(new, cell.lattice*3, PBC=cell.PBC, NC=cell.NC)
+  makeCell(new, cell.lattice*3, mask=cell.mask, PBC=cell.PBC, NC=cell.NC)
 end
 
 function makeSuperCell(cell, T)
 
   lattice = T * cell.lattice
-  N       = [T[1,1], T[2,2], T[3,3]]
 
   # Clean up machine precision noise
   for i = 1:9
@@ -143,11 +183,27 @@ function makeSuperCell(cell, T)
     end 
   end
     
-  super   = replicate(cell, N)
+  super   = replicate(cell, diag(T))
   bdys    = makeBdys(super)
   wrap!(bdys, lattice)
 
-  makeCell(bdys, lattice, PBC=cell.PBC, NC=cell.NC)
+  makeCell(bdys, lattice, mask=cell.mask, PBC=cell.PBC, NC=cell.NC)
+end
+
+function makeSuperCell!(super, cell, T)
+
+  super.lattice .= T * cell.lattice
+
+  # Clean up machine precision noise
+  for i = 1:9
+    if abs(super.lattice[i]) < 1e-8
+      super.lattice[i] = 0.0
+    end 
+  end
+    
+  replicate!(super, cell, diag(T))
+  wrap!(super)
+
 end
 
 function getPrimitiveCell(cell, symprec)
@@ -164,7 +220,10 @@ function getPrimitiveCell(cell, symprec)
   mas  = [ amu[i] for i in syms]
   L    = transpose(stan.lattice)
 
-  Cell(L, stan.positions, cell.velocity, mas, only.(syms), cell.PBC, cell.NC)
+  Cell(
+    L, stan.positions, cell.velocity, mas, 
+    only.(syms), cell.mask, cell.PBC, cell.NC
+  )
 end
 
 function getMols(cell::MyCell, rmax; D=3)

@@ -83,7 +83,10 @@ function opt(EoM, algo, cell::MyCell; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
 
-  Cell(cell.lattice, spos, cell.velocity, cell.masses, cell.symbols, cell.PBC, cell.NC)
+  Cell(
+    cell.lattice, spos, cell.velocity, cell.masses, 
+    cell.symbols, cell.mask, cell.PBC, cell.NC
+  )
 end
 
 function optCell(EoM, algo, cell::MyCell; kwargs...)
@@ -106,6 +109,29 @@ end
 # Should be done without reallocating cells/potVars at
 # every iteration.
 
+struct HiddenOptVars
+  potVars::PotVars
+  superBuf::MyCell
+  mols::Vector
+  pars::Vector
+  m::Vector{Float64}
+  mask::Vector{Bool}
+  PBC::Vector{Bool}
+  NC::Vector{Int32}
+  lattice::Matrix
+end
+
+# struct SuperBuffer
+#   pos::Vector{Vector{Float64}}
+#   cell::MyCell
+# end
+
+# TODO:
+# - make hidden opt vars struct hold buffers for super cell
+# - make a mask array to turn off pbc for some mols
+# - make optSuper and potPBC work with the hidden opt vars struct
+# - call this new functionality hiddenOpt?
+
 function optSuper(EoM, algo, cell, T; kwargs...)
 
   x0       = getPos(cell) |> (x -> vcat(x...))
@@ -127,6 +153,11 @@ function potPBC(F, G, EoM, cell, T, x0)
 
   N     = length(x0)
   super = makeSuperCell(cell, T)
+  bdys  = makeBdys(super)
+
+  deleteat!(bdys, mask)
+
+  super = makeCell(bdys, super.lattice)
 
   if G != nothing
     G .= - getForces(EoM, super) |> (x -> vcat(x...)[1:N])
