@@ -128,10 +128,20 @@ function replicate!(super, cell, N)
 
   a,b,c  = eachrow(cell.lattice)
   m      = length(cell.symbols)
+  M      = length(super.scaled_pos)
   n      = prod(N) * m
+  l      = n - (sum(cell.mask) * (prod(N) - 1))
 
-  if length(super.scaled_pos) != n*m
-    @error "super is the wrong size"
+  # End if super is too small 
+  # TODO: make this increase super size
+  if M < l 
+    @error "super is too small"
+    return
+  end
+
+  # Trim super (if needed)
+  if M > l
+    trim!(super, l+1:M)
   end
 
   x = 1
@@ -146,19 +156,18 @@ function replicate!(super, cell, N)
           r   = cell.lattice * cell.scaled_pos[q]
           r .+= (i*a) + (j*b) + (k*c)
 
-          # inplace update super scaled pos
+          # inplace update super
           super.scaled_pos[x] .= inv(super.lattice) * r
+          super.velocity[x]   .= cell.velocity[q]
+          super.masses[x]      = cell.masses[q]
+          super.symbols[x]     = cell.symbols[q]
+          super.mask[x]        = cell.mask[q]
           
           # increment x
           x += 1
         end
       end
     end
-  end
-
-  # Trim super (if needed)
-  if x < n
-    trim!(super, x:n)
   end
 
 end
@@ -199,7 +208,7 @@ function makeSuperCell(cell, T)
   bdys    = makeBdys(super)
   wrap!(bdys, lattice)
 
-  makeCell(bdys, lattice, mask=cell.mask, PBC=cell.PBC, NC=cell.NC)
+  makeCell(bdys, lattice, mask=super.mask, PBC=cell.PBC, NC=cell.NC)
 end
 
 function makeSuperCell!(super, cell, T)
