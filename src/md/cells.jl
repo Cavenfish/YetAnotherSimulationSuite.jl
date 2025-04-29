@@ -95,32 +95,20 @@ function center!(cell)
 
 end
 
-function replicate(cell, N)
+function Base.repeat(A::Vector, count::Integer, mask::Vector{Bool})
+  [A; repeat(A[.!mask], count-1)]
+end
 
-  a,b,c  = eachrow(cell.lattice)
-  m      = length(cell.symbols)
-  n      = prod(N)
-  newV   = repeat(cell.velocity, n)
-  newS   = repeat(cell.symbols, n)
-  newM   = repeat(cell.masses, n)
-  newMa  = repeat(cell.mask, n)
-  newLat = cell.lattice * Diagonal(N)
-  newPos = repeat(getPos(cell), n)
-
-  # Is this style easier to read than inline?
-  f = [i*a + j*b + k*c 
-        for i = 0:N[1]-1 
-          for j = 0:N[2]-1 
-            for k = 0:N[3]-1 
-              for q = 1:m]
-  
-  newPos .+= f
-
-  newScaledPos = [inv(newLat) * r for r in newPos]
-
+function Base.repeat(cell::MyCell, count::Integer)
   Cell(
-    newLat, newScaledPos, newV, newM, newS,
-    newMa, cell.PBC, cell.NC
+    deepcopy(cell.lattice),
+    repeat(cell.scaled_pos, count, cell.mask),
+    repeat(cell.velocity, count, cell.mask),
+    repeat(cell.masses, count, cell.mask),
+    repeat(cell.symbols, count, cell.mask),
+    repeat(cell.mask, count, cell.mask),
+    deepcopy(cell.PBC), 
+    deepcopy(cell.NC)
   )
 end
 
@@ -195,6 +183,7 @@ end
 
 function makeSuperCell(cell, T)
 
+  N       = diag(T)
   lattice = T * cell.lattice
 
   # Clean up machine precision noise
@@ -203,12 +192,20 @@ function makeSuperCell(cell, T)
       lattice[i] = 0.0
     end 
   end
-    
-  super   = replicate(cell, diag(T))
-  bdys    = makeBdys(super)
-  wrap!(bdys, lattice)
 
-  makeCell(bdys, lattice, mask=super.mask, PBC=cell.PBC, NC=cell.NC)
+  # allocate super cell
+  super = repeat(cell, prod(N))
+
+  # inplace update lattice
+  super.lattice .= lattice
+
+  # inplace update fields
+  replicate!(super, cell, N)
+
+  # inplace wrap atoms outside PBC
+  wrap!(super)
+
+  super
 end
 
 function makeSuperCell!(super, cell, T)
