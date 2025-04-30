@@ -100,7 +100,10 @@ function Base.repeat(A::Vector{T}, count::Integer, mask::Vector{Bool}) where T <
 end
 
 # Hate how this function is, but I couldn't find another solution
-# to the A = Vector{Vector{Float64}} issue 
+# to the A = Vector{Vector{Float64}} issue.
+# I checked a rewrite of this where no middle man (B) was needed
+# the allocations were unchanged, since this is cleaner to read
+# I'm keeping it.
 function Base.repeat(A::Vector{Vector{Float64}}, count::Integer, mask::Vector{Bool})
   B = [A; repeat(A[.!mask], count-1)]
   C = zero(B)
