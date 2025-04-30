@@ -41,10 +41,20 @@ function makeBdys(cell)::Vector{MyAtoms}
 end
 
 function getScaledPos(x0, lattice)
-
-  T    = inv(lattice)
+  T = inv(lattice)
   
   [T * x0[i:i+2] for i = 1:3:length(x0)-1]
+end
+
+function getScaledPos!(cell, x0)
+  T = inv(cell.lattice)
+
+  for i = 1:3:length(x0)-1
+    j::Int = (i+2)/3
+
+    cell.scaled_pos[j] .= T * x0[i:i+2]
+  end
+
 end
 
 function getPos(cell)
