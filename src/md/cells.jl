@@ -105,7 +105,7 @@ function center!(cell)
 
 end
 
-function Base.repeat(A::Vector{T}, count::Integer, mask::Vector{Bool}) where T <: Union{Char, Number}
+function myRepeat(A::Vector{T}, count::Integer, mask::Vector{Bool}) where T <: Union{Char, Number}
   [A; repeat(A[.!mask], count-1)]
 end
 
@@ -114,7 +114,7 @@ end
 # I checked a rewrite of this where no middle man (B) was needed
 # the allocations were unchanged, since this is cleaner to read
 # I'm keeping it.
-function Base.repeat(A::Vector{Vector{Float64}}, count::Integer, mask::Vector{Bool})
+function myRepeat(A::Vector{Vector{Float64}}, count::Integer, mask::Vector{Bool})
   B = [A; repeat(A[.!mask], count-1)]
   C = zero(B)
 
@@ -128,11 +128,11 @@ end
 function Base.repeat(cell::MyCell, count::Integer)
   Cell(
     deepcopy(cell.lattice),
-    repeat(cell.scaled_pos, count, cell.mask),
-    repeat(cell.velocity, count, cell.mask),
-    repeat(cell.masses, count, cell.mask),
-    repeat(cell.symbols, count, cell.mask),
-    repeat(cell.mask, count, cell.mask),
+    myRepeat(cell.scaled_pos, count, cell.mask),
+    myRepeat(cell.velocity, count, cell.mask),
+    myRepeat(cell.masses, count, cell.mask),
+    myRepeat(cell.symbols, count, cell.mask),
+    myRepeat(cell.mask, count, cell.mask),
     deepcopy(cell.PBC), 
     deepcopy(cell.NC)
   )

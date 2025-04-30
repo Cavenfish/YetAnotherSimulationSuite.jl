@@ -54,8 +54,8 @@ module JMD
     swapIso!, pickRandomMol, centerBdys!, translateBdys!, swapAtoms!,
 
     #cells.jl
-    makeCell, makeBdys, getScaledPos, getPos, wrap!, replicate, makeSuperCell,
-    getMIC, center!, getPrimitiveCell, getVolume,
+    makeCell, makeBdys, getScaledPos, getPos, wrap!, makeSuperCell,
+    makeSuperCell!, getMIC, center!, getPrimitiveCell, getVolume,
 
     #potentials
     MvHff, HGNN, MBX, SPCF, TIP4P, SCMEf,
