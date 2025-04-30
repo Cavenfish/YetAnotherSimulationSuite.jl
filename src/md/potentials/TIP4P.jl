@@ -85,14 +85,10 @@ end
 function TIP4P(F, G, y0, p)
   
   # initialize things
-  E      = 0.0
-  u      = Vector[]
   P      = p.potVars
-  forces = Vector[]
-  for i in 1:3:length(y0)
-    push!(u, y0[i:i+2])
-    push!(forces, [0.0, 0.0, 0.0])
-  end
+  E      = 0.0
+  u      = [y0[i:i+2] for i = 1:3:length(y0)]
+  forces = [zeros(3) for i = 1:3:length(y0)]
 
   for mol in p.mols
     o, h1, h2 = mol
