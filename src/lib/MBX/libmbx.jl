@@ -110,3 +110,21 @@ function mbx_set_box(box)
   )
 
 end
+
+function mbx_getDipole(cell::MyCell)
+  _ = getPotEnergy(MBX, cell)
+  μ = zeros(3)
+
+  mbx_get_total_dipole(μ)
+
+  μ
+end
+
+function mbx_getDipole(bdys::Vector{MyAtoms})
+  _ = getPotEnergy(MBX, bdys)
+  μ = zeros(3)
+
+  mbx_get_total_dipole(μ)
+
+  μ
+end

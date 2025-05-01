@@ -54,8 +54,8 @@ module JMD
     swapIso!, pickRandomMol, centerBdys!, translateBdys!, swapAtoms!,
 
     #cells.jl
-    makeCell, makeBdys, getScaledPos, getPos, wrap!, replicate, makeSuperCell,
-    getMIC, center!, getPrimitiveCell, getVolume,
+    makeCell, makeBdys, getScaledPos, getPos, wrap!, makeSuperCell,
+    makeSuperCell!, getMIC, center!, getPrimitiveCell, getVolume,
 
     #potentials
     MvHff, HGNN, MBX, SPCF, TIP4P, SCMEf,
@@ -117,7 +117,13 @@ module JMD
     hitAndStick, HnS,
 
     #phonopy.jl
-    phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons
+    phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons,
+
+    #libscmef.jl
+    scmef_getDipole,
+
+    #libmbx.jl
+    mbx_getDipole
   
   #end exports
 
@@ -133,6 +139,7 @@ module JMD
   include("./helpers.jl")
 
   include("./lib/MBX/libmbx.jl")
+  include("./lib/SCMEf/libscmef.jl")
   include("./lib/Phonopy/phonopy.jl")
 
   include("./md/cells.jl")

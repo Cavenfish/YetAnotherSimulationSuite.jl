@@ -83,7 +83,14 @@ function opt(EoM, algo, cell::MyCell; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
 
-  Cell(cell.lattice, spos, cell.velocity, cell.masses, cell.symbols, cell.PBC, cell.NC)
+  # The new cell returned will have fields that point to
+  # fields in the original cell. For example, new.lattice
+  # points to old.lattice. A deepcopy needs to be done to 
+  # untangle the two, but I'm unsure if I care to do it.
+  Cell(
+    cell.lattice, spos, cell.velocity, cell.masses, 
+    cell.symbols, cell.mask, cell.PBC, cell.NC
+  )
 end
 
 function optCell(EoM, algo, cell::MyCell; kwargs...)
@@ -99,41 +106,62 @@ function optCell(EoM, algo, cell::MyCell; kwargs...)
   ret
 end
 
+struct HiddenOptVars
+  potVars::PotVars
+  cellBuf::MyCell
+  superBuf::MyCell
+  scaleEnergy::Float64
+  mols::Vector
+  pars::Vector
+  T::Matrix
+end
 
-# optSuper and potPBC are good first run functions 
-# however, they are not efficient and NEED to be redone.
+function hiddenOpt(EoM, algo, cell, T; kwargs...)
 
-# Should be done without reallocating cells/potVars at
-# every iteration.
+  super   = makeSuperCell(cell, T)
+  y, vars = prep4pot(EoM, super)
+  x0      = prepX0(cell)
+  Γ       = zero(y)
 
-function optSuper(EoM, algo, cell, T; kwargs...)
+  hideVars = HiddenOptVars(
+    vars.potVars,
+    deepcopy(cell),
+    super,
+    length(cell.masses) / length(super.masses),
+    vars.mols,
+    vars.pars,
+    T
+  )
 
-  x0       = getPos(cell) |> (x -> vcat(x...))
-  tmp      = deepcopy(cell)
-  optFunc  = Optim.only_fg!((F,G,x) -> potPBC(F,G, EoM, tmp, T, x))
+  optFunc  = Optim.only_fg!((F,G,x) -> hiddenEoM(F,G,Γ,EoM,hideVars,x))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
 
-  Cell(cell.lattice, spos, cell.velocity, cell.masses, cell.symbols, cell.PBC, cell.NC)  
+  # The new cell returned will have fields that point to
+  # fields in the original cell. For example, new.lattice
+  # points to old.lattice. A deepcopy needs to be done to 
+  # untangle the two, but I'm unsure if I care to do it.
+  Cell(
+    cell.lattice, spos, cell.velocity, cell.masses,
+    cell.symbols, cell.mask, cell.PBC, cell.NC
+  )  
 end
 
-function potPBC(F, G, EoM, cell, T, x0)
-  spos = getScaledPos(x0, cell.lattice)
+function hiddenEoM(F, G, Γ, EoM, vars, x)
+  getScaledPos!(vars.cellBuf, x)
 
-  for i in 1:length(cell.scaled_pos)
-    cell.scaled_pos[i] .= spos[i]
-  end
+  makeSuperCell!(vars.superBuf, vars.cellBuf, vars.T)
 
-  N     = length(x0)
-  super = makeSuperCell(cell, T)
+  y = prepX0(vars.superBuf)
+  E = EoM(F, Γ, y, vars)
 
   if G != nothing
-    G .= - getForces(EoM, super) |> (x -> vcat(x...)[1:N])
+    G .= Γ[1:length(G)]
   end
   
   if F != nothing
-    return getPotEnergy(EoM, super) / det(T)
+    return E * vars.scaleEnergy
   end
 
 end

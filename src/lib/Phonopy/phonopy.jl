@@ -71,6 +71,7 @@ function phonopy_getDisplacements(
   lat      = T * cell.lattice
   mas      = repeat(cell.masses,  n)
   sym      = repeat(cell.symbols, n)
+  mask     = repeat(cell.mask,    n)
 
   cells = MyCell[]
   for dcell in supercells
@@ -83,7 +84,7 @@ function phonopy_getDisplacements(
 
     spos = getScaledPos(vcat(pos...), lat)
     vels = zero(spos)
-    tmp  = Cell(lat, spos, vels, mas, sym, cell.PBC, cell.NC)
+    tmp  = Cell(lat, spos, vels, mas, sym, mask, cell.PBC, cell.NC)
 
     push!(cells, tmp)
   end

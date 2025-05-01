@@ -11,6 +11,10 @@ end
   include("./io_test.jl")
 end
 
+@testset "Cells" begin
+  include("./md/cells_test.jl")
+end
+
 @testset "Potentials" begin
 
   @testset "HGNN" begin
