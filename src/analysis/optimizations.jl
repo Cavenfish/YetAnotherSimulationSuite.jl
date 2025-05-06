@@ -111,6 +111,7 @@ struct HiddenOptVars
   cellBuf::MyCell
   superBuf::MyCell
   scaleEnergy::Float64
+  PBC::Vector{Bool}
   mols::Vector
   pars::Vector
   T::Matrix
@@ -128,6 +129,7 @@ function hiddenOpt(EoM, algo, cell, T; kwargs...)
     deepcopy(cell),
     super,
     length(cell.masses) / length(super.masses),
+    cell.PBC,
     vars.mols,
     vars.pars,
     T
