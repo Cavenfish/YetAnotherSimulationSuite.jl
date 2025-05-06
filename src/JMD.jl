@@ -118,6 +118,7 @@ module JMD
 
     #phonopy.jl
     phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons,
+    phonopy_getDisplacementsDataset,
 
     #libscmef.jl
     scmef_getDipole,
