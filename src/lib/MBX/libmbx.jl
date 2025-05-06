@@ -1,4 +1,4 @@
-const libmbx       = joinpath(@__DIR__, "libmbx.so")
+const libmbx       = joinpath(ENV["MBX_HOME"], "lib/libmbx.so")
 const E_MBX2JMD    = 0.043 # kcal/mol --> eV
 const MBX_GAS_JSON = joinpath(@__DIR__, "gas.json")
 const MBX_PBC_JSON = joinpath(@__DIR__, "pbc.json")
