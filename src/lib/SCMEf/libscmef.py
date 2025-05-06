@@ -7,7 +7,7 @@ PyCall wrapping will make calls to SCME/f slower, but
 making this wrapper is quicker than a proper c wrapper.
 """
 
-def scmef_init(pos, cell, NC=[1,1,1], pbc=True):
+def scmef_init(pos, cell, pbc=True, **kwargs):
     # SCMEf imports
     import pyscme
     from pyscme.parameters import parameter_H2O
@@ -35,10 +35,13 @@ def scmef_init(pos, cell, NC=[1,1,1], pbc=True):
         "C10": 33441.0000e0,
         "scf_convcrit": 1e-12,
         "scf_policy": pyscme.SCFPolicy.strict,
-        "NC": NC,
+        "NC": [1,1,1],
         "dms": True,
         "qms": True
     }
+
+    for (key, value) in kwargs.items():
+        para_dict[key] = value
 
     # Define system
     symbols  = ["O", "H", "H"] * int(len(pos)/3)
@@ -51,24 +54,24 @@ def scmef_init(pos, cell, NC=[1,1,1], pbc=True):
 
     return bdys
 
-def scmef_get_energy(pos, cell, NC=[1,1,1], pbc=True):
+def scmef_get_energy(pos, cell, pbc=True, **kwargs):
 
-    bdys = scmef_init(pos, cell, NC=NC, pbc=pbc)
+    bdys = scmef_init(pos, cell, pbc=pbc, **kwargs)
 
     return bdys.get_potential_energy()
 
-def scmef_get_energy_and_forces(pos, cell, NC=[1,1,1], pbc=True):
+def scmef_get_energy_and_forces(pos, cell, pbc=True, **kwargs):
 
-    bdys = scmef_init(pos, cell, NC=NC, pbc=pbc)
+    bdys = scmef_init(pos, cell, pbc=pbc)
 
     E = bdys.get_potential_energy()
     F = bdys.get_forces()
 
     return E,F
 
-def scmef_get_dipole(pos, cell, NC=[1,1,1], pbc=True):
+def scmef_get_dipole(pos, cell, pbc=True, **kwargs):
     
-    bdys = scmef_init(pos, cell, NC=NC, pbc=pbc)
+    bdys = scmef_init(pos, cell, pbc=pbc)
 
     return bdys.get_dipole_moment()
     
