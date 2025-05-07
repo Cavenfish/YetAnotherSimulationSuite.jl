@@ -38,3 +38,11 @@ end
   end
 
 end
+
+@testset "Structural" begin
+
+  @testset "Distributions" begin
+    include("./structural/distributions_test.jl")
+  end
+
+end
