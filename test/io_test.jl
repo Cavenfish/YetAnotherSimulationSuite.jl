@@ -33,7 +33,7 @@ function cellTesting(f, N, lat)
   @test cell.scaled_pos[123] ≈ new.scaled_pos[123] atol = 1e-5
 end
 
-@testset "Reading files" begin
+@testset "JMD Style File IO" begin
 
   bdysTesting(
     "testingFiles/xyzFiles/co.xyz",
@@ -61,4 +61,26 @@ end
     2304, [30.9 0.0 0.0; 0.0 26.8 0.0; 0.0 0.0 29.1]
   )
   
+end
+
+@testset "Read ASE xyz" begin
+  file = joinpath(@__DIR__, "testingFiles/xyzFiles/co_ase.xyz")
+  bdys = readASExyz(file)
+
+  @test bdys[1].s == 'C'
+  @test bdys[1].m == 12.011
+  @test bdys[2].s == 'O'
+  @test bdys[2].m == 15.999
+  @test bdys[1].r == [-0.07311636, -0.11425678, -0.02537179]
+  @test bdys[2].v == [0.0, 0.0, 0.0]
+
+  file = joinpath(@__DIR__, "testingFiles/xyzFiles/Ih_ase.xyz")
+  
+  bdys, cell = readASExyz(file; getCell=true)
+
+  @test cell == [
+    7.82, 0.0, 0.0, 
+    -3.9099999999999984, 6.772318657594311, 0.0,
+    0.0, 0.0, 7.36
+  ]
 end
