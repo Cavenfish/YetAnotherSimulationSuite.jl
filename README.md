@@ -4,9 +4,12 @@
 [aqua-img]: https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg
 [aqua-url]: https://github.com/JuliaTesting/Aqua.jl
 
+[codecov-img]: https://codecov.io/github/Cavenfish/JMD/branch/main/graph/badge.svg
+[codecov-url]: https://app.codecov.io/github/Cavenfish/JMD
+
 # JMD.jl
 
-[![][ci-img]][ci-url] [![][aqua-img]][aqua-url] 
+[![][ci-img]][ci-url] [![][aqua-img]][aqua-url] [![][codecov-img]][codecov-url]
 
 Julia Molecular Dynamics (JMD)
 
