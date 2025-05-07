@@ -186,6 +186,4 @@ module JMD
 
   include("./building/anneal.jl")
   include("./building/hitAndStick.jl")
-
-  include("./QM/orcaConfig.jl")
 end # module
