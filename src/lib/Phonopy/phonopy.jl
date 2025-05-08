@@ -18,6 +18,23 @@ but does column vectors for spos; we cannot pass spos between
 phonopy and JMD.
 """
 
+function getNewMaskOrder(N, T)
+  n::Int = det(T)
+  q::Int = div(N, n)
+
+  x = [i+(j*T[5]) for i = 1:T[1] for j = 0:T[5]-1]
+  I = Int[]
+  
+  tmp = [i for i = 1:q:N]
+  for i = 1:q
+    tmp .= [j for j = i:q:N][x]
+    push!(I, tmp...)
+  end
+
+  I
+end
+
+
 function reorderPhonopySupercell!(pos, n)
   N = length(pos)
   I = [j for i = 1:n for j = i:n:N]
@@ -132,7 +149,6 @@ function phonopy_addForces(yamlFile, saveName, forces; symprec=1e-5)
   obj        = phonopy.load(yamlFile, symprec=symprec)
   n::Int64   = det(obj.supercell_matrix)
 
-  reorderPhonopyForces!(forces, n)
   obj.forces = forces
   obj.save(saveName)
 end

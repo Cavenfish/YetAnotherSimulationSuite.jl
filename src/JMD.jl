@@ -118,7 +118,7 @@ module JMD
 
     #phonopy.jl
     phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons,
-    phonopy_getDisplacementsDataset,
+    phonopy_getDisplacementsDataset, getNewMaskOrder, reorderPhonopyForces!,
 
     #libscmef.jl
     scmef_getDipole,
