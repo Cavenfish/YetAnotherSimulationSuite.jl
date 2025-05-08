@@ -21,6 +21,10 @@ end
 
 @testset "Potentials" begin
 
+  @testset "Call Test" begin
+    include("./potentials/calls_test.jl")
+  end
+  
   @testset "HGNN" begin
     include("./potentials/hgnn_test.jl")
   end
