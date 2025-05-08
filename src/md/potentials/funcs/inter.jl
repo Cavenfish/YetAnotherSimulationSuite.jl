@@ -14,7 +14,7 @@ function _vdw(ri::Vector{Float64}, rj::Vector{Float64}, ϵij::Float64, σij::Flo
 end
 
 function _vdw!(
-  F::Vector{T}, u::Vector{SVector},
+  F::Vector{T}, u::Vector{SVector{3, Float64}},
   i::Int64, j::Int64, ϵij::Float64, σij::Float64
 ) where T <: Union{MVector, Vector}
 
@@ -42,7 +42,7 @@ function _Buckingham(ri::Vector{Float64}, rj::Vector{Float64},
 end
 
 function _Buckingham!(
-  F::Vector{T}, u::Vector{SVector},
+  F::Vector{T}, u::Vector{SVector{3, Float64}},
   i::Int64, j::Int64, Aij::Float64, Bij::Float64, Cij::Float64
 ) where T <: Union{MVector, Vector}
 
@@ -69,7 +69,7 @@ function _Coulomb(ri::Vector{Float64}, rj::Vector{Float64}, Qi::Float64, Qj::Flo
 end
 
 function _Coulomb!(
-  F::Vector{T}, u::Vector{SVector}, 
+  F::Vector{T}, u::Vector{SVector{3, Float64}}, 
   i::Int64, j::Int64, Qi::Float64, Qj::Float64
 ) where T <: Union{MVector, Vector}
 
@@ -94,7 +94,7 @@ function _shortDisp(ri::Vector{Float64}, rj::Vector{Float64},
 end
 
 function _shortDisp!(
-  F::Vector{T}, u::Vector{SVector},
+  F::Vector{T}, u::Vector{SVector{3, Float64}},
   i::Int64, j::Int64, Aij::Float64, Bij::Float64
 ) where T <: Union{MVector, Vector}
 
@@ -125,7 +125,7 @@ function _longDisp(ri::Vector{Float64}, rj::Vector{Float64},
 end
 
 function _longDisp!(
-  F::Vector{T}, u::Vector{SVector}, 
+  F::Vector{T}, u::Vector{SVector{3, Float64}}, 
   i::Int64, j::Int64, Cij::Float64; damp=nothing, p=nothing
 ) where T <: Union{MVector, Vector}
 
