@@ -147,8 +147,6 @@ end
 function phonopy_addForces(yamlFile, saveName, forces; symprec=1e-5)
   phonopy    = pyimport("phonopy")
   obj        = phonopy.load(yamlFile, symprec=symprec)
-  n::Int64   = det(obj.supercell_matrix)
-
   obj.forces = forces
   obj.save(saveName)
 end
