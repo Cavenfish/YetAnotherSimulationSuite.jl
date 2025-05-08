@@ -46,3 +46,11 @@ end
   end
 
 end
+
+@testset "Analysis" begin
+
+  @testset "Vibrations" begin
+    include("./analysis/vibrations_test.jl")
+  end
+
+end
