@@ -74,7 +74,7 @@ function HGNN(dv, v, u, p, t)
 
   # initialize things
   E = 0.0
-  F = zero(u)
+  F = [@MVector zeros(3) for i = 1:length(u)]
   P = p.potVars
   r = u ./ 0.5291772083 # to Bohr
 

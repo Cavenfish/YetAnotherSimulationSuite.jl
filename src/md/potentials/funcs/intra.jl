@@ -12,8 +12,10 @@ function _Morse(r::Float64, rvec::Vector{Float64}, D::Float64,
   E, F
 end
 
-function _Morse!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},
-                 i::Int64, j::Int64, D::Float64, a::Float64, req::Float64)
+function _Morse!(
+  F::Vector{T}, u::Vector{SVector}, i::Int64, j::Int64,
+  D::Float64, a::Float64, req::Float64
+) where T <: Union{MVector, Vector}
   
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -34,8 +36,11 @@ function _harmonicBond(r::Float64, rvec::Vector{Float64}, K::Float64, req::Float
   E, F
 end
 
-function _harmonicBond!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}}, 
-                        i::Int64, j::Int64, K::Float64, req::Float64)
+function _harmonicBond!(
+  F::Vector{T}, u::Vector{SVector}, 
+  i::Int64, j::Int64, K::Float64, req::Float64
+) where T <: Union{MVector, Vector}
+
   rvec  = u[j] - u[i]
   r     = norm(rvec)
   E     = 0.5 * K * (r - req)^2
@@ -59,8 +64,11 @@ function _harmonicBondAngle(r1::Vector{Float64}, r2::Vector{Float64},
   E, F1, F2, Fo
 end
 
-function _harmonicBondAngle!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}}, 
-                             i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64)
+function _harmonicBondAngle!(
+  F::Vector{T}, u::Vector{SVector}, 
+  i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64
+) where T <: Union{MVector, Vector}
+
   ri    = u[i] - u[o]
   rj    = u[j] - u[o]
   θ     = dot(ri, rj) / (norm(ri) * norm(rj)) |> (x -> round(x, digits=10)) |> acos

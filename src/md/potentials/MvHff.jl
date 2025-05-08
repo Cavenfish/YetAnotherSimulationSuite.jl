@@ -44,9 +44,11 @@ function MvHff(dv, v, u, p, t)
 
   # initialize things
   E = 0.0
-  F = zero(u)
+  F = [@MVector zeros(3) for i = 1:length(u)]
   P = p.potVars
 
+  typeof(u) |> println
+  typeof(F) |> println
   for mol in p.mols
     E += _Morse!(F, u, mol[1], mol[2], P.D, P.a, P.req)
   end
