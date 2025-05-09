@@ -23,8 +23,8 @@ end
 # if the potentials perform correctly, rather it 
 # checks if any code changes breaks their calls. 
 @testset "Test Potential Function Calls" begin
-  co  = "../testingFiles/xyzFiles/co.xyz"
-  h2o = "../testingFiles/xyzFiles/h2o.xyz"
+  co  = "../testingFiles/xyzFiles/co-dimer.xyz"
+  h2o = "../testingFiles/xyzFiles/h2o-dimer.xyz"
   
   # MvHff
   @test staticTest(MvHff, co)
