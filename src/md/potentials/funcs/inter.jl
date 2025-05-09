@@ -3,7 +3,10 @@ Intermolecular Potential Functions
 """
 
 
-function _vdw(ri::Vector{Float64}, rj::Vector{Float64}, ϵij::Float64, σij::Float64)
+function _vdw(
+  ri::S, rj::S, ϵij::Float64, σij::Float64
+) where S <: Union{SVector, Vector}
+
   rvec = rj - ri
   r    = norm(rvec)
   a    = σij / (r)
@@ -29,8 +32,10 @@ function _vdw!(
   E
 end
 
-function _Buckingham(ri::Vector{Float64}, rj::Vector{Float64},
-                     Aij::Float64, Bij::Float64, Cij::Float64)
+function _Buckingham(
+  ri::S, rj::S, Aij::Float64, Bij::Float64, Cij::Float64
+) where S <: Union{SVector, Vector}
+
   rvec = rj - ri
   r    = norm(rvec)
   a    = Aij * exp(-Bij * r)
@@ -59,7 +64,7 @@ function _Buckingham!(
   E
 end
 
-function _Coulomb(ri::Vector{Float64}, rj::Vector{Float64}, Qi::Float64, Qj::Float64)
+function _Coulomb(ri::S, rj::S, Qi::Float64, Qj::Float64) S <: Union{SVector, Vector}
   rvec = rj - ri
   r    = norm(rvec)
   E    = Qi*Qj / r
@@ -83,8 +88,10 @@ function _Coulomb!(
   E
 end
 
-function _shortDisp(ri::Vector{Float64}, rj::Vector{Float64}, 
-                    Aij::Float64, Bij::Float64)
+function _shortDisp(
+  ri::S, rj::S, Aij::Float64, Bij::Float64
+) where S <: Union{SVector, Vector}
+
   rvec = rj - ri
   r    = norm(rvec)
   E    = Aij * exp(-Bij * r)
@@ -108,8 +115,10 @@ function _shortDisp!(
   E
 end
 
-function _longDisp(ri::Vector{Float64}, rj::Vector{Float64}, 
-                   Cij::Float64; damp=nothing, p=nothing)
+function _longDisp(
+  ri::S, rj::S, Cij::Float64; damp=nothing, p=nothing
+) where S <: Union{SVector, Vector}
+
   rvec = rj - ri
   r    = norm(rvec)
   

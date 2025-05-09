@@ -3,8 +3,10 @@ Intramolecular Potential Functions
 """
 
 
-function _Morse(r::Float64, rvec::Vector{Float64}, D::Float64, 
-                a::Float64, req::Float64)
+function _Morse(
+  r::Float64, rvec::S, D::Float64, a::Float64, req::Float64
+) where S <: Union{SVector, Vector}
+
   c = exp(-a*(r-req))
   E = D * (1 - c)^2
   F = @. -2D * a * c * (1 - c) * rvec / r
@@ -29,7 +31,10 @@ function _Morse!(
   E
 end
 
-function _harmonicBond(r::Float64, rvec::Vector{Float64}, K::Float64, req::Float64)
+function _harmonicBond(
+  r::Float64, rvec::S, K::Float64, req::Float64
+) where S <: Union{SVector, Vector}
+
   E     = 0.5 * K * (r - req)^2
   f     = @. - K * (r - req) * revc / r
 
@@ -52,8 +57,10 @@ function _harmonicBond!(
   E
 end
 
-function _harmonicBondAngle(r1::Vector{Float64}, r2::Vector{Float64}, 
-                            K::Float64, θeq::Float64)
+function _harmonicBondAngle(
+  r1::S, r2::S, K::Float64, θeq::Float64
+) where S <: Union{SVector, Vector}
+
   θ   = dot(r1, r2) / (norm(r1) * norm(r2)) |> (x -> round(x, digits=10)) |> acos
   E   = 0.5 * K * (θ - θeq)^2
   pre = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * norm(r1) * norm(r2))
