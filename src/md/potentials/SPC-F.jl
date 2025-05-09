@@ -28,7 +28,7 @@ function SPCF(dv, v, u, p, t)
 
   # initialize things
   E = 0.0
-  F = zero(u)
+  F = [zeros(3) for i = 1:length(u)]
   P = p.potVars
 
   for mol in p.mols
