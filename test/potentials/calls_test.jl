@@ -13,7 +13,7 @@ function dynamicTest(EoM, f)
   file = joinpath(@__DIR__, f)
   bdys = readXyz(file)
 
-  runMD(MvHff, bdys, (0.0, 10fs), 1fs)
+  runMD(EoM, bdys, (0.0, 10fs), 1fs)
 
   true
 end
