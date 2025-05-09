@@ -64,7 +64,10 @@ function _Buckingham!(
   E
 end
 
-function _Coulomb(ri::S, rj::S, Qi::Float64, Qj::Float64) S <: Union{SVector, Vector}
+function _Coulomb(
+  ri::S, rj::S, Qi::Float64, Qj::Float64
+) where S <: Union{SVector, Vector}
+
   rvec = rj - ri
   r    = norm(rvec)
   E    = Qi*Qj / r
