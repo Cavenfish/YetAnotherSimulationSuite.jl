@@ -13,9 +13,9 @@ function _Morse(r::Float64, rvec::Vector{Float64}, D::Float64,
 end
 
 function _Morse!(
-  F::Vector{T}, u::Vector{SVector{3, Float64}}, 
+  F::Vector{M}, u::Vector{S}, 
   i::Int64, j::Int64, D::Float64, a::Float64, req::Float64
-) where T <: Union{MVector, Vector}
+) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
   
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -37,9 +37,9 @@ function _harmonicBond(r::Float64, rvec::Vector{Float64}, K::Float64, req::Float
 end
 
 function _harmonicBond!(
-  F::Vector{T}, u::Vector{SVector{3, Float64}}, 
+  F::Vector{M}, u::Vector{S}, 
   i::Int64, j::Int64, K::Float64, req::Float64
-) where T <: Union{MVector, Vector}
+) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -65,9 +65,9 @@ function _harmonicBondAngle(r1::Vector{Float64}, r2::Vector{Float64},
 end
 
 function _harmonicBondAngle!(
-  F::Vector{T}, u::Vector{SVector{3, Float64}}, 
+  F::Vector{M}, u::Vector{S}, 
   i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64
-) where T <: Union{MVector, Vector}
+) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
 
   ri    = u[i] - u[o]
   rj    = u[j] - u[o]

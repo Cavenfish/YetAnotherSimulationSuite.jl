@@ -14,9 +14,9 @@ function _vdw(ri::Vector{Float64}, rj::Vector{Float64}, ϵij::Float64, σij::Flo
 end
 
 function _vdw!(
-  F::Vector{T}, u::Vector{SVector{3, Float64}},
+  F::Vector{M}, u::Vector{S},
   i::Int64, j::Int64, ϵij::Float64, σij::Float64
-) where T <: Union{MVector, Vector}
+) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -42,9 +42,9 @@ function _Buckingham(ri::Vector{Float64}, rj::Vector{Float64},
 end
 
 function _Buckingham!(
-  F::Vector{T}, u::Vector{SVector{3, Float64}},
+  F::Vector{M}, u::Vector{S},
   i::Int64, j::Int64, Aij::Float64, Bij::Float64, Cij::Float64
-) where T <: Union{MVector, Vector}
+) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
 
   rvec = u[j] - u[i]
   r    = norm(rvec)
@@ -69,9 +69,9 @@ function _Coulomb(ri::Vector{Float64}, rj::Vector{Float64}, Qi::Float64, Qj::Flo
 end
 
 function _Coulomb!(
-  F::Vector{T}, u::Vector{SVector{3, Float64}}, 
+  F::Vector{M}, u::Vector{S}, 
   i::Int64, j::Int64, Qi::Float64, Qj::Float64
-) where T <: Union{MVector, Vector}
+) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -94,9 +94,9 @@ function _shortDisp(ri::Vector{Float64}, rj::Vector{Float64},
 end
 
 function _shortDisp!(
-  F::Vector{T}, u::Vector{SVector{3, Float64}},
+  F::Vector{M}, u::Vector{S},
   i::Int64, j::Int64, Aij::Float64, Bij::Float64
-) where T <: Union{MVector, Vector}
+) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -125,9 +125,9 @@ function _longDisp(ri::Vector{Float64}, rj::Vector{Float64},
 end
 
 function _longDisp!(
-  F::Vector{T}, u::Vector{SVector{3, Float64}}, 
+  F::Vector{M}, u::Vector{S}, 
   i::Int64, j::Int64, Cij::Float64; damp=nothing, p=nothing
-) where T <: Union{MVector, Vector}
+) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
