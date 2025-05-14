@@ -13,9 +13,7 @@ module JMD
   using Libdl
   using Optim
   using PyCall
-  using LsqFit
   using Spglib
-  using MiniQhull
   using DataFrames
   using Statistics#might not be used
   using Clustering
@@ -69,13 +67,8 @@ module JMD
     #post-processing.jl
     processDynamics, processDynamics!, processTmpFiles, 
     
-    #tracking.jl
-    trackVACF, trackEnergyDissipation, trackAllVibEnergy, trackRadialEnergy,
-
     #vacf.jl
     vacfInps, VDOS, getVelMas,
-
-    #desorb.jl
 
     #vibrations.jl
     getHarmonicFreqs, animateMode, getModePES, getModeInteractionPES,
@@ -89,20 +82,11 @@ module JMD
     #stress.jl
     getNumericalStress, getNumericalStressOrthogonal,
 
-    #freqShifts.jl
-    getINM, getMolFreq, getAllFreqs, getFvE, getFreqCoupling,
-
     #participationRatio.jl
     getIPR, getPR,
 
     #neighbors.jl
     countNearestNeighbors,
-
-    #vibCoup.jl
-    getVibCoup,
-
-    #alphashape.jl
-    alphashape,
 
     #savitzkyGolay.jl
     savGol,
@@ -164,21 +148,15 @@ module JMD
   include("./md/potentials/funcs/TTMnrg.jl")
 
   include("./analysis/vacf.jl")
-  include("./analysis/desorb.jl")
   include("./analysis/vibrations.jl")
   include("./analysis/optimizations.jl")
-  include("./analysis/decayRates.jl")
-  include("./analysis/freqShifts.jl")
   include("./analysis/participationRatio.jl")
-  include("./analysis/vibCoup.jl")
   include("./analysis/energetics.jl")
-  include("./analysis/trajectories/tracking.jl")
 
   include("./structural/distributions.jl")
   include("./structural/molsAndPairs.jl")
   include("./structural/neighbors.jl")
 
-  include("./mathtk/alphashape.jl")
   include("./mathtk/savitzkyGolay.jl")
   include("./mathtk/peakFinding.jl")
   include("./mathtk/stress.jl")
