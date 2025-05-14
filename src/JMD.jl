@@ -10,6 +10,7 @@ module JMD
   # These are part of the Julia Standard Library
   using TOML
   using Libdl
+  using Statistics
   using Serialization
   using LinearAlgebra
 
@@ -20,13 +21,11 @@ module JMD
   using PyCall
   using Spglib
   using DataFrames
-  using Statistics#might not be used
   using Clustering
   using StaticArrays
-  using Distributions#might not be used
+  using Distributions
   using KernelDensity
   using OrdinaryDiffEq
-  using SpecialFunctions#might not be used
   using FiniteDifferences
 
   # Wrapper for ASE calculator with SCME/f potential
