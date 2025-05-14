@@ -20,6 +20,15 @@ Some consequences of the "no one will use this code" mentality:
   - There is currently no documentation for anything in JMD.jl
   - JMD.jl is a bit bloated with niche code (specific to my use case)
 
-I do plan on making a documentation, not because my mentality has changed and I expect this package to have many users, but because I want to learn how to make proper documentation with the Documentar.jl package. This is a work in progress (peep the docs branch), and the timeframe is non-existent.
+I do plan on turning this into a true to form package, with proper documentation and less bloat. I will keep track of the progress in the roadmap check list below. If you do wish to use JMD.jl and the docs don't yet exist, then your best bet is to take a look at the scripts directory in the repo. I'll try to be proactive about adding scripts I use in my research into the directory. 
 
-If you do wish to use JMD.jl and the docs don't yet exist, then your best bet is to take a look at the scripts directory in the repo. I'll try to be proactive about adding scripts I use in my research into the directory. 
+# Roadmap to Becoming a True Package
+
+  - Clear out niche code [x]
+  - Make documentation []
+  - Add example scripts []
+
+## Features to Add
+
+  - Add NPT simulations []
+  - Add anharmonic vibrational analysis []
