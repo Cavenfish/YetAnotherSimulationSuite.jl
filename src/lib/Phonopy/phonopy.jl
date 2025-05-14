@@ -18,45 +18,6 @@ but does column vectors for spos; we cannot pass spos between
 phonopy and JMD.
 """
 
-function getNewMaskOrder(mask_len, normal_len, T)
-  # n => number of cells
-  # δ => number of atoms that are masked
-  # N => number of atoms in masked supercell excluding masked atoms
-  # q => number of atoms in masked primitive excluding masked atoms
-  n::Int = det(T)
-  δ::Int = (normal_len - mask_len) / (n-1)
-  N::Int = mask_len - δ 
-  q::Int = div(N, n)
-  I      = Int[]
-
-  # JMD and Phonopy build supercells differently 
-  # This reorders replica atoms to match Phonopy
-  x = [i+(j*T[5]) for i = 1:T[1] for j = 0:T[5]-1]
-  
-  # preallocate tmp vector
-  tmp = [i for i = 1:n]
-
-  # Build up the new ordering 
-  for i = 1:q
-    tmp .= [j for j = i:q:N][x]
-    push!(I, tmp...)
-  end
-
-  # Add to account for masked atoms (those that are kept but not replicated)
-  # since those are not accounted for in the above building
-  for i = 1:length(I)
-    if I[i] >= q + 1
-      I[i] += δ
-    end
-  end
-
-  # push the non-replicated atoms to vector 
-  push!(I, [i for i = q+1:q+δ]...)
-
-  I
-end
-
-
 function reorderPhonopySupercell!(pos, n)
   N = length(pos)
   I = [j for i = 1:n for j = i:n:N]
