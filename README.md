@@ -28,11 +28,10 @@ I do plan on turning this into a true to form package, with proper documentation
   - Make documentation []
   - Add example scripts []
   - Get codecov above 70% []
-  - Allow all atoms []
+  - Rewrite code to use AtomsBase []
 
-## Features to Add
+# Features to Add
 
   - Add NPT simulations []
   - Add anharmonic vibrational analysis []
   - Add PIMD methods []
-  - Read and write other file formats []
