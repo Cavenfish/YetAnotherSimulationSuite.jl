@@ -1,10 +1,4 @@
 
-#Calculate the shift frequency for a molecule at vib energy E
-freqShiftMorse(v0, D, E) = v0 * ( (D - E) / D )^0.5
-
-#Calculate the energy for a given shifted frequency
-engyShiftMorse(v0, D, v) = D - D * (v/v0)^2
-
 function mkvar(x)
   fn = Symbol(x)
   X  = @eval $fn
