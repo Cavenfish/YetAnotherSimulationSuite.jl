@@ -31,16 +31,6 @@ function myRepeat(A::Vector{Vector{Float64}}, count::Integer, mask::Vector{Bool}
   C
 end
 
-function getAngleCO(co1, co2)
-  r1 = co1[1].r - co1[2].r
-  r2 = co2[1].r - co2[2].r
-
-  x  = (dot(r1, r2)) / (norm(r1) * norm(r2))
-  x  = round(x, digits=15)
-  
-  acos(x)
-end
-
 function getFrame(tj, i::Int64)
   m = tj.m
   s = tj.s
