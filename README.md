@@ -27,8 +27,12 @@ I do plan on turning this into a true to form package, with proper documentation
   - Clear out niche code [x]
   - Make documentation []
   - Add example scripts []
+  - Get codecov above 70% []
+  - Allow all atoms []
 
 ## Features to Add
 
   - Add NPT simulations []
   - Add anharmonic vibrational analysis []
+  - Add PIMD methods []
+  - Read and write other file formats []
