@@ -7,10 +7,15 @@ author: Brian C. Ferrari
 """
 module JMD
 
+  # These are part of the Julia Standard Library
   using TOML
+  using Libdl
+  using Serialization
+  using LinearAlgebra
+
+  # These are fully external dependencies
   using JLD2
   using FFTW
-  using Libdl
   using Optim
   using PyCall
   using Spglib
@@ -18,8 +23,6 @@ module JMD
   using Statistics#might not be used
   using Clustering
   using StaticArrays
-  using Serialization
-  using LinearAlgebra
   using Distributions#might not be used
   using KernelDensity
   using OrdinaryDiffEq
