@@ -139,7 +139,6 @@ module JMD
   include("./md/potentials/HGNN.jl")
   include("./md/potentials/TIP4P.jl")
   include("./md/potentials/SPC-F.jl")
-  include("./md/potentials/CH4.jl")
   include("./md/potentials/MBX.jl")
   include("./md/potentials/SCMEf.jl")
 
@@ -147,7 +146,6 @@ module JMD
   include("./md/potentials/funcs/intra.jl")
   include("./md/potentials/funcs/inter.jl")
   include("./md/potentials/funcs/damping.jl")
-  include("./md/potentials/funcs/TTMnrg.jl")
 
   include("./analysis/vacf.jl")
   include("./analysis/vibrations.jl")
