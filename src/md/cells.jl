@@ -33,11 +33,12 @@ function trim!(cell::MyCell, iter)
   deleteat!(cell.mask, iter)
 end
 
-function makeBdys(cell)::Vector{MyAtoms}
-  pos  = getPos(cell)
-  vel  = [i for i in cell.velocity]
+function makeBdys(cell::MyCell)::Vector{MyAtoms}
+  D    = length(cell.velocity[1])
+  pos  = MVector{D}.(getPos(cell))
+  vel  = [MVector{D}(i) for i in cell.velocity]
 
-  [Atom(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
+  [Particle(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
 end
 
 function getScaledPos(x0, lattice)
@@ -181,7 +182,7 @@ function getMIC(cell::MyCell)
               for q = 1:length(bdys)]
 
   for i = 1:length(f)
-    push!(new, Atom(f[i], v[i], m[i], s[i]))
+    push!(new, Particle(f[i], v[i], m[i], s[i]))
   end
 
   makeCell(new, cell.lattice*3, mask=cell.mask, PBC=cell.PBC, NC=cell.NC)
