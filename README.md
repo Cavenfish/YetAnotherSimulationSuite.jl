@@ -24,14 +24,15 @@ I do plan on turning this into a true to form package, with proper documentation
 
 # Roadmap to Becoming a True Package
 
-  - Clear out niche code [x]
-  - Make documentation []
-  - Add example scripts []
-  - Get codecov above 70% []
-  - Rewrite code to use AtomsBase? []
+  - [x] Clear out niche code
+  - [ ] Make documentation
+  - [ ] Add example scripts
+  - [ ] Get codecov above 70%
+  - [ ] Rewrite code to use AtomsBase?
+  - [ ] Use Chemfiles for file parsing
 
 # Features to Add
 
-  - Add NPT simulations []
-  - Add anharmonic vibrational analysis []
-  - Add PIMD methods []
+  - [ ] Add NPT simulations
+  - [ ] Add anharmonic vibrational analysis
+  - [ ] Add PIMD methods
