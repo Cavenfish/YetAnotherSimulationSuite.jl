@@ -42,6 +42,48 @@ function readTraj(buf::Trajectory, N::Int)
   zeros(N)
 end
 
+function Base.write(file::String, bdys::Vector{MyAtoms})
+  buf   = Trajectory(file, 'w')
+  frame = Frame()
+  r     = zeros(3)
+  v     = zeros(3)
+
+  add_velocities!(frame)
+
+  for i in bdys
+    r .= i.r
+    v .= i.v
+
+    add_atom!(frame, Atom(i.s), r, v)
+  end
+
+  write(buf, frame)
+
+  close(buf)
+end
+
+function Base.write(file::String, cell::MyCell)
+  buf   = Trajectory(file, 'w')
+  frame = Frame()
+  ucell = UnitCell(cell.lattice)
+  pos   = getPos(cell)
+
+  set_cell!(buf, ucell)
+  add_velocities!(frame)
+  
+  for i = 1:length(cell.masses)
+    r = pos[i]
+    v = cell.velocity[i]
+    s = cell.symbols[i]
+
+    add_atom!(frame, Atom(s), r, v)
+  end
+
+  write(buf, frame)
+
+  close(buf)
+end
+
 function readCell(fileName::String)
   stream = readlines(fileName)
   amu    = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
