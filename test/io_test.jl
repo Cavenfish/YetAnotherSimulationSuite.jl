@@ -2,7 +2,7 @@ using SHA
 
 function bdysTesting(f, N, s, m, r, v)
   file = joinpath(@__DIR__, f)
-  bdys = readXyz(file)
+  bdys = readSystem(file)
   og   = read(file) |> sha256
 
   @test length(bdys) == N
@@ -11,7 +11,7 @@ function bdysTesting(f, N, s, m, r, v)
   @test [i.r for i in bdys] == r
   @test [i.v for i in bdys] == v
 
-  writeXyz("./tmp.xyz", bdys)
+  write("./tmp.xyz", bdys)
   new = read("./tmp.xyz") |> sha256
   rm("./tmp.xyz")
 
@@ -20,13 +20,13 @@ end
 
 function cellTesting(f, N, lat)
   file = joinpath(@__DIR__, f)
-  cell = readCell(file)
+  cell = readSystem(file)
 
   @test length(cell.masses) == N
   @test cell.lattice == lat
 
-  writeCell("./tmp.xyz", cell)
-  new = readCell("./tmp.xyz")
+  write("./tmp.xyz", cell)
+  new = readSystem("./tmp.xyz")
   rm("./tmp.xyz")
 
   @test cell.lattice == new.lattice
