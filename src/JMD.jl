@@ -39,7 +39,7 @@ module JMD
     fs, ps, ns, kB,
 
     #io.jl
-    readSystem, writeCell,
+    readSystem,
 
     #helpers.jl
     CoM, vCoM, zeroVCoM!, getFrame, getFrame!, getLastFrame, getLastFrame!,
