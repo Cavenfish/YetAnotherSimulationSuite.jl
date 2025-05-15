@@ -1,88 +1,45 @@
 
-function readASExyz(xyz; getCell=false)
-  sys = readlines(xyz)
-  N   = length(sys) - 2
-  hed = sys[2]
-  sys = split.(sys[3:end], " ")
-  sys = deleteat!.(sys, findall.(e -> e == "", sys))
-  amu = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
-  set = MyAtoms[]
+function readSystem(file::String)
+  buf    = Trajectory(file)
+  N::Int = length(buf)
 
-  for i in range(1,N)
-    props = parse.(Float64, sys[i][2:end])
-    pos   = Vector(props[1:3])
-    s     = sys[i][1]
-
-    if occursin("masses", hed)
-      mas = props[4]
-      vel = Vector(props[5:7] ./ mas)
-    else
-      mas = amu[s]
-      # vel = Vector(props[4:6] ./ mas)
-      vel = zeros(3)
-    end #if-else
-
-    particle = Atom(pos, vel, mas, s[1])
-    push!(set, particle)
-  end #for loop
-
-  if getCell
-    tmp  = split(hed, "Lattice=")[2] |> (x -> split(x, "\"")[2]) |> (x -> split(x, " "))
-    cell = parse.(Float64, tmp)
-
-    return set, cell
+  if N > 1
+    return readTraj(buf, N)
+  else
+    return read(buf) |> readFrame
   end
 
-  set
-end #read_ase_xyz
-
-function readXyz(xyz::String)
-  stream = readlines(xyz)
-  amu    = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
-  set    = MyAtoms[]
-
-  #Skip header lines then parse file
-  for line in stream[3:end]
-    s = split(line, " ")
-    s = deleteat!(s, findall(e -> e == "", s))
-
-    pos  = parse.(Float64, s[2:4])
-    pos  = Vector(pos)
-    
-    vel  = if length(s) >= 7
-      tmp = parse.(Float64, s[5:end])
-      Vector(tmp)
-    else
-      zeros(3)
-    end
-    
-    mas  = amu[s[1]]
-    sym  = s[1][1]
-
-    atom = Atom(pos, vel, mas, sym)
-    push!(set, atom)
-  end
-
-  return set
 end
 
-function writeXyz(fileName::String, bdys)
-  f = open(fileName, "w")
-  N = length(bdys)
+function readFrame(frame::Frame)
+  N::Int = length(frame)
+  bdys   = MyAtoms[]
+  pos    = positions(frame)
+  n      = size(pos)[1]
+  ucell  = UnitCell(frame)
+  lat    = matrix(ucell)
+  
+  has_velocities(frame) ? vel = velocities(frame) : vel = zero(pos)
 
-  println(f, N)
-  println(f, "Made by JMD")
+  for i = 1:N
+    # C++ Indexing (ie. starts at 0)
+    atm = Atom(frame, i-1)
+    
+    r = MVector{n}(pos[:, i])
+    v = MVector{n}(vel[:, i])
+    m = mass(atm)
+    s = name(atm)
 
-  for j in 1:N
+    push!(bdys, Particle(r, v, m, s))
+  end
 
-    s          = bdys[j].s
-    x,y,z      = bdys[j].r
-    vx, vy, vz = bdys[j].v 
+  sum(lat) == 0.0 && return bdys
 
-    println(f, "$s   $x   $y   $z   $vx   $vy   $vz")
-  end 
+  makeCell(bdys, lat)
+end
 
-  close(f)
+function readTraj(buf::Trajectory, N::Int)
+  zeros(N)
 end
 
 function readCell(fileName::String)

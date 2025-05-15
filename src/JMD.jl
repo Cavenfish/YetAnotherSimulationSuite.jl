@@ -20,6 +20,7 @@ module JMD
   using Optim
   using PyCall
   using Spglib
+  using Chemfiles
   using DataFrames
   using Clustering
   using StaticArrays
@@ -38,7 +39,7 @@ module JMD
     fs, ps, ns, kB,
 
     #io.jl
-    readASExyz, readXyz, writeXyz, readCell, writeCell, writeXyzTraj,
+    readSystem, writeCell,
 
     #helpers.jl
     CoM, vCoM, zeroVCoM!, getFrame, getFrame!, getLastFrame, getLastFrame!,

@@ -6,7 +6,7 @@ struct Cell <: MyCell
   scaled_pos::Vector{Vector{Float64}}
   velocity::Vector{Vector{Float64}}
   masses::Vector{Float64}
-  symbols::Vector{Char}
+  symbols::Vector{String}
   mask::Vector{Bool}
   PBC::Vector{Bool}
   NC::Vector{Int32}

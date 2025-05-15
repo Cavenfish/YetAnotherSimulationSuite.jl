@@ -4,6 +4,7 @@ authors = ["brian <ferraribrian1996@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+Chemfiles = "46823bd8-5fb3-5f92-9aa0-96921f3dd015"
 Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -24,6 +25,7 @@ TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [compat]
 Aqua = "^0.8.0"
+Chemfiles = "0.10.42"
 Clustering = "0.15.8"
 DataFrames = "^1.7.0"
 Distributions = "0.25.119"
