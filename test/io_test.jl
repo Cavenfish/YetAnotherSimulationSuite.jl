@@ -37,21 +37,21 @@ end
 
   bdysTesting(
     "testingFiles/xyzFiles/co.xyz",
-    2, ['C', 'O'], [12.011, 15.999], 
+    2, ["C", "O"], [12.011, 15.999], 
     [[0.0,0.0,0.0],[1.1,0.0,0.0]], 
     [[0.0,0.0,0.0],[0.0,0.0,0.0]]
   )
 
   bdysTesting(
     "testingFiles/xyzFiles/co2.xyz",
-    3, ['C', 'O', 'O'], [12.011, 15.999, 15.999], 
+    3, ["C", "O", "O"], [12.011, 15.999, 15.999], 
     [[0.0,0.0,0.0],[-1.12,0.0,0.0],[1.12,0.0,0.0]], 
     [[0.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]]
   )
 
   bdysTesting(
     "testingFiles/xyzFiles/ch4.xyz",
-    5, ['C', 'H', 'H', 'H', 'H'], [12.011, 1.007, 1.007, 1.007, 1.007], 
+    5, ["C", "H", "H", "H", "H"], [12.011, 1.007, 1.007, 1.007, 1.007], 
     [[0.0,0.0,0.0],[0.0,0.0,1.0],[1.0,0.0,0.0],[-0.5,-0.8,-0.3],[-0.5,0.8,-0.3]], 
     [[1.0,0.0,0.0],[1.0,0.0,0.0],[1.0,0.0,0.0],[1.0,0.0,0.0],[1.0,0.0,0.0]]
   )
@@ -65,18 +65,18 @@ end
 
 @testset "Read ASE xyz" begin
   file = joinpath(@__DIR__, "testingFiles/xyzFiles/co_ase.xyz")
-  bdys = readASExyz(file)
+  bdys = readSystem(file)
 
-  @test bdys[1].s == 'C'
+  @test bdys[1].s == "C"
   @test bdys[1].m == 12.011
-  @test bdys[2].s == 'O'
+  @test bdys[2].s == "O"
   @test bdys[2].m == 15.999
   @test bdys[1].r == [-0.07311636, -0.11425678, -0.02537179]
   @test bdys[2].v == [0.0, 0.0, 0.0]
 
   file = joinpath(@__DIR__, "testingFiles/xyzFiles/Ih_ase.xyz")
   
-  bdys, cell = readASExyz(file; getCell=true)
+  bdys, cell = readSystem(file; getCell=true)
 
   @test cell == [
     7.82, 0.0, 0.0, 
