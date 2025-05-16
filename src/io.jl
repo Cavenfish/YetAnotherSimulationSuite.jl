@@ -67,10 +67,16 @@ function Base.write(file::String, bdys::Vector{MyAtoms})
   add_velocities!(frame)
 
   for i in bdys
-    r .= i.r
-    v .= i.v
-
-    add_atom!(frame, Atom(i.s), r, v)
+    r  .= i.r
+    v  .= i.v
+    atm = Atom(i.s)
+    
+    if occursin(".xyz", file)
+      set_property!(atm, "velo", v)
+      add_atom!(frame, atm, r)
+    else
+      add_atom!(frame, atm, r, v)
+    end
   end
 
   write(buf, frame)
