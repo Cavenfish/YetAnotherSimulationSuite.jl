@@ -29,7 +29,11 @@ I do plan on turning this into a true to form package, with proper documentation
   - [ ] Add example scripts
   - [ ] Get codecov above 70%
   - [ ] Rewrite code to use AtomsBase?
-  - [ ] Use Chemfiles for file parsing
+  - [ ] Use Chemfiles for file IO
+    - [x] Read system files 
+    - [x] Write system files
+    - [ ] Read traj files
+    - [ ] Write traj files
 
 # Features to Add
 
