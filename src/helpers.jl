@@ -5,7 +5,7 @@ function mkvar(x)
   return X
 end
 
-function myRepeat(A::Vector{T}, count::Integer, mask::Vector{Bool}) where T <: Union{Char, Number}
+function myRepeat(A::Vector{T}, count::Integer, mask::Vector{Bool}) where T <: Union{String, Number}
   [A; repeat(A[.!mask], count-1)]
 end
 
@@ -109,7 +109,7 @@ function zeroVCoM!(bdys)
   x    = vcom / N * M
   
   for i in 1:N
-    bdys[i].v -= (x / bdys[i].m)
+    bdys[i].v .-= (x / bdys[i].m)
   end
 end
 

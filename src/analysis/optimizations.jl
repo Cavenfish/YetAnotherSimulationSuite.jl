@@ -1,3 +1,5 @@
+# TODO:
+#   - Generalize the dimensionality of optimizations
 
 struct optVars
   potVars::PotVars
@@ -54,11 +56,11 @@ function getNewBdys(bdys, res)
   for i in 1:3:N*3
     j::UInt16 = (i+2) / 3
 
-    r = SVector{3}(opt[i:i+2])
+    r = MVector{3}(opt[i:i+2])
     v = bdys[j].v
     m = bdys[j].m
     s = bdys[j].s
-    push!(new, Atom(r,v,m,s))
+    push!(new, Particle(r,v,m,s))
   end
 
   new

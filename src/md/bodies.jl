@@ -15,6 +15,15 @@ struct Particle{D} <: MyAtoms
   s::String
 end
 
+function Particle(r::V, v::V, m::Float64, s::String) where V <: Vector{Float64}
+  n = length(r)
+
+  rm = MVector{n}(r)
+  vm = MVector{n}(v)
+
+  Particle(rm, vm, m, s)
+end
+
 function translateBdys!(bdys::Vector{MyAtoms}, v)
   for i in bdys
     i.r .+= v
