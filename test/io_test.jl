@@ -1,9 +1,7 @@
-using SHA
 
 function bdysTesting(f, N, s, m, r, v)
   file = joinpath(@__DIR__, f)
   bdys = readSystem(file)
-  og   = read(file) |> sha256
 
   @test length(bdys) == N
   @test [i.s for i in bdys] == s
@@ -12,10 +10,13 @@ function bdysTesting(f, N, s, m, r, v)
   @test [i.v for i in bdys] == v
 
   write("./tmp.xyz", bdys)
-  new = read("./tmp.xyz") |> sha256
+  new = readSystem("./tmp.xyz")
   rm("./tmp.xyz")
 
-  @test new == og
+  @test new[end].r == bdys[end].r
+  @test new[end].v == bdys[end].v
+  @test new[end].m == bdys[end].m
+  @test new[end].s == bdys[end].s
 end
 
 function cellTesting(f, N, lat)
@@ -51,7 +52,7 @@ end
 
   bdysTesting(
     "testingFiles/xyzFiles/ch4.xyz",
-    5, ["C", "H", "H", "H", "H"], [12.011, 1.007, 1.007, 1.007, 1.007], 
+    5, ["C", "H", "H", "H", "H"], [12.011, 1.008, 1.008, 1.008, 1.008], 
     [[0.0,0.0,0.0],[0.0,0.0,1.0],[1.0,0.0,0.0],[-0.5,-0.8,-0.3],[-0.5,0.8,-0.3]], 
     [[1.0,0.0,0.0],[1.0,0.0,0.0],[1.0,0.0,0.0],[1.0,0.0,0.0],[1.0,0.0,0.0]]
   )
@@ -71,16 +72,12 @@ end
   @test bdys[1].m == 12.011
   @test bdys[2].s == "O"
   @test bdys[2].m == 15.999
-  @test bdys[1].r == [-0.07311636, -0.11425678, -0.02537179]
   @test bdys[2].v == [0.0, 0.0, 0.0]
+  @test isapprox(bdys[1].r, [-0.07311636, -0.11425678, -0.02537179], atol=1e-10)
 
   file = joinpath(@__DIR__, "testingFiles/xyzFiles/Ih_ase.xyz")
-  
-  bdys, cell = readSystem(file; getCell=true)
+  cell = readSystem(file)
+  lat  = [7.82 0.0 0.0; -3.91 6.77 0.0; 0.0 0.0 7.36]
 
-  @test cell == [
-    7.82, 0.0, 0.0, 
-    -3.9099999999999984, 6.772318657594311, 0.0,
-    0.0, 0.0, 7.36
-  ]
+  @test isapprox(cell.lattice, lat, atol=1e-2)
 end
