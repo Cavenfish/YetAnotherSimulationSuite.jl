@@ -2,7 +2,7 @@
 @testset "Dimer Test" begin
 
   # Load dimer
-  bdys = joinpath(@__DIR__, "../testingFiles/xyzFiles/co-dimer.xyz") |> readXyz
+  bdys = joinpath(@__DIR__, "../testingFiles/xyzFiles/co-dimer.xyz") |> readSystem
 
   # Optimize dimer
   new = opt(MvHff, JMD.LBFGS(), bdys, iterations=1000, g_tol=1e-8)

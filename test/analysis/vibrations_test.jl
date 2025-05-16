@@ -1,7 +1,7 @@
 
 @testset "Test Harmonic Frequency" begin
   file = joinpath(@__DIR__, "../testingFiles/xyzFiles/co-dimer.xyz")
-  bdys = readXyz(file)
+  bdys = readSystem(file)
   
   # ensure bdys are optimized
   new = opt(MvHff, JMD.LBFGS(), bdys; g_tol=1e-9, iterations=500)

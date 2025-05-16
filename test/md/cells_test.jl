@@ -1,8 +1,7 @@
 
-
 # Read in some dummy bdys
-co2 = readXyz("$(@__DIR__)/../testingFiles/xyzFiles/co2.xyz")
-h2o = readXyz("$(@__DIR__)/../testingFiles/xyzFiles/h2o.xyz")
+co2 = readSystem("$(@__DIR__)/../testingFiles/xyzFiles/co2.xyz")
+h2o = readSystem("$(@__DIR__)/../testingFiles/xyzFiles/h2o.xyz")
 
 # Define a box lattice
 lat = [10 0 0; 0 10 0; 0 0 10]

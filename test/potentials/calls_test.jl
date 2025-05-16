@@ -1,7 +1,7 @@
 
 function staticTest(EoM, f)
   file = joinpath(@__DIR__, f)
-  bdys = readXyz(file)
+  bdys = readSystem(file)
 
   getPotEnergy(EoM, bdys)
   getForces(EoM, bdys)
@@ -11,7 +11,7 @@ end
 
 function dynamicTest(EoM, f)
   file = joinpath(@__DIR__, f)
-  bdys = readXyz(file)
+  bdys = readSystem(file)
 
   runMD(EoM, bdys, (0.0, 10fs), 1fs)
 
