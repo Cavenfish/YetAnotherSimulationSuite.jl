@@ -30,9 +30,16 @@ function readFrame(frame::Frame)
   
   has_velocities(frame) ? vel = velocities(frame) : vel = zero(pos)
 
+  atm   = Atom(frame, 0)
+  props = list_properties(atm)
+
   for i = 1:N
     # C++ Indexing (ie. starts at 0)
     atm = Atom(frame, i-1)
+
+    if "velo" in props
+      vel[:, i] .= property(atm, "velo")
+    end
     
     r = MVector{n}(pos[:, i])
     v = MVector{n}(vel[:, i])
