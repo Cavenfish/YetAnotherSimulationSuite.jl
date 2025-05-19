@@ -2,6 +2,9 @@
 Abstract types used in JMD
 """
 
+#MD image (a time snapshot)
+abstract type MyImage end
+
 #MD trajectory
 abstract type MyTraj end
 

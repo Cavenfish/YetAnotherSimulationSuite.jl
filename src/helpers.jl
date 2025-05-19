@@ -25,59 +25,6 @@ function myRepeat(A::Vector{Vector{Float64}}, count::Integer, mask::Vector{Bool}
   C
 end
 
-function getFrame(tj, i::Int64)
-  m = tj.m
-  s = tj.s
-  r = tj.r[i]
-  v = tj.v[i]
-
-  [Atom(r[j], v[j], m[j], s[j]) for j in 1:length(m)]
-end
-
-function getFrame!(bdys, tj, i::Int64)
-  r = tj.r[i]
-  v = tj.v[i]
-
-  for j = 1:length(bdys)
-    bdys[j].r = r[j]
-    bdys[j].v = v[j]
-  end
-
-end
-
-function getLastFrame(solu)
-  n = length(solu.prob.p.bdys)
-  
-  new = Atom[]
-  for i in 1:n
-    r = solu.u[end].x[2][i]
-    v = solu.u[end].x[1][i]
-    m = solu.prob.p.bdys[i].m
-    s = solu.prob.p.bdys[i].s
-    push!(new, Atom(r, v, m, s))
-  end
-  return new
-end
-
-function getLastFrame!(bdys::Vector{MyAtoms}, solu)
-  N = length(bdys)
-  
-  for i in 1:N
-    bdys[i].r = solu.u[end].x[2][i]
-    bdys[i].v = solu.u[end].x[1][i]
-    bdys[i].m = solu.prob.p.bdys[i].m
-    bdys[i].s = solu.prob.p.bdys[i].s
-  end
-end
-
-function getLastFrame!(cell::MyCell, solu)
-  x0 = [j for i in solu.u[end].x[2] for j in i]
-
-  cell.velocity   .= solu.u[end].x[1]
-  cell.scaled_pos .= getScaledPos(x0, cell.lattice)
-
-end
-
 function CoM(bdys)
   M = sum([i.m for i in bdys])
   r = sum([i.m*i.r for i in bdys])
