@@ -1,3 +1,9 @@
+"""
+I want to refactor this to resemble the Traj style. One struct with
+universal properties, and multiple other structs with more specific 
+properties. This will reduce unnecessary memory.
+"""
+
 struct Simulation
   bdys::Vector
   pars::Vector

@@ -15,7 +15,7 @@ struct Particle{D} <: MyAtoms
   s::String
 end
 
-function Particle(r::V, v::V, m::Float64, s::String) where V <: Vector{Float64}
+function Particle(r::V, v::V, m::Float64, s::String) where V <: Union{Vector, SVector}
   n = length(r)
 
   rm = MVector{n}(r)

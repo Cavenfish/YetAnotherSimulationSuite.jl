@@ -134,6 +134,7 @@ module JMD
   include("./md/bodies.jl")
   include("./md/simulation.jl")
   include("./md/thermostats.jl")
+  include("./md/trajectories.jl")
   include("./md/post-processing.jl")
 
   include("./md/potentials/MvHff.jl")
