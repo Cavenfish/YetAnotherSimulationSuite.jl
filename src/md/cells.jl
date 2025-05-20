@@ -1,15 +1,15 @@
 #TODO:
 #   -Make function to clean duplicates
 
-struct Cell <: MyCell
-  lattice::Matrix{Float64}
-  scaled_pos::Vector{Vector{Float64}}
-  velocity::Vector{Vector{Float64}}
-  masses::Vector{Float64}
-  symbols::Vector{String}
-  mask::Vector{Bool}
-  PBC::Vector{Bool}
-  NC::Vector{Int32}
+struct Cell{D, B, I, F<:AbstractFloat, S<:AbstractString} <: MyCell
+  lattice::SMatrix{D,D,F}
+  scaled_pos::Vector{MVector{D,F}}
+  velocity::Vector{MVector{D,F}}
+  masses::Vector{F}
+  symbols::Vector{S}
+  mask::Vector{B}
+  PBC::Vector{B}
+  NC::Vector{I}
 end
 
 function makeCell(bdys::Vector{MyAtoms}, lattice; 

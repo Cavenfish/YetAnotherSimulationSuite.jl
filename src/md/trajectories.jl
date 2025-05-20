@@ -1,19 +1,19 @@
 
 # Time dependent MD properties
-struct Image{D} <: MyImage
-  pos::Vector{SVector{D, Float64}}
-  vel::Vector{SVector{D, Float64}}
-  time::Float64
-  temp::Float64
-  energy::Float64
-  forces::Vector{SVector{D, Float64}}
+struct Image{D, F<:AbstractFloat} <: MyImage
+  pos::Vector{SVector{D, F}}
+  vel::Vector{SVector{D, F}}
+  time::F
+  temp::F
+  energy::F
+  forces::Vector{SVector{D, F}}
 end
 
-struct Traj <: MyTraj
-  images::Vector{MyImage}
-  masses::Vector{Float64}
-  symbols::Vector{String}
-  lattice::Matrix{Float64}
+struct Traj{D, F<:AbstractFloat, S<:AbstractString, I<:MyImage} <: MyTraj
+  images::Vector{I}
+  masses::Vector{F}
+  symbols::Vector{S}
+  lattice::SMatrix{D,D,F}
 end
 
 function getImage(solu::SciMLBase.ODESolution, i::Int, dt::Float64)

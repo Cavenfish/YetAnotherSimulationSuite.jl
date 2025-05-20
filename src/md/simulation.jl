@@ -2,28 +2,37 @@
 I want to refactor this to resemble the Traj style. One struct with
 universal properties, and multiple other structs with more specific 
 properties. This will reduce unnecessary memory.
+
+Notes
+----------
+The simulations are where performance matters, hence any and all performance
+tips and tricks should be done here. Making r and v SVectors prior to the
+dynamics run is one example. 
 """
 
-struct Simulation
-  bdys::Vector
-  pars::Vector
-  mols::Vector
-  energy::Vector
-  forces::Vector
-  temp::Vector
-  save::String
-  PBC::Vector{Bool}
-  NC::Vector{Int32}
-  lattice::Matrix
-  m::Vector
-  potVars::PotVars
-  NVT::Bool
-  thermostat!
-  thermoInps
+struct NVT{C}
+  thermoVars::ThermoVars
+  thermostat!::C
 end
 
-function runMD(EoM, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
-               dt::Float64; save="full", thermostat=nothing, thermoinps=nothing, kwargs...)
+struct Dynamics{D, B, I, F<:AbstractFloat, S<:AbstractString}
+  m::Vector{F}
+  s::Vector{S}
+  pars::Vector
+  mols::Vector
+  temp::Vector{F}
+  energy::Vector{F}
+  forces::Vector{Vector{SVector{D, F}}}
+  potVars::PotVars
+  PBC::Vector{B}
+  NC::Vector{I}
+  lattice::SMatrix{D, D, F}
+end
+
+function runMD(
+  EoM::Function, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
+  dt::Float64; thermostat=nothing, thermoinps=nothing, kwargs...
+)
              
   NC         = [0,0,0]
   PBC        = repeat([false], 3)

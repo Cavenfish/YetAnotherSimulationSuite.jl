@@ -8,11 +8,11 @@
 #   momentum to atoms.
 
 # Atoms in simulation
-struct Particle{D} <: MyAtoms
-  r::MVector{D, Float64}
-  v::MVector{D, Float64}
-  m::Float64
-  s::String
+struct Particle{D, F <: AbstractFloat, S <: AbstractString} <: MyAtoms
+  r::MVector{D, F}
+  v::MVector{D, F}
+  m::F
+  s::S
 end
 
 function Particle(r::V, v::V, m::Float64, s::String) where V <: Union{Vector, SVector}
