@@ -1,7 +1,7 @@
 # TODO:
 #   - Generalize the dimensionality of optimizations
 
-struct optVars{D,B,I,P, PV<:PotVars, F<:AbstractFloat}
+struct optVars{D,B,P, I<:Int, PV<:PotVars, F<:AbstractFloat}
   potVars::PV
   mols::Vector{Vector{I}}
   pars::Vector{P}

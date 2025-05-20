@@ -1,7 +1,7 @@
 #TODO:
 #   -Make function to clean duplicates
 
-struct Cell{D, B, I, F<:AbstractFloat, S<:AbstractString} <: MyCell
+struct Cell{D, B, I<:Int, F<:AbstractFloat, S<:AbstractString} <: MyCell
   lattice::SMatrix{D,D,F}
   scaled_pos::Vector{MVector{D,F}}
   velocity::Vector{MVector{D,F}}

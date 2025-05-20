@@ -9,8 +9,8 @@ struct Image{D, F<:AbstractFloat} <: MyImage
   forces::Vector{SVector{D, F}}
 end
 
-struct Traj{D, F<:AbstractFloat, S<:AbstractString, I<:MyImage} <: MyTraj
-  images::Vector{I}
+struct Traj{D, F<:AbstractFloat, S<:AbstractString, Im<:MyImage} <: MyTraj
+  images::Vector{Im}
   masses::Vector{F}
   symbols::Vector{S}
   lattice::SMatrix{D,D,F}

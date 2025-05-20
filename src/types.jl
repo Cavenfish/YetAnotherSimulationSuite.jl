@@ -16,3 +16,6 @@ abstract type MyAtoms end
 
 #Cell struct
 abstract type MyCell end
+
+# Variables for thermostats
+abstract type ThermoVars end

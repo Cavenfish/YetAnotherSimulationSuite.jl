@@ -10,23 +10,24 @@ tips and tricks should be done here. Making r and v SVectors prior to the
 dynamics run is one example. 
 """
 
-struct NVT{C}
-  thermoVars::ThermoVars
+struct NVT{C, TV<:ThermoVars}
+  thermoVars::TV
   thermostat!::C
 end
 
-struct Dynamics{D, B, I, F<:AbstractFloat, S<:AbstractString}
+struct Dynamics{T,D,B,P, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractString}
   m::Vector{F}
   s::Vector{S}
-  pars::Vector
-  mols::Vector
+  pars::Vector{P}
+  mols::Vector{Vector{I}}
   temp::Vector{F}
   energy::Vector{F}
   forces::Vector{Vector{SVector{D, F}}}
-  potVars::PotVars
+  potVars::PV
   PBC::Vector{B}
   NC::Vector{I}
   lattice::SMatrix{D, D, F}
+  ensemble::T
 end
 
 function runMD(
