@@ -14,7 +14,7 @@ end
 function Base.push!(tj::MyTraj, solu::SciMLBase.ODESolution; dt=fs, step=1)
   N = length(solu.t)
   
-  for i = 1:N
+  for i = 1:step:N
     push!(tj.images, getImage(solu, i, dt))
   end
 

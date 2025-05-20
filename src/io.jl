@@ -8,6 +8,12 @@ Julia bindings repo:
 https://github.com/chemfiles/Chemfiles.jl/tree/master
 """
 
+Chemfiles.mass(frame::Frame, i::Int) = Atom(frame, i) |> mass
+Chemfiles.name(frame::Frame, i::Int) = Atom(frame, i) |> name
+
+getMasses(frame::Frame) = [mass(frame, i) for i = 0:length(frame)-1]
+getNames( frame::Frame) = [name(frame, i) for i = 0:length(frame)-1]
+
 function readSystem(file::String)
   buf    = Trajectory(file)
   N::Int = length(buf)
@@ -54,8 +60,49 @@ function readFrame(frame::Frame)
   makeCell(bdys, lat)
 end
 
+ifProperty(frame, props, p) = p in props ? property(frame, p) : 0.0
+atomForces(frame, i) = property(Atom(frame, i), "forces")
+
+function readImage(frame::Frame)
+  pos    = positions(frame)
+  props  = list_properties(frame)
+  n      = size(pos)[1]
+
+  forces = if "forces" in list_properties(Atom(frame, 1))
+    [atomForces(frame, i) for i = 0:length(frame)-1]
+  else
+    tmp = zero(pos)
+    [SVector{n}(tmp[:, i]) for i = 1:length(frame)]
+  end
+
+  # Props here must be able to be Float
+  time   = ifProperty(frame, props, "time")
+  temp   = ifProperty(frame, props, "temp")
+  energy = ifProperty(frame, props, "energy")
+
+  # Check for velocities
+  has_velocities(frame) ? vel = velocities(frame) : vel = zero(pos)
+
+  # Reshape pos & vel
+  pos = [SVector{n}(pos[:, i]) for i = 1:length(frame)]
+  vel = [SVector{n}(vel[:, i]) for i = 1:length(frame)]
+
+  Image(pos, vel, time, temp, energy, forces)
+end
+
 function readTraj(buf::Trajectory, N::Int)
-  zeros(N)
+  frame   = read(buf)
+  lattice = UnitCell(frame) |> matrix
+  symbols = getNames(frame)
+  masses  = getMasses(frame)
+  images  = [readImage(frame)]
+
+  for i = 2:N
+    frame = read(buf)
+    push!(images, readImage(frame))
+  end
+
+  Traj(images, masses, symbols, lattice)
 end
 
 function Base.write(file::String, bdys::Vector{MyAtoms})
@@ -102,6 +149,40 @@ function Base.write(file::String, cell::MyCell)
   end
 
   write(buf, frame)
+
+  close(buf)
+end
+
+function Base.write(file::String, traj::MyTraj; step=1)
+  buf   = Trajectory(file, 'w')
+  ucell = UnitCell(traj.lattice)
+  r     = zeros(3)
+  v     = zeros(3)
+  f     = zeros(3)
+
+  set_cell!(buf, ucell)
+
+  for img in traj.images[1:step:end]
+    frame = Frame()
+    add_velocities!(frame)
+
+    # Add frame properties
+    set_property!(frame, "time", img.time)
+    set_property!(frame, "temp", img.temp)
+    set_property!(frame, "energy", img.energy)
+
+    for i = 1:length(img.pos)
+      r  .= img.pos[i]
+      v  .= img.vel[i]
+      f  .= img.forces[i]
+      atm = Atom(traj.symbols[i])
+
+      set_property!(atm, "forces", f)
+      add_atom!(frame, atm, r, v)
+    end
+
+    write(buf, frame)
+  end
 
   close(buf)
 end
