@@ -10,6 +10,8 @@ tips and tricks should be done here. Making r and v SVectors prior to the
 dynamics run is one example. 
 """
 
+struct NVE end
+
 struct NVT{C, TV<:ThermoVars}
   thermoVars::TV
   thermostat!::C
@@ -30,30 +32,24 @@ struct Dynamics{T,D,B,P, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractStrin
   ensemble::T
 end
 
-function runMD(
+function Base.run(
   EoM::Function, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
-  dt::Float64; thermostat=nothing, thermoinps=nothing, kwargs...
-)
+  dt::Float64, ensemble::T; kwargs...
+) where T <: Union{NVE,NVT}
              
   NC         = [0,0,0]
   PBC        = repeat([false], 3)
-  lattice    = zeros(3,3)
+  lattice    = @SMatrix zeros(3,3)
+  symbols    = [i.s for i in bdys]
   mas        = [i.m for i in bdys]
   potVars    = EoM(bdys)
   pars, mols = getPairs(bdys)
   pos        = [SVector{3}(i.r) for i in bdys]
   vel        = [SVector{3}(i.v) for i in bdys]
 
-  if thermoinps != nothing && thermostat != nothing
-    NVT = true
-  else
-    NVT = false
-  end
-
-  simu = Simulation(
-    bdys, pars, mols, [], [], [],
-    save, PBC, NC, lattice, mas, potVars,
-    NVT, thermostat, thermoinps
+  simu = Dynamics(
+    mas, symbols, pars, mols, Float64[], Float64[], [],
+    potVars, PBC, NC, lattice, ensemble
   )
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)

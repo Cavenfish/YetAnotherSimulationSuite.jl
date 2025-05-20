@@ -8,7 +8,7 @@ function getTemp(m, v, kB, N)
   Ekin / (kB * Nf)
 end
 
-struct Berendsen
+struct Berendsen <:ThermoVars
   T::Float64
   kB::Float64
   gamma::Float64
@@ -26,7 +26,7 @@ function Berendsen!(T, a, v, m, inp)
   end
 end
 
-struct Langevin
+struct Langevin <:ThermoVars
   T::Float64
   kB::Float64
   gamma::Float64
@@ -50,13 +50,13 @@ function Langevin!(T, a, v, m, inp)
   @. a += a1 + a2
 end
 
-struct BDP
+struct BDP <:ThermoVars
   T::Float64
   kB::Float64
   tau::Float64
 end
 
-struct BDPnT
+struct BDPnT <:ThermoVars
   T::Vector
   mols::Vector
   kB::Float64
