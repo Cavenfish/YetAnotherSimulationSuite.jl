@@ -2,7 +2,7 @@
 #   -Make function to clean duplicates
 
 struct Cell{D, B, I<:Int, F<:AbstractFloat, S<:AbstractString} <: MyCell
-  lattice::SMatrix{D,D,F}
+  lattice::MMatrix{D,D,F}
   scaled_pos::Vector{MVector{D,F}}
   velocity::Vector{MVector{D,F}}
   masses::Vector{F}
@@ -12,7 +12,23 @@ struct Cell{D, B, I<:Int, F<:AbstractFloat, S<:AbstractString} <: MyCell
   NC::Vector{I}
 end
 
-function makeCell(bdys::Vector{MyAtoms}, lattice; 
+function Cell(
+  lat::Matrix, spos::AbstractArray, vel::AbstractArray, 
+  mas::Vector{F}, sym::Vector{S}, mask::Vector{Bool},
+  PBC::Vector{Bool}, NC::Vector{Int}
+) where {F<:AbstractFloat, S<:AbstractString}
+
+  n = length(spos[1])
+
+  Cell(
+    MMatrix{n,n}(lat),
+    MVector{n}.(spos),
+    MVector{n}.(vel),
+    mas, sym, mask, PBC, NC
+  )
+end
+
+function makeCell(bdys::Vector{MyAtoms}, lattice::AbstractMatrix; 
   mask=repeat([false], length(bdys)), PBC=repeat([true], 3), NC=[1,1,1])
 
   Cell(
