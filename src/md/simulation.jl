@@ -10,9 +10,25 @@ tips and tricks should be done here. Making r and v SVectors prior to the
 dynamics run is one example. 
 """
 
-struct NVE end
+struct NVE{D, F<:AbstractFloat}
+  lattice::SMatrix{D, D, F}
+end
 
-struct NVT{C, TV<:ThermoVars}
+NVE() = NVE(@SMatrix zeros(3,3))
+NVE(lat::AbstractMatrix) = SMatrix{size(lat)...}(lat) |> NVE
+NVE(cell::MyCell) = NVE(cell.lattice)
+
+struct NpT{C,D, TV<:ThermoVars, BV<:BaroVars, F<:AbstractFloat}
+  lattice::MMatrix{D, D, F}
+  baroVars::BV
+  barostat!::C
+  thermoVars::TV
+  thermostat!::C
+end
+
+# C is callable
+struct NVT{C,D, TV<:ThermoVars, F<:AbstractFloat}
+  lattice::SMatrix{D, D, F}
   thermoVars::TV
   thermostat!::C
 end
@@ -28,18 +44,16 @@ struct Dynamics{T,D,B,P, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractStrin
   potVars::PV
   PBC::Vector{B}
   NC::Vector{I}
-  lattice::SMatrix{D, D, F}
   ensemble::T
 end
 
 function Base.run(
   EoM::Function, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
-  dt::Float64, ensemble::T; kwargs...
-) where T <: Union{NVE,NVT}
-             
+  dt::Float64, ensemble::T; algo=VelocityVerlet(), kwargs...
+) where T <: Union{NVE,NpT,NVT}
+
   NC         = [0,0,0]
   PBC        = repeat([false], 3)
-  lattice    = @SMatrix zeros(3,3)
   symbols    = [i.s for i in bdys]
   mas        = [i.m for i in bdys]
   potVars    = EoM(bdys)
@@ -48,37 +62,31 @@ function Base.run(
   vel        = [SVector{3}(i.v) for i in bdys]
 
   simu = Dynamics(
-    mas, symbols, pars, mols, Float64[], Float64[], [],
-    potVars, PBC, NC, lattice, ensemble
+    mas, symbols, pars, mols, Float64[], Float64[], 
+    Vector{SVector{3, Float64}}[], potVars, PBC, NC, ensemble
   )
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   
-  solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
+  solve(prob, algo, dt=dt, dense=false, calck=false)
 end
 
-function runMD(EoM, cell::MyCell, tspan::Tuple{Float64, Float64}, dt::Float64; 
-               save="full", thermostat=nothing, thermoinps=nothing, kwargs...)
+function Base.run(
+  EoM::Function, cell::MyCell, tspan::Tuple{Float64, Float64},
+  dt::Float64, ensemble::T; algo=VelocityVerlet(), kwargs...
+) where T <: Union{NVE,NpT,NVT}
 
-  bdys       = makeBdys(cell)
   potVars    = EoM(cell)
-  pars, mols = getPairs(bdys)
-  pos        = [SVector{3}(i.r) for i in bdys]
-  vel        = [SVector{3}(i.v) for i in bdys]
+  pars, mols = getPairs(cell)
+  pos        = [SVector{3}(i) for i in getPos(cell)]
+  vel        = [SVector{3}(i) for i in cell.velocity]
 
-  if thermoinps != nothing && thermostat != nothing
-    NVT = true
-  else
-    NVT = false
-  end
-
-  simu = Simulation(
-    bdys, pars, mols, [], [], [],
-    save, cell.PBC, cell.NC, cell.lattice, cell.masses, potVars,
-    NVT, thermostat, thermoinps
+  simu = Dynamics(
+    cell.masses, cell.symbols, pars, mols, Float64[], Float64[], 
+    Vector{SVector{3, Float64}}[], potVars, cell.PBC, cell.NC, ensemble
   )
 
   prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
   
-  solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
+  solve(prob, algo, dt=dt, dense=false, calck=false)
 end

@@ -19,3 +19,6 @@ abstract type MyCell end
 
 # Variables for thermostats
 abstract type ThermoVars end
+
+# Variables for barostats
+abstract type BaroVars end
