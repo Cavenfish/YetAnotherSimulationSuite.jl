@@ -8,7 +8,7 @@ struct optVars{D,B,P, I<:Int, PV<:PotVars, F<:AbstractFloat}
   m::Vector{F}
   PBC::Vector{B}
   NC::Vector{I}
-  lattice::SMatrix{D,D,F}
+  lattice::MMatrix{D,D,F}
 end
 
 
@@ -31,7 +31,7 @@ function prep4pot(EoM, bdys::Vector{MyAtoms})
   pars, mols = getPairs(bdys)
   NC         = [0,0,0]
   PBC        = repeat([false], 3)
-  lattice    = zeros(3,3)
+  lattice    = MMatrix{3,3}(zeros(3,3))
   vars       = optVars(potVars, mols, pars, m, PBC, NC, lattice)
   
   x0, vars
