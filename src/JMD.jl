@@ -28,7 +28,8 @@ module JMD
   using Distributions
   using KernelDensity
   using OrdinaryDiffEq
-  using FiniteDifferences
+
+  import FiniteDiff: JacobianCache, finite_difference_jacobian!
 
   # Wrapper for ASE calculator with SCME/f potential
   function __init__()

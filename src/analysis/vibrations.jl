@@ -13,15 +13,12 @@ function getHarmonicFreqs(EoM, bdys; kwargs...)
   x0, vars = prep4pot(EoM, bdys)
   im       = [i.m ^ -0.5 for i in bdys for j in 1:3]
   m        = im * im' #inverse mass scaling matrix
+  n        = length(x0)
+  H        = zeros(n,n)
+  cache    = JacobianCache(x0)
 
-  function f(x, vars)
-    G = zero(x)
-    EoM(nothing, G, x, vars)
-    return G
-  end
-
-  fdm = central_fdm(7,1)
-  H   = jacobian(fdm, x -> f(x, vars), x0)[1]
+  # Calculate Hessian
+  finite_difference_jacobian!(H, (dx,x) -> EoM(nothing, dx, x, vars), x0, cache)
 
   mH    = m .* H
   mH    = Symmetric(mH) #Ensures eigvecs are not imaginary
@@ -29,7 +26,7 @@ function getHarmonicFreqs(EoM, bdys; kwargs...)
   modes = eigvecs(mH)
   freqs = c * sqrt.(Complex.(freqs))
 
-  return freqs, modes
+  (freqs, modes)
 end
 
 function animateMode(bdys, mode, fileName)
