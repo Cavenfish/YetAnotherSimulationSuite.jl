@@ -1,5 +1,5 @@
 function getMols(bdys::Vector{MyAtoms}, rmax; D=3)
-  pts = zeros(length(r[1]), length(r))
+  pts = zeros(length(bdys[1].r), length(bdys))
 
   for i = 1:length(bdys)
     pts[:, i] .= bdys[i].r
