@@ -32,14 +32,24 @@ function getPairs(bdys::Vector{MyAtoms})
 end
 
 function getMols(cell::MyCell, rmax; D=3)
-  r   = getPos(cell)
-  pts = zeros(length(r[1]), length(r))
+  n = length(cell.scaled_pos)
+  m = length(cell.scaled_pos[1])
+  p = PeriodicEuclidean(1.0)
+  D = zeros(n, n)
 
-  for i = 1:length(r)
-    pts[:, i] .= r[i]
+  for i = 1:n
+    for j = i+1:n
+      sr = [
+        p(cell.scaled_pos[i][1], cell.scaled_pos[j][1]),
+        p(cell.scaled_pos[i][2], cell.scaled_pos[j][2]),
+        p(cell.scaled_pos[i][3], cell.scaled_pos[j][3])
+      ]
+      D[i,j] = cell.lattice * sr |> norm
+      D[j,i] = D[i,j]
+    end
   end
 
-  ret = dbscan(pts[1:D, :], rmax)
+  ret = dbscan(D, rmax, metric=nothing)
 
   [i.core_indices for i in ret.clusters]
 end

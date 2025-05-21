@@ -21,6 +21,7 @@ module JMD
   using PyCall
   using Spglib
   using Chemfiles
+  using Distances
   using DataFrames
   using Clustering
   using StaticArrays
