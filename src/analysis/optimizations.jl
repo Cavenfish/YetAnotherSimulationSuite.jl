@@ -66,10 +66,31 @@ function getNewBdys(bdys, res)
   new
 end
 
+function fg!(F, G, x, p, EoM)
+  # initialize things
+  u      = [x[i:i+2] for i = 1:3:length(x)]
+  forces = [zeros(3) for i = 1:3:length(x)]
+
+  # Calculate energy and forces
+  E = EoM(forces, u, p)
+
+  if G != nothing
+    tmp = [j for i in forces for j in i]
+    for i in 1:length(G)
+      G[i] = -tmp[i]
+    end
+  end
+
+  if F != nothing
+    return E
+  end
+
+end
+
 function opt(EoM, algo, bdys::Vector{MyAtoms}; kwargs...)
 
   x0, vars = prep4pot(EoM, bdys)
-  optFunc  = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
+  optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, EoM))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   optBdys  = getNewBdys(bdys, res)

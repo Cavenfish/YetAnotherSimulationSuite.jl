@@ -40,11 +40,8 @@ MvHff(bdys) = _MvHff_PotVars(
   2.131611069944055
 )
 
-function MvHff(dv, v, u, p, t)
-
-  # initialize things
+function MvHff(F, u, p)
   E = 0.0
-  F = [@MVector zeros(3) for i = 1:length(u)]
   P = p.potVars
 
   for mol in p.mols
@@ -69,64 +66,56 @@ function MvHff(dv, v, u, p, t)
 
     #Special Electrostatics
     E += _electroMvH!(F, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
-
   end
+
+  E
+end
+
+
+function MvHff(dv, v, u, p, t)
+
+  # initialize things
+  F = [@MVector zeros(3) for i = 1:length(u)]
+  P = p.potVars
+
+  # Calculate energy and forces
+  E = MvHff(F, u, P)
 
   dv .= F ./ p.m
-  if p.NVT
-    p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
+  T   = getTemp(p.m, v, kB, length(p.m))
+
+  if typeof(p.ensemble) == NVT
+    p.thermostat!(dv, v, p.m, p.thermoInps)
   end
 
+  push!(p.temp,   T)
   push!(p.energy, E)
   push!(p.forces, F)
 
 end
 
-function MvHff(F, G, y0, p)
+# function MvHff(F, G, y0, p)
 
-  # initialize things
-  P      = p.potVars
-  E      = 0.0
-  u      = [y0[i:i+2] for i = 1:3:length(y0)]
-  forces = [zeros(3) for i = 1:3:length(y0)]
+#   # initialize things
+#   u      = [y0[i:i+2] for i = 1:3:length(y0)]
+#   forces = [zeros(3) for i = 1:3:length(y0)]
+#   P      = p.potVars
 
-  for mol in p.mols
-    E += _Morse!(forces, u, mol[1], mol[2], P.D, P.a, P.req)
-  end
+#   # Calculate energy and forces
+#   E = MvHff(forces, u, P)
 
-  for par in p.pars
-    c1, o1 = par[1]
-    c2, o2 = par[2]
+#   if G != nothing
+#     tmp = [j for i in forces for j in i]
+#     for i in 1:length(G)
+#       G[i] = -tmp[i]
+#     end
+#   end
 
-    #C--C
-    E += _Buckingham!(forces, u, c1, c2, P.Acc, P.Bcc, P.Ccc)
+#   if F != nothing
+#     return E
+#   end
 
-    #C--O
-    E += _Buckingham!(forces, u, c1, o2, P.Aco, P.Bco, P.Cco)
-
-    #O--C
-    E += _Buckingham!(forces, u, o1, c2, P.Aco, P.Bco, P.Cco)
-
-    #O--O
-    E += _Buckingham!(forces, u, o1, o2, P.Aoo, P.Boo, P.Coo)
-
-    #Special Electrostatics
-    E += _electroMvH!(forces, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
-
-  end
-
-  if G != nothing
-    tmp = [j for i in forces for j in i]
-    for i in 1:length(G)
-      G[i] = -tmp[i]
-    end
-  end
-
-  if F != nothing
-    return E
-  end
-
-end
+# end
 
 function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
 

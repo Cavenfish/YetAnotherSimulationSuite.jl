@@ -14,10 +14,9 @@ struct Berendsen <:ThermoVars
   gamma::Float64
 end
 
-function Berendsen!(T, a, v, m, inp)
+function Berendsen!(a, v, m, inp)
   N    = length(m)
   Tsim = getTemp(m, v, inp.kB, N)
-  push!(T, Tsim)
 
   if Tsim == 0.0
     a .+= inp.gamma .* v
@@ -32,10 +31,8 @@ struct Langevin <:ThermoVars
   gamma::Float64
 end
 
-function Langevin!(T, a, v, m, inp)
+function Langevin!(a, v, m, inp)
   N    = length(m)
-  Tsim = getTemp(m, v, inp.kB, N)
-  push!(T, Tsim)
 
   # M   = sum(m) / N
   # sig = sqrt(2 * inp.gamma * M * inp.kB * inp.T)
@@ -76,10 +73,9 @@ function BDPnT!(T, a, v, m, inp)
   end
 end
 
-function BDP!(T, a, v, m, inp)
+function BDP!(a, v, m, inp)
   N    = length(m)
   Tsim = getTemp(m, v, inp.kB, N)
-  push!(T, Tsim)
 
   if Tsim == 0.0
     return
