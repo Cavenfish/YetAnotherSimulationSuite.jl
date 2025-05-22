@@ -48,7 +48,7 @@ struct Dynamics{T,D,B,P, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractStrin
 end
 
 function Base.run(
-  EoM::Function, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
+  calc::MyCalc, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
   dt::Float64, ensemble::T; algo=VelocityVerlet(), kwargs...
 ) where T <: Union{NVE,NpT,NVT}
 
@@ -56,7 +56,7 @@ function Base.run(
   PBC        = repeat([false], 3)
   symbols    = [i.s for i in bdys]
   mas        = [i.m for i in bdys]
-  potVars    = EoM(bdys)
+  potVars    = calc.b(bdys)
   pars, mols = getPairs(bdys)
   pos        = [SVector{3}(i.r) for i in bdys]
   vel        = [SVector{3}(i.v) for i in bdys]
@@ -66,7 +66,10 @@ function Base.run(
     Vector{SVector{3, Float64}}[], potVars, PBC, NC, ensemble
   )
 
-  prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
+  prob  = SecondOrderODEProblem(
+    (dv, v, u, p, t) -> dyn!(dv, v, u, p, t, calc), 
+    vel, pos, tspan, simu; kwargs...
+  )
   
   solve(prob, algo, dt=dt, dense=false, calck=false)
 end

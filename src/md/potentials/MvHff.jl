@@ -2,6 +2,8 @@
 CO-CO Potential from van Hemert et al. 2015
 """
 
+MvHff() = Calculator(MvHff; EF=MvHff!)
+
 struct _MvHff_PotVars{F<:Float64} <: PotVars
   D::F
   a::F
@@ -21,7 +23,7 @@ struct _MvHff_PotVars{F<:Float64} <: PotVars
   αo::F
 end
 
-MvHff(bdys) = _MvHff_PotVars(
+MvHff(bdys::Vector{MyAtoms}) = _MvHff_PotVars(
   11.230139012256362,
   2.3281,
   1.1282058129221093,
@@ -40,7 +42,7 @@ MvHff(bdys) = _MvHff_PotVars(
   2.131611069944055
 )
 
-function MvHff(F, u, p)
+function MvHff!(F, u, p)
   E = 0.0
   P = p.potVars
 
@@ -70,52 +72,6 @@ function MvHff(F, u, p)
 
   E
 end
-
-
-function MvHff(dv, v, u, p, t)
-
-  # initialize things
-  F = [@MVector zeros(3) for i = 1:length(u)]
-  P = p.potVars
-
-  # Calculate energy and forces
-  E = MvHff(F, u, P)
-
-  dv .= F ./ p.m
-  T   = getTemp(p.m, v, kB, length(p.m))
-
-  if typeof(p.ensemble) == NVT
-    p.thermostat!(dv, v, p.m, p.thermoInps)
-  end
-
-  push!(p.temp,   T)
-  push!(p.energy, E)
-  push!(p.forces, F)
-
-end
-
-# function MvHff(F, G, y0, p)
-
-#   # initialize things
-#   u      = [y0[i:i+2] for i = 1:3:length(y0)]
-#   forces = [zeros(3) for i = 1:3:length(y0)]
-#   P      = p.potVars
-
-#   # Calculate energy and forces
-#   E = MvHff(forces, u, P)
-
-#   if G != nothing
-#     tmp = [j for i in forces for j in i]
-#     for i in 1:length(G)
-#       G[i] = -tmp[i]
-#     end
-#   end
-
-#   if F != nothing
-#     return E
-#   end
-
-# end
 
 function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)
 

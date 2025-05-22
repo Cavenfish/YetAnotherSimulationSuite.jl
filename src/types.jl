@@ -22,3 +22,6 @@ abstract type ThermoVars end
 
 # Variables for barostats
 abstract type BaroVars end
+
+# Calculator
+abstract type MyCalc end

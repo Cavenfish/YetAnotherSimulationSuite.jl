@@ -87,10 +87,9 @@ function fg!(F, G, x, p, EoM)
 
 end
 
-function opt(EoM, algo, bdys::Vector{MyAtoms}; kwargs...)
-
-  x0, vars = prep4pot(EoM, bdys)
-  optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, EoM))
+function opt(calc::MyCalc, algo, bdys::Vector{MyAtoms}; kwargs...)
+  x0, vars = prep4pot(calc.b, bdys)
+  optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   optBdys  = getNewBdys(bdys, res)
