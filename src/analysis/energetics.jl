@@ -88,16 +88,9 @@ function getVibEnergy(mol, eignvec; pot=nothing)
   E
 end
 
-function getPotEnergy(EoM, bdys::Vector{MyAtoms})
-  x0, vars = prep4pot(EoM, bdys)
-  energy   = EoM(true, nothing, x0, vars)
-  
-  energy
-end
-
-function getPotEnergy(EoM, cell::MyCell)
-  x0, vars = prep4pot(EoM, cell)
-  energy   = EoM(true, nothing, x0, vars)
+function getPotEnergy(calc::MyCalc, obj::Union{MyCell, Vector{MyAtoms}})
+  x, vars = prep4pot(calc.b, obj)
+  energy  = fg!(true, nothing, x, vars, calc)
   
   energy
 end

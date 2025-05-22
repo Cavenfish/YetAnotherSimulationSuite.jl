@@ -1,5 +1,5 @@
 
-function getHarmonicFreqs(EoM, bdys; kwargs...)
+function getHarmonicFreqs(calc::MyCalc, bdys; kwargs...)
   _hbar = 1.0545718001391127e-34
   _e    = 1.6021766208e-19
   _amu  = 1.66053904e-27
@@ -10,7 +10,7 @@ function getHarmonicFreqs(EoM, bdys; kwargs...)
   c     = _hbar * 1e10 / sqrt(_e * _amu) * 8065.610420 
 
   # Prepare vars
-  x0, vars = prep4pot(EoM, bdys)
+  x0, vars = prep4pot(calc.b, bdys)
   im       = [i.m ^ -0.5 for i in bdys for j in 1:3]
   m        = im * im' #inverse mass scaling matrix
   n        = length(x0)
@@ -19,7 +19,7 @@ function getHarmonicFreqs(EoM, bdys; kwargs...)
 
   # Barrier function
   function f(dx::Vector{Float64}, x::Vector{Float64})
-    EoM(nothing, dx, x, vars)
+    fg!(nothing, dx, x, vars, calc)
   end
 
   # Calculate Hessian

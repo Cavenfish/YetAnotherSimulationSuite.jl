@@ -70,18 +70,30 @@ function reducedMass(mas::Vector{Float64})
   return μ
 end
 
-function getForces(EoM, bdys::Vector{MyAtoms})
-  x0, vars = prep4pot(EoM, bdys)
-  G        = zero(x0)
-  EoM(nothing, G, x0, vars)
+function getForces(calc::MyCalc, bdys::Vector{MyAtoms})
+  u       = [i.r for i in bdys]
+  F       = zero(u)
+  _, vars = prep4pot(calc.b, bdys)
 
-  [-G[i:i+2] for i = 1:3:length(G)]
+  if calc.f! != nothing
+    calc.f!(F, u, vars)
+  else
+    calc.ef!(F, u, vars)
+  end
+
+  F
 end
+  
+function getForces(calc::MyCalc, cell::MyCell)
+  u       = getPos(cell)
+  F       = zero(u)
+  _, vars = prep4pot(calc.b, cell)
 
-function getForces(EoM, cell::MyCell)
-  x0, vars = prep4pot(EoM, cell)
-  G        = zero(x0)
-  EoM(nothing, G, x0, vars)
+  if calc.f! != nothing
+    calc.f!(F, u, vars)
+  else
+    calc.ef!(F, u, vars)
+  end
 
-  [-G[i:i+2] for i = 1:3:length(G)]
+  F
 end

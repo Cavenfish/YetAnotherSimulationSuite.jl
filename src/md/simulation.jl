@@ -75,11 +75,11 @@ function Base.run(
 end
 
 function Base.run(
-  EoM::Function, cell::MyCell, tspan::Tuple{Float64, Float64},
+  calc::MyCalc, cell::MyCell, tspan::Tuple{Float64, Float64},
   dt::Float64, ensemble::T; algo=VelocityVerlet(), kwargs...
 ) where T <: Union{NVE,NpT,NVT}
 
-  potVars    = EoM(cell)
+  potVars    = calc.b(cell)
   pars, mols = getPairs(cell)
   pos        = [SVector{3}(i) for i in getPos(cell)]
   vel        = [SVector{3}(i) for i in cell.velocity]
@@ -89,7 +89,10 @@ function Base.run(
     Vector{SVector{3, Float64}}[], potVars, cell.PBC, cell.NC, ensemble
   )
 
-  prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
+  prob  = SecondOrderODEProblem(
+    (dv, v, u, p, t) -> dyn!(dv, v, u, p, t, calc), 
+    vel, pos, tspan, simu; kwargs...
+  )
   
   solve(prob, algo, dt=dt, dense=false, calck=false)
 end

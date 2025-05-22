@@ -46,16 +46,18 @@ potential (ie. md simulations) this significantly speeds up the
 code by reducing allocations.
 """
 
-struct _HGNN_PotVars <: PotVars
-  A::Matrix{Float64}
-  P::SizedVector{7}
-  dPdr::SizedMatrix{7,6}
-  rhats::SizedMatrix{6,3}
-  molVars
-  pairVars
+HGNN() = Calculator(HGNN; EF=HGNN!)
+
+struct _HGNN_PotVars{MV,PV,D1,D2,D3, F<:AbstractFloat} <: PotVars
+  A::Matrix{F}
+  P::SizedVector{D1,F}
+  dPdr::SizedMatrix{D1,D2,F}
+  rhats::SizedMatrix{D2,D3,F}
+  molVars::MV
+  pairVars::PV
 end 
 
-function HGNN(bdys)
+function HGNN(bdys::Vector{MyAtoms})
   f = jldopen(joinpath(@__DIR__, "params/hgnn.jld2"))
   molVars  = f["molVars"]
   pairVars = f["pairVars"]
@@ -70,11 +72,8 @@ function HGNN(bdys)
   _HGNN_PotVars(A, P, dPdr, rhats, molVars, pairVars)
 end
 
-function HGNN(dv, v, u, p, t)
-
-  # initialize things
+function HGNN!(F, u, p)
   E = 0.0
-  F = [@MVector zeros(3) for i = 1:length(u)]
   P = p.potVars
   r = u ./ 0.5291772083 # to Bohr
 
@@ -89,55 +88,7 @@ function HGNN(dv, v, u, p, t)
   E  *= 0.000124 # cm-1 to eV
   F .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
 
-  
-  dv .= F ./ p.m
-  if p.NVT
-    p.thermostat!(p.temp, dv, v, p.m, p.thermoInps)
-  end
-
-  push!(p.energy, E)
-  push!(p.forces, F)
-end
-
-function HGNN(F, G, y0, p)
-
-  # initialize things
-  P      = p.potVars
-  energy = 0.0
-  r      = [y0[i:i+2] for i = 1:3:length(y0)]
-  forces = [zeros(3) for i = 1:3:length(y0)]
-
-  # convert Angstrom to Bohr without allocating
-  for i = 1:length(r)
-    r[i] ./= 0.5291772083
-  end
-
-  for i in p.mols
-    energy += molPot!(forces, r, i, P.molVars)
-  end
-
-  for i in p.pars
-    energy += pairPot!(forces, r, i, P.pairVars, P.rhats, P.dPdr, P.P, P.A)
-  end
-  
-  energy  *= 0.000124 # cm-1 to eV
-  
-  # Because of shape of forces we need loop to properly
-  # multiply without allocating
-  for i = 1:length(forces) 
-    forces[i] .*= (0.000124 / 0.5291772083) # cm-1/Bohr to eV/Angstrom
-  end
-
-  if G != nothing
-    tmp = [j for i in forces for j in i]
-    for i in 1:length(G)
-      G[i] = -tmp[i]
-    end
-  end
-
-  if F != nothing
-    return energy
-  end
+  E
 end
 
 function g(i,j)

@@ -80,7 +80,7 @@ function dyn!(dv, v, u, p, t, calc)
   T   = getTemp(p.m, v, kB, length(p.m))
 
   if typeof(p.ensemble) == NVT
-    p.thermostat!(dv, v, p.m, p.thermoInps)
+    p.ensemble.thermostat!(dv, v, p.m, p.thermoInps)
   end
 
   push!(p.temp,   T)
