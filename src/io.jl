@@ -8,11 +8,11 @@ Julia bindings repo:
 https://github.com/chemfiles/Chemfiles.jl/tree/master
 """
 
-Chemfiles.mass(frame::Frame, i::Int) = Atom(frame, i) |> mass
-Chemfiles.name(frame::Frame, i::Int) = Atom(frame, i) |> name
+atomMass(frame::Frame, i::Int) = Atom(frame, i) |> mass
+atomName(frame::Frame, i::Int) = Atom(frame, i) |> name
 
-getMasses(frame::Frame) = [mass(frame, i) for i = 0:length(frame)-1]
-getNames( frame::Frame) = [name(frame, i) for i = 0:length(frame)-1]
+getMasses(frame::Frame) = [atomMass(frame, i) for i = 0:length(frame)-1]
+getNames( frame::Frame) = [atomName(frame, i) for i = 0:length(frame)-1]
 
 function readSystem(file::String)
   buf    = Trajectory(file)
@@ -134,16 +134,18 @@ end
 function Base.write(file::String, cell::MyCell)
   buf   = Trajectory(file, 'w')
   frame = Frame()
-  ucell = UnitCell(cell.lattice)
+  ucell = Matrix(cell.lattice) |> UnitCell
   pos   = getPos(cell)
+  r     = zeros(3)
+  v     = zeros(3)
 
   set_cell!(buf, ucell)
   add_velocities!(frame)
   
   for i = 1:length(cell.masses)
-    r = pos[i]
-    v = cell.velocity[i]
-    s = cell.symbols[i]
+    r .= pos[i]
+    v .= cell.velocity[i]
+    s  = cell.symbols[i]
 
     add_atom!(frame, Atom(s), r, v)
   end
@@ -155,7 +157,7 @@ end
 
 function Base.write(file::String, traj::MyTraj; step=1)
   buf   = Trajectory(file, 'w')
-  ucell = UnitCell(traj.lattice)
+  ucell = Matrix(traj.lattice) |> UnitCell
   r     = zeros(3)
   v     = zeros(3)
   f     = zeros(3)

@@ -44,8 +44,7 @@ module JMD
     readSystem,
 
     #helpers.jl
-    CoM, vCoM, zeroVCoM!, getFrame, getFrame!, getLastFrame, getLastFrame!,
-    getForces,
+    CoM, vCoM, zeroVCoM!, getForces,
 
     #energetics.jl
     vibExcite!, transExcite!, getPotEnergy,
@@ -61,16 +60,16 @@ module JMD
     makeSuperCell!, getMIC, center!, getPrimitiveCell, getVolume,
 
     #potentials
-    MvHff, HGNN, MBX, SPCF, TIP4P, SCMEf,
+    MvHff, HGNN, MBX, SPCF, TIP4Pf, SCMEf,
 
     #simulation.jl
-    runMD,
+    NVE, NVT,
 
     #thermostats.jl
     Berendsen, Berendsen!, Langevin, Langevin!, BDP, BDP!, BDPnT, BDPnT!,
 
     #post-processing.jl
-    processDynamics, processDynamics!, processTmpFiles, 
+    processDynamics, processTmpFiles, 
     
     #vacf.jl
     vacfInps, VDOS, getVelMas,

@@ -4,7 +4,7 @@ co2 = readSystem("$(@__DIR__)/../testingFiles/xyzFiles/co2.xyz")
 h2o = readSystem("$(@__DIR__)/../testingFiles/xyzFiles/h2o.xyz")
 
 # Define a box lattice
-lat = [10 0 0; 0 10 0; 0 0 10]
+lat = [10.0 0 0; 0 10.0 0; 0 0 10.0]
 
 @testset "Test Basic Functions" begin
   cell = makeCell(co2, lat)

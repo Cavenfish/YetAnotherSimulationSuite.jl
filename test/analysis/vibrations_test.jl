@@ -2,11 +2,12 @@
 @testset "Test Harmonic Frequency" begin
   file = joinpath(@__DIR__, "../testingFiles/xyzFiles/co-dimer.xyz")
   bdys = readSystem(file)
+  calc = MvHff()
   
   # ensure bdys are optimized
-  new = opt(MvHff, JMD.LBFGS(), bdys; g_tol=1e-9, iterations=500)
+  new = opt(calc, JMD.LBFGS(), bdys; g_tol=1e-9, iterations=500)
 
-  v,m = getHarmonicFreqs(MvHff, new)
+  v,m = getHarmonicFreqs(calc, new)
 
   @test length(v) == 3*length(bdys)
   @test size(m) == (length(v), length(v))

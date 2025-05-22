@@ -14,7 +14,7 @@ end
 # I checked a rewrite of this where no middle man (B) was needed
 # the allocations were unchanged, since this is cleaner to read
 # I'm keeping it.
-function myRepeat(A::Vector{Vector{Float64}}, count::Integer, mask::Vector{Bool})
+function myRepeat(A::Vector{MVector{D,Float64}}, count::Integer, mask::Vector{Bool}) where D
   B = [A; repeat(A[.!mask], count-1)]
   C = zero(B)
 
