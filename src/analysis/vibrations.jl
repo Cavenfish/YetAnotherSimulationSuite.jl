@@ -17,8 +17,13 @@ function getHarmonicFreqs(EoM, bdys; kwargs...)
   H        = zeros(n,n)
   cache    = JacobianCache(x0)
 
+  # Barrier function
+  function f(dx::Vector{Float64}, x::Vector{Float64})
+    EoM(nothing, dx, x, vars)
+  end
+
   # Calculate Hessian
-  finite_difference_jacobian!(H, (dx,x) -> EoM(nothing, dx, x, vars), x0, cache)
+  finite_difference_jacobian!(H, f, x0, cache)
 
   mH    = m .* H
   mH    = Symmetric(mH) #Ensures eigvecs are not imaginary
