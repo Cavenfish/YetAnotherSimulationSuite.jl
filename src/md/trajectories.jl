@@ -16,6 +16,17 @@ struct Traj{D, F<:AbstractFloat, S<:AbstractString, Im<:MyImage} <: MyTraj
   lattice::SMatrix{D,D,F}
 end
 
+function Traj(
+  imgs::T, mas::Vector{Float64}, 
+  sym::Vector{String}, lat::Union{Matrix, MMatrix}
+) where T
+
+  n,_     = size(lat)
+  lattice = SMatrix{n,n}(lat)
+
+  Traj(imgs, mas, sym, lattice)
+end
+
 function getImage(solu::SciMLBase.ODESolution, i::Int, dt::Float64)
   r = solu.u[i].x[2]
   v = solu.u[i].x[1]

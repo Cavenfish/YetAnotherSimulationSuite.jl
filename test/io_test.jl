@@ -77,7 +77,7 @@ end
 
   trajTesting(
     "testingFiles/mdData/traj.xyz",
-    50
+    51
   )
   
 end

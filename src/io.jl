@@ -14,6 +14,22 @@ atomName(frame::Frame, i::Int) = Atom(frame, i) |> name
 getMasses(frame::Frame) = [atomMass(frame, i) for i = 0:length(frame)-1]
 getNames( frame::Frame) = [atomName(frame, i) for i = 0:length(frame)-1]
 
+function ifProperty(frame, props, p)
+  if p in props
+    x = property(frame, p)
+    return parse(Float64, x)
+  else 
+    return 0.0
+  end
+end
+
+function atomForces(frame, i)
+  x = property(Atom(frame, i), "forces")
+  n = length(x)
+
+  SVector{n}(x)
+end
+
 function readSystem(file::String)
   buf    = Trajectory(file)
   N::Int = length(buf)
@@ -59,9 +75,6 @@ function readFrame(frame::Frame)
 
   makeCell(bdys, lat)
 end
-
-ifProperty(frame, props, p) = p in props ? property(frame, p) : 0.0
-atomForces(frame, i) = property(Atom(frame, i), "forces")
 
 function readImage(frame::Frame)
   pos    = positions(frame)
