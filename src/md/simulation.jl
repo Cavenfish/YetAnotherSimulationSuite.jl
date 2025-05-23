@@ -1,72 +1,137 @@
-struct Simulation
-  bdys::Vector
-  pars::Vector
-  mols::Vector
-  energy::Vector
-  forces::Vector
-  temp::Vector
-  save::String
-  PBC::Vector{Bool}
-  NC::Vector{Int32}
-  lattice::Matrix
-  m::Vector
-  potVars::PotVars
-  NVT::Bool
-  thermostat!
-  thermoInps
+"""
+I want to refactor this to resemble the Traj style. One struct with
+universal properties, and multiple other structs with more specific 
+properties. This will reduce unnecessary memory.
+
+Notes
+----------
+The simulations are where performance matters, hence any and all performance
+tips and tricks should be done here. Making r and v SVectors prior to the
+dynamics run is one example. 
+"""
+
+struct NVE{D, F<:AbstractFloat}
+  lattice::SMatrix{D, D, F}
 end
 
-function runMD(EoM, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
-               dt::Float64; save="full", thermostat=nothing, thermoinps=nothing, kwargs...)
-             
+NVE() = NVE(@SMatrix zeros(3,3))
+NVE(lat::AbstractMatrix) = SMatrix{size(lat)...}(lat) |> NVE
+NVE(cell::MyCell) = NVE(cell.lattice)
+
+struct NpT{D,B, T<:MyThermostat, F<:AbstractFloat}
+  lattice::MMatrix{D, D, F}
+  barostat::B
+  thermostat::T
+end
+
+struct NVT{D, T<:MyThermostat, F<:AbstractFloat}
+  lattice::SMatrix{D, D, F}
+  thermostat::T
+end
+
+NVT(thermostat::MyThermostat) = NVT(zeros(3,3), thermostat)
+NVT(cell::MyCell, thermostat::MyThermostat) = NVT(cell.lattice, thermostat)
+
+function NVT(lat::AbstractMatrix, thermostat::MyThermostat)
+  l = SMatrix{size(lat)...}(lat)
+  NVT(l, thermostat)
+end
+
+struct Dynamics{T,D,B,P, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractString}
+  m::Vector{F}
+  s::Vector{S}
+  pars::Vector{P}
+  mols::Vector{Vector{I}}
+  temp::Vector{F}
+  energy::Vector{F}
+  forces::Vector{Vector{SVector{D, F}}}
+  potVars::PV
+  PBC::Vector{B}
+  NC::Vector{I}
+  ensemble::T
+end
+
+function singleRun(
+  calc::MyCalc, vel::T, pos::T, tspan::Tuple{Float64, Float64},
+  simu::Dynamics, algo::A, dt::AbstractFloat; kwargs...
+) where {T,A}
+
+  prob  = SecondOrderODEProblem(
+    (dv, v, u, p, t) -> dyn!(dv, v, u, p, t, calc), 
+    vel, pos, tspan, simu; kwargs...
+  )
+  
+  solve(prob, algo; dt=dt, dense=false, calck=false)
+end
+
+function doRun(
+  calc::MyCalc, vel::T, pos::T, tspan::Tuple{Float64, Float64},
+  simu::Dynamics, algo::A, dt::AbstractFloat, split::Int; kwargs...
+) where {T,A}
+
+  if split > 1
+    t = tspan[1]
+    Δ = (tspan[2] - tspan[1]) / split
+    
+    for i = 1:split
+      span = (t, t+Δ)
+      solu = singleRun(calc, vel, pos, span, simu, algo, dt; kwargs...)
+
+      open("./$(i).tmp", "w") do io
+        serialize(io, solu)
+      end
+
+      # Is this needed?
+      @free solu
+
+      t   += Δ
+    end
+
+    files = ["./$(i).tmp" for i = 1:split]
+    return processTmpFiles(files; dt=dt)
+  else
+    solu = singleRun(calc, vel, pos, tspan, simu, algo, dt; kwargs...)
+    return processDynamics(solu)
+  end
+
+end
+
+function Base.run(
+  calc::MyCalc, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
+  dt::Float64, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
+) where T <: Union{NVE,NpT,NVT}
+
   NC         = [0,0,0]
   PBC        = repeat([false], 3)
-  lattice    = zeros(3,3)
+  symbols    = [i.s for i in bdys]
   mas        = [i.m for i in bdys]
-  potVars    = EoM(bdys)
+  potVars    = calc.b(bdys)
   pars, mols = getPairs(bdys)
   pos        = [SVector{3}(i.r) for i in bdys]
   vel        = [SVector{3}(i.v) for i in bdys]
 
-  if thermoinps != nothing && thermostat != nothing
-    NVT = true
-  else
-    NVT = false
-  end
-
-  simu = Simulation(
-    bdys, pars, mols, [], [], [],
-    save, PBC, NC, lattice, mas, potVars,
-    NVT, thermostat, thermoinps
+  simu = Dynamics(
+    mas, symbols, pars, mols, Float64[], Float64[], 
+    Vector{SVector{3, Float64}}[], potVars, PBC, NC, ensemble
   )
 
-  prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
-  
-  solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
+  doRun(calc, vel, pos, tspan, simu, algo, dt, split; kwargs...)
 end
 
-function runMD(EoM, cell::MyCell, tspan::Tuple{Float64, Float64}, dt::Float64; 
-               save="full", thermostat=nothing, thermoinps=nothing, kwargs...)
+function Base.run(
+  calc::MyCalc, cell::MyCell, tspan::Tuple{Float64, Float64},
+  dt::Float64, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
+) where T <: Union{NVE,NpT,NVT}
 
-  bdys       = makeBdys(cell)
-  potVars    = EoM(cell)
-  pars, mols = getPairs(bdys)
-  pos        = [SVector{3}(i.r) for i in bdys]
-  vel        = [SVector{3}(i.v) for i in bdys]
+  potVars    = calc.b(cell)
+  pars, mols = getPairs(cell)
+  pos        = [SVector{3}(i) for i in getPos(cell)]
+  vel        = [SVector{3}(i) for i in cell.velocity]
 
-  if thermoinps != nothing && thermostat != nothing
-    NVT = true
-  else
-    NVT = false
-  end
-
-  simu = Simulation(
-    bdys, pars, mols, [], [], [],
-    save, cell.PBC, cell.NC, cell.lattice, cell.masses, potVars,
-    NVT, thermostat, thermoinps
+  simu = Dynamics(
+    cell.masses, cell.symbols, pars, mols, Float64[], Float64[], 
+    Vector{SVector{3, Float64}}[], potVars, cell.PBC, cell.NC, ensemble
   )
 
-  prob  = SecondOrderODEProblem(EoM, vel, pos, tspan, simu; kwargs...)
-  
-  solve(prob, VelocityVerlet(), dt=dt, dense=false, calck=false)
+  doRun(calc, vel, pos, tspan, simu, algo, dt, split; kwargs...)
 end

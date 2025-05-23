@@ -1,12 +1,14 @@
+# TODO:
+#   - Generalize the dimensionality of optimizations
 
-struct optVars
-  potVars::PotVars
-  mols::Vector
-  pars::Vector
-  m::Vector
-  PBC::Vector{Bool}
-  NC::Vector{Int32}
-  lattice::Matrix
+struct optVars{D,B,P, I<:Int, PV<:PotVars, F<:AbstractFloat}
+  potVars::PV
+  mols::Vector{Vector{I}}
+  pars::Vector{P}
+  m::Vector{F}
+  PBC::Vector{B}
+  NC::Vector{I}
+  lattice::MMatrix{D,D,F}
 end
 
 
@@ -22,23 +24,23 @@ function prepX0(cell::MyCell)
   [j for i in r for j in i]
 end
 
-function prep4pot(EoM, bdys::Vector{MyAtoms})
+function prep4pot(builder, bdys::Vector{MyAtoms})
   m          = [i.m for i in bdys]
   x0         = prepX0(bdys)
-  potVars    = EoM(bdys)
+  potVars    = builder(bdys)
   pars, mols = getPairs(bdys)
   NC         = [0,0,0]
   PBC        = repeat([false], 3)
-  lattice    = zeros(3,3)
+  lattice    = MMatrix{3,3}(zeros(3,3))
   vars       = optVars(potVars, mols, pars, m, PBC, NC, lattice)
   
   x0, vars
 end
 
-function prep4pot(EoM, cell::MyCell)
+function prep4pot(builder, cell::MyCell)
   bdys       = makeBdys(cell)
   x0         = prepX0(cell)
-  potVars    = EoM(cell)
+  potVars    = builder(cell)
   pars, mols = getPairs(cell)
   vars       = optVars(potVars, mols, pars, cell.masses, 
                        cell.PBC, cell.NC, cell.lattice)
@@ -54,20 +56,19 @@ function getNewBdys(bdys, res)
   for i in 1:3:N*3
     j::UInt16 = (i+2) / 3
 
-    r = SVector{3}(opt[i:i+2])
+    r = MVector{3}(opt[i:i+2])
     v = bdys[j].v
     m = bdys[j].m
     s = bdys[j].s
-    push!(new, Atom(r,v,m,s))
+    push!(new, Particle(r,v,m,s))
   end
 
   new
 end
 
-function opt(EoM, algo, bdys::Vector{MyAtoms}; kwargs...)
-
-  x0, vars = prep4pot(EoM, bdys)
-  optFunc  = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
+function opt(calc::MyCalc, algo, bdys::Vector{MyAtoms}; kwargs...)
+  x0, vars = prep4pot(calc.b, bdys)
+  optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   optBdys  = getNewBdys(bdys, res)
@@ -75,13 +76,13 @@ function opt(EoM, algo, bdys::Vector{MyAtoms}; kwargs...)
   optBdys
 end
 
-function opt(EoM, algo, cell::MyCell; kwargs...)
-
-  x0, vars = prep4pot(EoM, cell)
-  optFunc  = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
+function opt(calc::MyCalc, algo, cell::MyCell; kwargs...)
+  x0, vars = prep4pot(calc.b, cell)
+  optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
+  spos     = [MVector(i) for i in spos]
 
   # The new cell returned will have fields that point to
   # fields in the original cell. For example, new.lattice

@@ -1,18 +1,34 @@
 #TODO:
 #   -Make function to clean duplicates
 
-struct Cell <: MyCell
-  lattice::Matrix{Float64}
-  scaled_pos::Vector{Vector{Float64}}
-  velocity::Vector{Vector{Float64}}
-  masses::Vector{Float64}
-  symbols::Vector{Char}
-  mask::Vector{Bool}
-  PBC::Vector{Bool}
-  NC::Vector{Int32}
+struct Cell{D, B, I<:Int, F<:AbstractFloat, S<:AbstractString} <: MyCell
+  lattice::MMatrix{D,D,F}
+  scaled_pos::Vector{MVector{D,F}}
+  velocity::Vector{MVector{D,F}}
+  masses::Vector{F}
+  symbols::Vector{S}
+  mask::Vector{B}
+  PBC::Vector{B}
+  NC::Vector{I}
 end
 
-function makeCell(bdys::Vector{MyAtoms}, lattice; 
+function Cell(
+  lat::Matrix, spos::AbstractArray, vel::AbstractArray, 
+  mas::Vector{F}, sym::Vector{S}, mask::Vector{Bool},
+  PBC::Vector{Bool}, NC::Vector{Int}
+) where {F<:AbstractFloat, S<:AbstractString}
+
+  n = length(spos[1])
+
+  Cell(
+    MMatrix{n,n}(lat),
+    MVector{n}.(spos),
+    MVector{n}.(vel),
+    mas, sym, mask, PBC, NC
+  )
+end
+
+function makeCell(bdys::Vector{MyAtoms}, lattice::AbstractMatrix; 
   mask=repeat([false], length(bdys)), PBC=repeat([true], 3), NC=[1,1,1])
 
   Cell(
@@ -33,11 +49,12 @@ function trim!(cell::MyCell, iter)
   deleteat!(cell.mask, iter)
 end
 
-function makeBdys(cell)::Vector{MyAtoms}
-  pos  = getPos(cell)
-  vel  = [i for i in cell.velocity]
+function makeBdys(cell::MyCell)::Vector{MyAtoms}
+  D    = length(cell.velocity[1])
+  pos  = MVector{D}.(getPos(cell))
+  vel  = [MVector{D}(i) for i in cell.velocity]
 
-  [Atom(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
+  [Particle(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
 end
 
 function getScaledPos(x0, lattice)
@@ -181,7 +198,7 @@ function getMIC(cell::MyCell)
               for q = 1:length(bdys)]
 
   for i = 1:length(f)
-    push!(new, Atom(f[i], v[i], m[i], s[i]))
+    push!(new, Particle(f[i], v[i], m[i], s[i]))
   end
 
   makeCell(new, cell.lattice*3, mask=cell.mask, PBC=cell.PBC, NC=cell.NC)
@@ -248,37 +265,4 @@ function getPrimitiveCell(cell, symprec)
     L, stan.positions, cell.velocity, mas, 
     only.(syms), cell.mask, cell.PBC, cell.NC
   )
-end
-
-function getMols(cell::MyCell, rmax; D=3)
-  r   = getPos(cell)
-
-  pts = hcat(r...)
-
-  ret = dbscan(pts[1:D, :], rmax)
-
-  [i.core_indices for i in ret.clusters]
-end
-
-function getPairs(cell::MyCell)
-
-  n = length(cell.masses)
-
-  # Get mols and N
-  mols = if n <= 3
-    getMols(cell, 1.5, D=n-1) 
-  else
-    getMols(cell, 1.5)
-  end
-  N    = size(mols)[1]
-
-  # Make all pairs
-  pars = Pair[]
-  for i in 1:N
-    for j in i+1:N
-      push!(pars, Pair(mols[i],mols[j]))
-    end
-  end
-
-  pars, mols
 end

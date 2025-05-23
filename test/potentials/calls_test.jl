@@ -1,19 +1,19 @@
 
-function staticTest(EoM, f)
+function staticTest(calc, f)
   file = joinpath(@__DIR__, f)
-  bdys = readXyz(file)
+  bdys = readSystem(file)
 
-  getPotEnergy(EoM, bdys)
-  getForces(EoM, bdys)
+  getPotEnergy(calc, bdys)
+  getForces(calc, bdys)
 
   true
 end
 
-function dynamicTest(EoM, f)
+function dynamicTest(calc, f)
   file = joinpath(@__DIR__, f)
-  bdys = readXyz(file)
+  bdys = readSystem(file)
 
-  runMD(EoM, bdys, (0.0, 10fs), 1fs)
+  run(calc, bdys, (0.0, 10fs), 1fs, NVE())
 
   true
 end
@@ -27,19 +27,19 @@ end
   h2o = "../testingFiles/xyzFiles/h2o-dimer.xyz"
   
   # MvHff
-  @test staticTest(MvHff, co)
-  @test dynamicTest(MvHff, co)
+  @test staticTest(MvHff(), co)
+  @test dynamicTest(MvHff(), co)
 
   # HGNN
-  @test staticTest(HGNN, co)
-  @test dynamicTest(HGNN, co)
+  @test staticTest(HGNN(), co)
+  @test dynamicTest(HGNN(), co)
 
   # TIP4P
-  @test staticTest(TIP4P, h2o)
-  @test dynamicTest(TIP4P, h2o)
+  @test staticTest(TIP4Pf(), h2o)
+  @test dynamicTest(TIP4Pf(), h2o)
 
   # SPCF
-  @test staticTest(SPCF, h2o)
-  @test dynamicTest(SPCF, h2o)
+  @test staticTest(SPCF(), h2o)
+  @test dynamicTest(SPCF(), h2o)
 
 end

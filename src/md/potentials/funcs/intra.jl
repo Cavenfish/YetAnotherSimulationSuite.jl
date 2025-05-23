@@ -4,8 +4,8 @@ Intramolecular Potential Functions
 
 
 function _Morse(
-  r::Float64, rvec::S, D::Float64, a::Float64, req::Float64
-) where S <: Union{SVector, Vector}
+  r::Float64, rvec::V, D::Float64, a::Float64, req::Float64
+) where V <: AbstractVector
 
   c = exp(-a*(r-req))
   E = D * (1 - c)^2
@@ -15,9 +15,9 @@ function _Morse(
 end
 
 function _Morse!(
-  F::Vector{M}, u::Vector{S}, 
+  F::Vector{Vf}, u::Vector{Vu}, 
   i::Int64, j::Int64, D::Float64, a::Float64, req::Float64
-) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
   
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -32,8 +32,8 @@ function _Morse!(
 end
 
 function _harmonicBond(
-  r::Float64, rvec::S, K::Float64, req::Float64
-) where S <: Union{SVector, Vector}
+  r::Float64, rvec::V, K::Float64, req::Float64
+) where V <: AbstractVector
 
   E     = 0.5 * K * (r - req)^2
   f     = @. - K * (r - req) * revc / r
@@ -42,9 +42,9 @@ function _harmonicBond(
 end
 
 function _harmonicBond!(
-  F::Vector{M}, u::Vector{S}, 
+  F::Vector{Vf}, u::Vector{Vu}, 
   i::Int64, j::Int64, K::Float64, req::Float64
-) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -58,8 +58,8 @@ function _harmonicBond!(
 end
 
 function _harmonicBondAngle(
-  r1::S, r2::S, K::Float64, θeq::Float64
-) where S <: Union{SVector, Vector}
+  r1::V, r2::V, K::Float64, θeq::Float64
+) where V <: AbstractVector
 
   θ   = dot(r1, r2) / (norm(r1) * norm(r2)) |> (x -> round(x, digits=10)) |> acos
   E   = 0.5 * K * (θ - θeq)^2
@@ -72,9 +72,9 @@ function _harmonicBondAngle(
 end
 
 function _harmonicBondAngle!(
-  F::Vector{M}, u::Vector{S}, 
+  F::Vector{Vf}, u::Vector{Vu}, 
   i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64
-) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   ri    = u[i] - u[o]
   rj    = u[j] - u[o]

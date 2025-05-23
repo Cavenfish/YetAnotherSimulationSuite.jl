@@ -88,48 +88,9 @@ function getVibEnergy(mol, eignvec; pot=nothing)
   E
 end
 
-#The general method above will be great for more complicated molecules
-# but it is very slow. While below only works for CO but is fast.
-
-function getCOVibEnergy(mol; pot=nothing)
-  diff = mol[2].r - mol[1].r
-  rhat = normalize(diff)
-  v1   = dot(mol[1].v, rhat)
-  v2   = dot(mol[2].v, rhat)
-  E    = 0.5*mol[1].m*v1^2 + 0.5*mol[2].m*v2^2
-
-  if pot != nothing
-    E += getPotEnergy(pot, mol)
-  end
-
-  E
-end
-
-function getCOVibEnergy(pos,vel,mas; pot=nothing)
-  diff = pos[2] - pos[1]
-  rhat = normalize(diff)
-  v1   = dot(vel[1], rhat)
-  v2   = dot(vel[2], rhat)
-  E    = 0.5*mas[1]*v1^2 + 0.5*mas[2]*v2^2
-
-  if pot != nothing
-    x0 = [j for i in pos for j in i]
-    E += pot(true, nothing, x0, optVars([[1,2]], []))
-  end
-
-  E
-end
-
-function getPotEnergy(EoM, bdys::Vector{MyAtoms})
-  x0, vars = prep4pot(EoM, bdys)
-  energy   = EoM(true, nothing, x0, vars)
-  
-  energy
-end
-
-function getPotEnergy(EoM, cell::MyCell)
-  x0, vars = prep4pot(EoM, cell)
-  energy   = EoM(true, nothing, x0, vars)
+function getPotEnergy(calc::MyCalc, obj::Union{MyCell, Vector{MyAtoms}})
+  x, vars = prep4pot(calc.b, obj)
+  energy  = fg!(true, nothing, x, vars, calc)
   
   energy
 end

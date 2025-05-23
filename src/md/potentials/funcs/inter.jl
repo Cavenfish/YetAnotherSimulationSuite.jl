@@ -4,8 +4,8 @@ Intermolecular Potential Functions
 
 
 function _vdw(
-  ri::S, rj::S, ϵij::Float64, σij::Float64
-) where S <: Union{SVector, Vector}
+  ri::V, rj::V, ϵij::Float64, σij::Float64
+) where V <: AbstractVector
 
   rvec = rj - ri
   r    = norm(rvec)
@@ -17,9 +17,9 @@ function _vdw(
 end
 
 function _vdw!(
-  F::Vector{M}, u::Vector{S},
+  F::Vector{Vf}, u::Vector{Vu},
   i::Int64, j::Int64, ϵij::Float64, σij::Float64
-) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -33,8 +33,8 @@ function _vdw!(
 end
 
 function _Buckingham(
-  ri::S, rj::S, Aij::Float64, Bij::Float64, Cij::Float64
-) where S <: Union{SVector, Vector}
+  ri::V, rj::V, Aij::Float64, Bij::Float64, Cij::Float64
+) where V <: AbstractVector
 
   rvec = rj - ri
   r    = norm(rvec)
@@ -47,9 +47,9 @@ function _Buckingham(
 end
 
 function _Buckingham!(
-  F::Vector{M}, u::Vector{S},
+  F::Vector{Vf}, u::Vector{Vu},
   i::Int64, j::Int64, Aij::Float64, Bij::Float64, Cij::Float64
-) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   rvec = u[j] - u[i]
   r    = norm(rvec)
@@ -65,8 +65,8 @@ function _Buckingham!(
 end
 
 function _Coulomb(
-  ri::S, rj::S, Qi::Float64, Qj::Float64
-) where S <: Union{SVector, Vector}
+  ri::V, rj::V, Qi::Float64, Qj::Float64
+) where V <: AbstractVector
 
   rvec = rj - ri
   r    = norm(rvec)
@@ -77,9 +77,9 @@ function _Coulomb(
 end
 
 function _Coulomb!(
-  F::Vector{M}, u::Vector{S}, 
+  F::Vector{Vf}, u::Vector{Vu}, 
   i::Int64, j::Int64, Qi::Float64, Qj::Float64
-) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -92,8 +92,8 @@ function _Coulomb!(
 end
 
 function _shortDisp(
-  ri::S, rj::S, Aij::Float64, Bij::Float64
-) where S <: Union{SVector, Vector}
+  ri::V, rj::V, Aij::Float64, Bij::Float64
+) where V <: AbstractVector
 
   rvec = rj - ri
   r    = norm(rvec)
@@ -104,9 +104,9 @@ function _shortDisp(
 end
 
 function _shortDisp!(
-  F::Vector{M}, u::Vector{S},
+  F::Vector{Vf}, u::Vector{Vu},
   i::Int64, j::Int64, Aij::Float64, Bij::Float64
-) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
@@ -119,8 +119,8 @@ function _shortDisp!(
 end
 
 function _longDisp(
-  ri::S, rj::S, Cij::Float64; damp=nothing, p=nothing
-) where S <: Union{SVector, Vector}
+  ri::V, rj::V, Cij::Float64; damp=nothing, p=nothing
+) where V <: AbstractVector
 
   rvec = rj - ri
   r    = norm(rvec)
@@ -137,9 +137,9 @@ function _longDisp(
 end
 
 function _longDisp!(
-  F::Vector{M}, u::Vector{S}, 
+  F::Vector{Vf}, u::Vector{Vu}, 
   i::Int64, j::Int64, Cij::Float64; damp=nothing, p=nothing
-) where {M <: Union{MVector, Vector}, S <: Union{SVector, Vector}}
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)

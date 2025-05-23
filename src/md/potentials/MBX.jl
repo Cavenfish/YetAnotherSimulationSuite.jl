@@ -10,13 +10,15 @@ MBX Paper:
 https://pubs.aip.org/aip/jcp/article/159/5/054802/2904909/MBX-A-many-body-energy-and-force-calculator-for
 """
 
-struct _MBX_PotVars <: PotVars
-  xyz
-  json
-  num_ats
-  at_nams
-  num_mon
-  mon_nams
+MBX() = Calculator(MBX; E=MBX, EF=MBX!)
+
+struct _MBX_PotVars{X,J,NA,AN,NM,MN} <: PotVars
+  xyz::X
+  json::J
+  num_ats::NA
+  at_nams::AN
+  num_mon::NM
+  mon_nams::MN
 end
 
 function MBX(bdys::Vector{MyAtoms})
@@ -115,44 +117,25 @@ function MBX(cell::MyCell)
   vars
 end
 
-function MBX(dv, v, u, p, t)
-
-  # initialize things
-  x0   = [j for i in u for j in i]
-  G    = zero(x0)
-  F    = Vector[]
+function MBX(u, p)
+  x    = [j for i in u for j in i]
   nats = convert(Int32, length(p.potVars.at_nams))
 
-  E  = mbx_get_energy_grad!(G, x0, nats)
-
-  for i = 1:3:length(G)
-    push!(F, -G[i:i+2])
-  end
-
-  dv .= F ./ p.m
-  if p.NVT
-    p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
-  end
-
-  push!(p.energy, E)
-  push!(p.forces, F)
-
+  mbx_get_energy(x, nats)
 end
 
-function MBX(F, G, y0, p)
-
+function MBX!(F, u, p)
+  x    = [j for i in u for j in i]
+  G    = zero(x)
   nats = convert(Int32, length(p.potVars.at_nams))
+  E    = mbx_get_energy_grad!(G, x, nats)
 
-  E = if G != nothing
-    mbx_get_energy_grad!(G, y0, nats)
-  else
-    mbx_get_energy(y0, nats)
+  for i = 1:length(F)
+    j::Int = 3i - 2
+    F[i]  .= -G[j:j+2]
   end
-
-  if F != nothing
-    return E
-  end
-
+  
+  E
 end
 
 function MBX(F, G, cell::MyCell, lat)
