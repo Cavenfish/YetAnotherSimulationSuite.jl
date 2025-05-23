@@ -34,6 +34,19 @@ function cellTesting(f, N, lat)
   @test cell.scaled_pos[123] ≈ new.scaled_pos[123] atol = 1e-5
 end
 
+function trajTesting(f, N)
+  file = joinpath(@__DIR__, f)
+  traj = readSystem(file)
+
+  @test length(traj.images) == N
+
+  write("./tmp.xyz", traj)
+  new = readSystem("./tmp.xyz")
+  rm("./tmp.xyz")
+
+  @test length(new.images) == N
+end
+
 @testset "JMD Style File IO" begin
 
   bdysTesting(
@@ -60,6 +73,11 @@ end
   cellTesting(
     "testingFiles/xyzFiles/iceIh.xyz",
     2304, [30.9 0.0 0.0; 0.0 26.8 0.0; 0.0 0.0 29.1]
+  )
+
+  trajTesting(
+    "testingFiles/mdData/traj.xyz",
+    50
   )
   
 end
