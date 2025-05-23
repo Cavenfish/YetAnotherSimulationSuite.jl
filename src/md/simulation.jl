@@ -18,19 +18,23 @@ NVE() = NVE(@SMatrix zeros(3,3))
 NVE(lat::AbstractMatrix) = SMatrix{size(lat)...}(lat) |> NVE
 NVE(cell::MyCell) = NVE(cell.lattice)
 
-struct NpT{C,D, TV<:ThermoVars, BV<:BaroVars, F<:AbstractFloat}
+struct NpT{D,B, T<:MyThermostat, F<:AbstractFloat}
   lattice::MMatrix{D, D, F}
-  baroVars::BV
-  barostat!::C
-  thermoVars::TV
-  thermostat!::C
+  barostat::B
+  thermostat::T
 end
 
-# C is callable
-struct NVT{C,D, TV<:ThermoVars, F<:AbstractFloat}
+struct NVT{D, T<:MyThermostat, F<:AbstractFloat}
   lattice::SMatrix{D, D, F}
-  thermoVars::TV
-  thermostat!::C
+  thermostat::T
+end
+
+NVT(thermostat::MyThermostat) = NVT(zeros(3,3), thermostat)
+NVT(cell::MyCell, thermostat::MyThermostat) = NVT(cell.lattice, thermostat)
+
+function NVT(lat::AbstractMatrix, thermostat::MyThermostat)
+  l = SMatrix{size(lat)...}(lat)
+  NVT(l, thermostat)
 end
 
 struct Dynamics{T,D,B,P, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractString}

@@ -62,11 +62,11 @@ module JMD
     #potentials
     MvHff, HGNN, MBX, SPCF, TIP4Pf, SCMEf,
 
-    #simulation.jl
-    NVE, NVT,
+    #thermostats
+    Berendsen, Langevin, CVR,
 
-    #thermostats.jl
-    Berendsen, Berendsen!, Langevin, Langevin!, BDP, BDP!, BDPnT, BDPnT!,
+    #ensembles
+    NVE, NVT,
 
     #post-processing.jl
     processDynamics, processTmpFiles, 
@@ -138,6 +138,10 @@ module JMD
   include("./md/thermostats.jl")
   include("./md/trajectories.jl")
   include("./md/post-processing.jl")
+
+  include("./md/thermostats/CVR.jl")
+  include("./md/thermostats/Langevin.jl")
+  include("./md/thermostats/Berendsen.jl")
 
   include("./md/potentials/MvHff.jl")
   include("./md/potentials/HGNN.jl")
