@@ -51,9 +51,54 @@ struct Dynamics{T,D,B,P, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractStrin
   ensemble::T
 end
 
+function singleRun(
+  calc::MyCalc, vel::T, pos::T, tspan::Tuple{Float64, Float64},
+  simu::Dynamics, algo::A, dt::AbstractFloat; kwargs...
+) where {T,A}
+
+  prob  = SecondOrderODEProblem(
+    (dv, v, u, p, t) -> dyn!(dv, v, u, p, t, calc), 
+    vel, pos, tspan, simu; kwargs...
+  )
+  
+  solve(prob, algo; dt=dt, dense=false, calck=false)
+end
+
+function doRun(
+  calc::MyCalc, vel::T, pos::T, tspan::Tuple{Float64, Float64},
+  simu::Dynamics, algo::A, dt::AbstractFloat, split::Int; kwargs...
+) where {T,A}
+
+  if split > 1
+    t = tspan[1]
+    Δ = (tspan[2] - tspan[1]) / split
+    
+    for i = 1:split
+      span = (t, t+Δ)
+      solu = singleRun(calc, vel, pos, span, simu, algo, dt; kwargs...)
+
+      open("./$(i).tmp", "w") do io
+        serialize(io, solu)
+      end
+
+      # Is this needed?
+      @free solu
+
+      t   += Δ
+    end
+
+    files = ["./$(i).tmp" for i = 1:split]
+    return processTmpFiles(files; dt=dt)
+  else
+    solu = singleRun(calc, vel, pos, tspan, simu, algo, dt; kwargs...)
+    return processDynamics(solu)
+  end
+
+end
+
 function Base.run(
   calc::MyCalc, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
-  dt::Float64, ensemble::T; algo=VelocityVerlet(), kwargs...
+  dt::Float64, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
 ) where T <: Union{NVE,NpT,NVT}
 
   NC         = [0,0,0]
@@ -70,17 +115,12 @@ function Base.run(
     Vector{SVector{3, Float64}}[], potVars, PBC, NC, ensemble
   )
 
-  prob  = SecondOrderODEProblem(
-    (dv, v, u, p, t) -> dyn!(dv, v, u, p, t, calc), 
-    vel, pos, tspan, simu; kwargs...
-  )
-  
-  solve(prob, algo, dt=dt, dense=false, calck=false)
+  doRun(calc, vel, pos, tspan, simu, algo, dt, split; kwargs...)
 end
 
 function Base.run(
   calc::MyCalc, cell::MyCell, tspan::Tuple{Float64, Float64},
-  dt::Float64, ensemble::T; algo=VelocityVerlet(), kwargs...
+  dt::Float64, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
 ) where T <: Union{NVE,NpT,NVT}
 
   potVars    = calc.b(cell)
@@ -93,10 +133,5 @@ function Base.run(
     Vector{SVector{3, Float64}}[], potVars, cell.PBC, cell.NC, ensemble
   )
 
-  prob  = SecondOrderODEProblem(
-    (dv, v, u, p, t) -> dyn!(dv, v, u, p, t, calc), 
-    vel, pos, tspan, simu; kwargs...
-  )
-  
-  solve(prob, algo, dt=dt, dense=false, calck=false)
+  doRun(calc, vel, pos, tspan, simu, algo, dt, split; kwargs...)
 end
