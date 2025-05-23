@@ -28,7 +28,7 @@ I do plan on turning this into a true to form package, with proper documentation
   - [ ] Make documentation
   - [ ] Add example scripts
   - [ ] Get codecov above 70%
-  - [ ] Rewrite code to use AtomsBase?
+  - [ ] Rewrite code to use Unitful.jl?
   - [x] Use Chemfiles for file IO
 
 # Features to Add

@@ -1,13 +1,12 @@
 
 function processDynamics(solu::SciMLBase.ODESolution; dt=fs, step=1)
   N  = length(solu.t)
-  s  = [i.s for i in solu.prob.p.bdys] # WILL CHANGE
   
   Traj(
     [getImage(solu, i, dt) for i = 1:step:N],
     solu.prob.p.m,
-    s,
-    solu.prob.p.lattice
+    solu.prob.p.s,
+    solu.prob.p.ensemble.lattice
   )
 end
 
@@ -35,12 +34,17 @@ function processTmpFiles(files; kwargs...)
 
     # Append traj with next tmp file data
     open(file, "r") do io
-      solu = deserialize(f)
+      solu = deserialize(io)
       push!(tj, solu; kwargs...)
     end
 
     #Free memory. Needed?
     @free solu
+  end
+
+  # Clean-up
+  for f in files
+    rm(f)
   end
 
   tj

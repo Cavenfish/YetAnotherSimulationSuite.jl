@@ -25,3 +25,6 @@ abstract type BaroVars end
 
 # Calculator
 abstract type MyCalc end
+
+# Thermostat
+abstract type MyThermostat end
