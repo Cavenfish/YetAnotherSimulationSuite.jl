@@ -10,17 +10,17 @@ In JMD you have an Atom object, which contains the position, velocity, mass and 
 using JMD
 
 # Read it in from an xyz file
-bdys = readXyz("./myFile.xyz")
+bdys = readSystem("./myFile.xyz")
 
 # Or make it yourself
 bdys = [
-  Atom([ 0.00,  0.22, 0.0], zeros(3), 15.999, 'O'),
-  Atom([ 0.75, -0.36, 0.0], zeros(3),  1.000, 'H'),
-  Atom([-0.75, -0.36, 0.0], zeros(3),  1.000, 'H')
+  Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, 'O'),
+  Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, 'H'),
+  Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, 'H')
 ]
 
 # Write it to an xyz file
-writeXyz("./h2o.xyz", bdys)
+write("./h2o.xyz", bdys)
 ```
 
 Within JMD the Atom struct is mutable, this is to allow on-the-fly swapping of atomic masses. 
@@ -29,7 +29,7 @@ Within JMD the Atom struct is mutable, this is to allow on-the-fly swapping of a
 using JMD
 
 # Read it in from an xyz file
-bdys = readXyz("./myFile.xyz")
+bdys = readSystem("./myFile.xyz")
 
 # Change the mass of the first Atom
 bdys[1].m = 2.00
@@ -65,19 +65,19 @@ The Cell object within JMD holds the lattice, scaled positions, velocities, mass
 using JMD
 
 # Read it in from an xyz file
-cell = readXyz("./myFile.xyz")
+cell = readSystem("./myFile.xyz")
 
 # Or make it yourself
 bdys = [
-  Atom([ 0.00,  0.22, 0.0], zeros(3), 15.999, 'O'),
-  Atom([ 0.75, -0.36, 0.0], zeros(3),  1.000, 'H'),
-  Atom([-0.75, -0.36, 0.0], zeros(3),  1.000, 'H')
+  Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, 'O'),
+  Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, 'H'),
+  Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, 'H')
 ]
 lat  = [5 0 0; 0 5 0; 0 0 5]
 cell = makeCell(bdys, lat)
 
 # Write it to an xyz file
-writeCell("./myCell.xyz", cell)
+write("./myCell.xyz", cell)
 ```
 
 JMD also contians some basic auxiliary functions for cells. 
@@ -86,7 +86,7 @@ JMD also contians some basic auxiliary functions for cells.
 using JMD
 
 # Read it in from an xyz file
-cell = readXyz("./myFile.xyz")
+cell = readSystem("./myFile.xyz")
 
 # Wrap atoms outside cell back into cell
 wrap!(cell)
