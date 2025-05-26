@@ -1,10 +1,27 @@
-#Atoms in simulation
-#Needs mutable to swap masses on the fly
-mutable struct Atom <: MyAtoms
-  r::Vector{Float64}
-  v::Vector{Float64}
-  m::Float64
-  s::Char
+# Notes to Self:
+#   Making Atom mutable allows mass to swap on fly, but this 
+#   might be too niche. Most users likely don't need that, so I
+#   am scrubbing it.
+#
+#   I am making r and v MVectors to restrict array size but still
+#   allow mutating the vector. This lets the user translate or add
+#   momentum to atoms.
+
+# Atoms in simulation
+struct Particle{D, F <: AbstractFloat, S <: AbstractString} <: MyAtoms
+  r::MVector{D, F}
+  v::MVector{D, F}
+  m::F
+  s::S
+end
+
+function Particle(r::V, v::V, m::Float64, s::String) where V <: Union{Vector, SVector}
+  n = length(r)
+
+  rm = MVector{n}(r)
+  vm = MVector{n}(v)
+
+  Particle(rm, vm, m, s)
 end
 
 function translateBdys!(bdys::Vector{MyAtoms}, v)

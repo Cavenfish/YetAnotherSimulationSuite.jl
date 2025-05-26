@@ -12,55 +12,46 @@ SCME/f Paper:
 https://pubs.acs.org/doi/full/10.1021/acs.jctc.2c00598
 """
 
-struct _SCMEf_PotVars <: JMD.PotVars
-  lat
+SCMEf() = Calculator(SCMEf; EF=SCMEf!)
+
+struct _SCMEf_PotVars{T, F<:Float64} <: JMD.PotVars
+  lat::Vector{F}
+  kwargs::T
 end
 
-SCMEf(bdys::Vector{JMD.MyAtoms}) = _SCMEf_PotVars(ones(3)*1e3)
-
-function SCMEf(cell::JMD.MyCell)
-  lat = reshape(cell.lattice, 9)
-
-  _SCMEf_PotVars(lat[[1,5,9]])
-end
-
-function SCMEf(dv, v, u, p, t)
-  all(p.PBC) ? pbc = true : pbc = p.PBC
-
-  E, f = py"scmef_get_energy_and_forces"(u, p.potVars.lat, NC=p.NC, pbc=pbc)
-
-  F    = eachrow(f) |> (x -> convert(Vector{Vector{Float64}}, x))
-
-  dv .= F ./ p.m
-  if p.NVT
-    p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
-  end
-
-  push!(p.energy, E)
-  push!(p.forces, F)
-
-end
-
-function SCMEf(F, G, y0, p)
-
-  # initialize things
-  E = 0.0
-  u = [y0[i:i+2] for i = 1:3:length(y0)]
-
-  all(p.PBC) ? pbc = true : pbc = p.PBC
-
-  if G != nothing
-    e, f = py"scmef_get_energy_and_forces"(u, p.potVars.lat, NC=p.NC, pbc=pbc)
-    E    = e
-    G   .= transpose(-f) |> (x -> reshape(x, length(x)))
+function SCMEf(bdys::Vector{MyAtoms}) 
+  # grab args if user defined them
+  kwargs = if isdefined(Main, :SCMEf_USER_ARGS)
+    Main.SCMEf_USER_ARGS
   else
-    E    = py"scmef_get_energy"(u, p.potVars.lat, NC=p.NC, pbc=pbc)
+    Dict()
   end
 
-  if F != nothing
-    return E
+  _SCMEf_PotVars(ones(3)*1e3, kwargs)
+end
+
+function SCMEf(cell::MyCell)
+  lat = reshape(cell.lattice, 9)
+  
+  # grab args if user defined them
+  kwargs = if isdefined(Main, :SCMEf_USER_ARGS)
+    Main.SCMEf_USER_ARGS
+  else
+    Dict()
   end
 
+  _SCMEf_PotVars(lat[[1,5,9]], kwargs)
+end
+
+function SCMEf!(F, u, p)
+  P = p.potVars
+  all(p.PBC) ? pbc = true : pbc = p.PBC
+
+  E, f = py"scmef_get_energy_and_forces"(u, P.lat; pbc=pbc, P.kwargs...)
+
+  F   .= eachrow(f) |> (x -> convert(Vector{Vector{Float64}}, x))
+
+  E
 end
 
 function SCMEf(F, G, cell::JMD.MyCell, lat)

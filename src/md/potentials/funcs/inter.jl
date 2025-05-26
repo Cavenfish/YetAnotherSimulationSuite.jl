@@ -3,7 +3,10 @@ Intermolecular Potential Functions
 """
 
 
-function _vdw(ri::Vector{Float64}, rj::Vector{Float64}, ϵij::Float64, σij::Float64)
+function _vdw(
+  ri::V, rj::V, ϵij::Float64, σij::Float64
+) where V <: AbstractVector
+
   rvec = rj - ri
   r    = norm(rvec)
   a    = σij / (r)
@@ -13,8 +16,11 @@ function _vdw(ri::Vector{Float64}, rj::Vector{Float64}, ϵij::Float64, σij::Flo
   E,F
 end
 
-function _vdw!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},
-               i::Int64, j::Int64, ϵij::Float64, σij::Float64)
+function _vdw!(
+  F::Vector{Vf}, u::Vector{Vu},
+  i::Int64, j::Int64, ϵij::Float64, σij::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
+
   rvec  = u[j] - u[i]
   r     = norm(rvec)
   a     = σij / r
@@ -26,8 +32,10 @@ function _vdw!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},
   E
 end
 
-function _Buckingham(ri::Vector{Float64}, rj::Vector{Float64},
-                     Aij::Float64, Bij::Float64, Cij::Float64)
+function _Buckingham(
+  ri::V, rj::V, Aij::Float64, Bij::Float64, Cij::Float64
+) where V <: AbstractVector
+
   rvec = rj - ri
   r    = norm(rvec)
   a    = Aij * exp(-Bij * r)
@@ -38,8 +46,11 @@ function _Buckingham(ri::Vector{Float64}, rj::Vector{Float64},
   E,F
 end
 
-function _Buckingham!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},
-                      i::Int64, j::Int64, Aij::Float64, Bij::Float64, Cij::Float64)
+function _Buckingham!(
+  F::Vector{Vf}, u::Vector{Vu},
+  i::Int64, j::Int64, Aij::Float64, Bij::Float64, Cij::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
+
   rvec = u[j] - u[i]
   r    = norm(rvec)
   a    = Aij * exp(-Bij * r)
@@ -53,7 +64,10 @@ function _Buckingham!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},
   E
 end
 
-function _Coulomb(ri::Vector{Float64}, rj::Vector{Float64}, Qi::Float64, Qj::Float64)
+function _Coulomb(
+  ri::V, rj::V, Qi::Float64, Qj::Float64
+) where V <: AbstractVector
+
   rvec = rj - ri
   r    = norm(rvec)
   E    = Qi*Qj / r
@@ -62,8 +76,11 @@ function _Coulomb(ri::Vector{Float64}, rj::Vector{Float64}, Qi::Float64, Qj::Flo
   E,F
 end
 
-function _Coulomb!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}}, 
-                   i::Int64, j::Int64, Qi::Float64, Qj::Float64)
+function _Coulomb!(
+  F::Vector{Vf}, u::Vector{Vu}, 
+  i::Int64, j::Int64, Qi::Float64, Qj::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
+
   rvec  = u[j] - u[i]
   r     = norm(rvec)
   E     = Qi*Qj / r
@@ -74,8 +91,10 @@ function _Coulomb!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},
   E
 end
 
-function _shortDisp(ri::Vector{Float64}, rj::Vector{Float64}, 
-                    Aij::Float64, Bij::Float64)
+function _shortDisp(
+  ri::V, rj::V, Aij::Float64, Bij::Float64
+) where V <: AbstractVector
+
   rvec = rj - ri
   r    = norm(rvec)
   E    = Aij * exp(-Bij * r)
@@ -84,8 +103,11 @@ function _shortDisp(ri::Vector{Float64}, rj::Vector{Float64},
   E,F
 end
 
-function _shortDisp!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}}, 
-                     i::Int64, j::Int64, Aij::Float64, Bij::Float64)
+function _shortDisp!(
+  F::Vector{Vf}, u::Vector{Vu},
+  i::Int64, j::Int64, Aij::Float64, Bij::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
+
   rvec  = u[j] - u[i]
   r     = norm(rvec)
   E     = Aij * exp(-Bij * r)
@@ -96,8 +118,10 @@ function _shortDisp!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},
   E
 end
 
-function _longDisp(ri::Vector{Float64}, rj::Vector{Float64}, 
-                   Cij::Float64; damp=nothing, p=nothing)
+function _longDisp(
+  ri::V, rj::V, Cij::Float64; damp=nothing, p=nothing
+) where V <: AbstractVector
+
   rvec = rj - ri
   r    = norm(rvec)
   
@@ -112,8 +136,11 @@ function _longDisp(ri::Vector{Float64}, rj::Vector{Float64},
   E,F
 end
 
-function _longDisp!(F::Vector{Vector{Float64}}, u::Vector{Vector{Float64}},  
-                    i::Int64, j::Int64, Cij::Float64; damp=nothing, p=nothing)
+function _longDisp!(
+  F::Vector{Vf}, u::Vector{Vu}, 
+  i::Int64, j::Int64, Cij::Float64; damp=nothing, p=nothing
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
+
   rvec  = u[j] - u[i]
   r     = norm(rvec)
 

@@ -1,7 +1,14 @@
-const libmbx       = joinpath(@__DIR__, "libmbx.so")
 const E_MBX2JMD    = 0.043 # kcal/mol --> eV
 const MBX_GAS_JSON = joinpath(@__DIR__, "gas.json")
 const MBX_PBC_JSON = joinpath(@__DIR__, "pbc.json")
+
+# set libmbx path if MBX is properly installed
+const libmbx = if haskey(ENV, "MBX_HOME")
+  joinpath(ENV["MBX_HOME"], "lib/libmbx.so")
+else
+  @warn "MBX is not properly installed.\nMBX pot not available!"
+  ""
+end
 
 function mbx_get_monomer_info(at_nams)
   monomers = Dict()
@@ -109,4 +116,22 @@ function mbx_set_box(box)
     (Ref{Cint}, Ptr{Cdouble}), l, box 
   )
 
+end
+
+function mbx_getDipole(cell::MyCell)
+  _ = getPotEnergy(MBX, cell)
+  μ = zeros(3)
+
+  mbx_get_total_dipole(μ)
+
+  μ
+end
+
+function mbx_getDipole(bdys::Vector{MyAtoms})
+  _ = getPotEnergy(MBX, bdys)
+  μ = zeros(3)
+
+  mbx_get_total_dipole(μ)
+
+  μ
 end

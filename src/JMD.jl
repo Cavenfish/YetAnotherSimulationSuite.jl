@@ -7,26 +7,29 @@ author: Brian C. Ferrari
 """
 module JMD
 
+  # These are part of the Julia Standard Library
   using TOML
-  using JLD2
-  using FFTW
   using Libdl
-  using Optim
-  using PyCall
-  using LsqFit
-  using Spglib
-  using MiniQhull
-  using DataFrames
-  using Statistics#might not be used
-  using Clustering
-  using StaticArrays
+  using Statistics
   using Serialization
   using LinearAlgebra
-  using Distributions#might not be used
+
+  # These are fully external dependencies
+  using JLD2
+  using FFTW
+  using Optim
+  using PyCall
+  using Spglib
+  using Chemfiles
+  using Distances
+  using DataFrames
+  using Clustering
+  using StaticArrays
+  using Distributions
   using KernelDensity
   using OrdinaryDiffEq
-  using SpecialFunctions#might not be used
-  using FiniteDifferences
+
+  import FiniteDiff: JacobianCache, finite_difference_jacobian!
 
   # Wrapper for ASE calculator with SCME/f potential
   function __init__()
@@ -38,11 +41,10 @@ module JMD
     fs, ps, ns, kB,
 
     #io.jl
-    readASExyz, readXyz, writeXyz, readCell, writeCell, writeXyzTraj,
+    readSystem,
 
     #helpers.jl
-    CoM, vCoM, zeroVCoM!, getFrame, getFrame!, getLastFrame, getLastFrame!,
-    getForces,
+    CoM, vCoM, zeroVCoM!, getForces,
 
     #energetics.jl
     vibExcite!, transExcite!, getPotEnergy,
@@ -51,37 +53,32 @@ module JMD
     getMols, getPairs,
 
     #bodies.jl
-    swapIso!, pickRandomMol, centerBdys!, translateBdys!, swapAtoms!,
+    Particle, swapIso!, pickRandomMol, centerBdys!, translateBdys!, swapAtoms!,
 
     #cells.jl
-    makeCell, makeBdys, getScaledPos, getPos, wrap!, replicate, makeSuperCell,
-    getMIC, center!, getPrimitiveCell, getVolume,
+    makeCell, makeBdys, getScaledPos, getPos, wrap!, makeSuperCell,
+    makeSuperCell!, getMIC, center!, getPrimitiveCell, getVolume,
 
     #potentials
-    MvHff, HGNN, MBX, SPCF, TIP4P, SCMEf,
+    MvHff, HGNN, MBX, SPCF, TIP4Pf, SCMEf,
 
-    #simulation.jl
-    runMD,
+    #thermostats
+    Berendsen, Langevin, CVR,
 
-    #thermostats.jl
-    Berendsen, Berendsen!, Langevin, Langevin!, BDP, BDP!, BDPnT, BDPnT!,
+    #ensembles
+    NVE, NVT,
 
     #post-processing.jl
-    processDynamics, processDynamics!, processTmpFiles, 
+    processDynamics, processTmpFiles, 
     
-    #tracking.jl
-    trackVACF, trackEnergyDissipation, trackAllVibEnergy, trackRadialEnergy,
-
     #vacf.jl
     vacfInps, VDOS, getVelMas,
-
-    #desorb.jl
 
     #vibrations.jl
     getHarmonicFreqs, animateMode, getModePES, getModeInteractionPES,
 
     #optimizations.jl
-    opt, optCell,
+    opt, optCell, hiddenOpt,
 
     #distributions.jl
     rdf, adf, density,
@@ -89,20 +86,11 @@ module JMD
     #stress.jl
     getNumericalStress, getNumericalStressOrthogonal,
 
-    #freqShifts.jl
-    getINM, getMolFreq, getAllFreqs, getFvE, getFreqCoupling,
-
     #participationRatio.jl
     getIPR, getPR,
 
     #neighbors.jl
     countNearestNeighbors,
-
-    #vibCoup.jl
-    getVibCoup,
-
-    #alphashape.jl
-    alphashape,
 
     #savitzkyGolay.jl
     savGol,
@@ -117,7 +105,14 @@ module JMD
     hitAndStick, HnS,
 
     #phonopy.jl
-    phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons
+    phonopy_addForces, phonopy_getDisplacements, phonopy_getPhonons,
+    phonopy_getDisplacementsDataset, reorderPhonopyForces!,
+
+    #libscmef.jl
+    scmef_getDipole,
+
+    #libmbx.jl
+    mbx_getDipole
   
   #end exports
 
@@ -133,19 +128,25 @@ module JMD
   include("./helpers.jl")
 
   include("./lib/MBX/libmbx.jl")
+  include("./lib/SCMEf/libscmef.jl")
   include("./lib/Phonopy/phonopy.jl")
 
   include("./md/cells.jl")
   include("./md/bodies.jl")
   include("./md/simulation.jl")
+  include("./md/calculators.jl")
   include("./md/thermostats.jl")
+  include("./md/trajectories.jl")
   include("./md/post-processing.jl")
+
+  include("./md/thermostats/CVR.jl")
+  include("./md/thermostats/Langevin.jl")
+  include("./md/thermostats/Berendsen.jl")
 
   include("./md/potentials/MvHff.jl")
   include("./md/potentials/HGNN.jl")
   include("./md/potentials/TIP4P.jl")
   include("./md/potentials/SPC-F.jl")
-  include("./md/potentials/CH4.jl")
   include("./md/potentials/MBX.jl")
   include("./md/potentials/SCMEf.jl")
 
@@ -153,24 +154,17 @@ module JMD
   include("./md/potentials/funcs/intra.jl")
   include("./md/potentials/funcs/inter.jl")
   include("./md/potentials/funcs/damping.jl")
-  include("./md/potentials/funcs/TTMnrg.jl")
 
   include("./analysis/vacf.jl")
-  include("./analysis/desorb.jl")
   include("./analysis/vibrations.jl")
   include("./analysis/optimizations.jl")
-  include("./analysis/decayRates.jl")
-  include("./analysis/freqShifts.jl")
   include("./analysis/participationRatio.jl")
-  include("./analysis/vibCoup.jl")
   include("./analysis/energetics.jl")
-  include("./analysis/trajectories/tracking.jl")
 
   include("./structural/distributions.jl")
   include("./structural/molsAndPairs.jl")
   include("./structural/neighbors.jl")
 
-  include("./mathtk/alphashape.jl")
   include("./mathtk/savitzkyGolay.jl")
   include("./mathtk/peakFinding.jl")
   include("./mathtk/stress.jl")
@@ -178,6 +172,4 @@ module JMD
 
   include("./building/anneal.jl")
   include("./building/hitAndStick.jl")
-
-  include("./QM/orcaConfig.jl")
 end # module

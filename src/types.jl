@@ -2,6 +2,9 @@
 Abstract types used in JMD
 """
 
+#MD image (a time snapshot)
+abstract type MyImage end
+
 #MD trajectory
 abstract type MyTraj end
 
@@ -13,3 +16,15 @@ abstract type MyAtoms end
 
 #Cell struct
 abstract type MyCell end
+
+# Variables for thermostats
+abstract type ThermoVars end
+
+# Variables for barostats
+abstract type BaroVars end
+
+# Calculator
+abstract type MyCalc end
+
+# Thermostat
+abstract type MyThermostat end

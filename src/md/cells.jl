@@ -1,17 +1,35 @@
 #TODO:
 #   -Make function to clean duplicates
 
-struct Cell <: MyCell
-  lattice::Matrix{Float64}
-  scaled_pos::Vector{Vector{Float64}}
-  velocity::Vector{Vector{Float64}}
-  masses::Vector{Float64}
-  symbols::Vector{Char}
-  PBC::Vector{Bool}
-  NC::Vector{Int32}
+struct Cell{D, B, I<:Int, F<:AbstractFloat, S<:AbstractString} <: MyCell
+  lattice::MMatrix{D,D,F}
+  scaled_pos::Vector{MVector{D,F}}
+  velocity::Vector{MVector{D,F}}
+  masses::Vector{F}
+  symbols::Vector{S}
+  mask::Vector{B}
+  PBC::Vector{B}
+  NC::Vector{I}
 end
 
-function makeCell(bdys::Vector{MyAtoms}, lattice; PBC=repeat([true], 3), NC=[1,1,1])
+function Cell(
+  lat::Matrix, spos::AbstractArray, vel::AbstractArray, 
+  mas::Vector{F}, sym::Vector{S}, mask::Vector{Bool},
+  PBC::Vector{Bool}, NC::Vector{Int}
+) where {F<:AbstractFloat, S<:AbstractString}
+
+  n = length(spos[1])
+
+  Cell(
+    MMatrix{n,n}(lat),
+    MVector{n}.(spos),
+    MVector{n}.(vel),
+    mas, sym, mask, PBC, NC
+  )
+end
+
+function makeCell(bdys::Vector{MyAtoms}, lattice::AbstractMatrix; 
+  mask=repeat([false], length(bdys)), PBC=repeat([true], 3), NC=[1,1,1])
 
   Cell(
     lattice,
@@ -19,22 +37,41 @@ function makeCell(bdys::Vector{MyAtoms}, lattice; PBC=repeat([true], 3), NC=[1,1
     [i.v for i in bdys],
     [i.m for i in bdys],
     [i.s for i in bdys],
-    PBC, NC
+    mask, PBC, NC
   )
 end
 
-function makeBdys(cell)::Vector{MyAtoms}
-  pos  = getPos(cell)
-  vel  = [i for i in cell.velocity]
+function trim!(cell::MyCell, iter)
+  deleteat!(cell.scaled_pos, iter)
+  deleteat!(cell.velocity, iter)
+  deleteat!(cell.masses, iter)
+  deleteat!(cell.symbols, iter)
+  deleteat!(cell.mask, iter)
+end
 
-  [Atom(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
+function makeBdys(cell::MyCell)::Vector{MyAtoms}
+  D    = length(cell.velocity[1])
+  pos  = MVector{D}.(getPos(cell))
+  vel  = [MVector{D}(i) for i in cell.velocity]
+
+  [Particle(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
 end
 
 function getScaledPos(x0, lattice)
-
-  T    = inv(lattice)
+  T = inv(lattice)
   
   [T * x0[i:i+2] for i = 1:3:length(x0)-1]
+end
+
+function getScaledPos!(cell, x0)
+  T = inv(cell.lattice)
+
+  for i = 1:3:length(x0)-1
+    j::Int = (i+2)/3
+
+    cell.scaled_pos[j] .= T * x0[i:i+2]
+  end
+
 end
 
 function getPos(cell)
@@ -85,29 +122,65 @@ function center!(cell)
 
 end
 
-function replicate(cell, N)
+function Base.repeat(cell::MyCell, count::Integer)
+  Cell(
+    deepcopy(cell.lattice),
+    myRepeat(cell.scaled_pos, count, cell.mask),
+    myRepeat(cell.velocity, count, cell.mask),
+    myRepeat(cell.masses, count, cell.mask),
+    myRepeat(cell.symbols, count, cell.mask),
+    myRepeat(cell.mask, count, cell.mask),
+    deepcopy(cell.PBC), 
+    deepcopy(cell.NC)
+  )
+end
+
+function replicate!(super, cell, N)
 
   a,b,c  = eachrow(cell.lattice)
   m      = length(cell.symbols)
-  n      = prod(N)
-  newV   = repeat(cell.velocity, n)
-  newS   = repeat(cell.symbols, n)
-  newM   = repeat(cell.masses, n)
-  newLat = cell.lattice * Diagonal(N)
-  newPos = repeat(getPos(cell), n)
+  M      = length(super.scaled_pos)
+  n      = prod(N) * m
+  l      = n - (sum(cell.mask) * (prod(N) - 1))
 
-  # Is this style easier to read than inline?
-  f = [i*a + j*b + k*c 
-        for i = 0:N[1]-1 
-          for j = 0:N[2]-1 
-            for k = 0:N[3]-1 
-              for q = 1:m]
-  
-  newPos .+= f
+  # End if super is too small 
+  # TODO: make this increase super size
+  if M < l 
+    @error "super is too small"
+    return
+  end
 
-  newScaledPos = [inv(newLat) * r for r in newPos]
+  # Trim super (if needed)
+  if M > l
+    trim!(super, l+1:M)
+  end
 
-  Cell(newLat, newScaledPos, newV, newM, newS, cell.PBC, cell.NC)
+  x = 1
+  for i = 0:N[1]-1
+    for j = 0:N[2]-1
+      for k = 0:N[3]-1
+        for q = 1:m
+          # Skip replication if atom is masked
+          cell.mask[q] && x > m && continue
+
+          # Get replicated pos
+          r   = cell.lattice * cell.scaled_pos[q]
+          r .+= (i*a) + (j*b) + (k*c)
+
+          # inplace update super
+          super.scaled_pos[x] .= inv(super.lattice) * r
+          super.velocity[x]   .= cell.velocity[q]
+          super.masses[x]      = cell.masses[q]
+          super.symbols[x]     = cell.symbols[q]
+          super.mask[x]        = cell.mask[q]
+          
+          # increment x
+          x += 1
+        end
+      end
+    end
+  end
+
 end
 
 function getMIC(cell::MyCell)
@@ -125,16 +198,16 @@ function getMIC(cell::MyCell)
               for q = 1:length(bdys)]
 
   for i = 1:length(f)
-    push!(new, Atom(f[i], v[i], m[i], s[i]))
+    push!(new, Particle(f[i], v[i], m[i], s[i]))
   end
 
-  makeCell(new, cell.lattice*3, PBC=cell.PBC, NC=cell.NC)
+  makeCell(new, cell.lattice*3, mask=cell.mask, PBC=cell.PBC, NC=cell.NC)
 end
 
 function makeSuperCell(cell, T)
 
+  N       = diag(T)
   lattice = T * cell.lattice
-  N       = [T[1,1], T[2,2], T[3,3]]
 
   # Clean up machine precision noise
   for i = 1:9
@@ -142,12 +215,36 @@ function makeSuperCell(cell, T)
       lattice[i] = 0.0
     end 
   end
-    
-  super   = replicate(cell, N)
-  bdys    = makeBdys(super)
-  wrap!(bdys, lattice)
 
-  makeCell(bdys, lattice, PBC=cell.PBC, NC=cell.NC)
+  # allocate super cell
+  super = repeat(cell, prod(N))
+
+  # inplace update lattice
+  super.lattice .= lattice
+
+  # inplace update fields
+  replicate!(super, cell, N)
+
+  # inplace wrap atoms outside PBC
+  wrap!(super)
+
+  super
+end
+
+function makeSuperCell!(super, cell, T)
+
+  super.lattice .= T * cell.lattice
+
+  # Clean up machine precision noise
+  for i = 1:9
+    if abs(super.lattice[i]) < 1e-8
+      super.lattice[i] = 0.0
+    end 
+  end
+    
+  replicate!(super, cell, diag(T))
+  wrap!(super)
+
 end
 
 function getPrimitiveCell(cell, symprec)
@@ -164,38 +261,8 @@ function getPrimitiveCell(cell, symprec)
   mas  = [ amu[i] for i in syms]
   L    = transpose(stan.lattice)
 
-  Cell(L, stan.positions, cell.velocity, mas, only.(syms), cell.PBC, cell.NC)
-end
-
-function getMols(cell::MyCell, rmax; D=3)
-  r   = getPos(cell)
-
-  pts = hcat(r...)
-
-  ret = dbscan(pts[1:D, :], rmax)
-
-  [i.core_indices for i in ret.clusters]
-end
-
-function getPairs(cell::MyCell)
-
-  n = length(cell.masses)
-
-  # Get mols and N
-  mols = if n <= 3
-    getMols(cell, 1.5, D=n-1) 
-  else
-    getMols(cell, 1.5)
-  end
-  N    = size(mols)[1]
-
-  # Make all pairs
-  pars = Pair[]
-  for i in 1:N
-    for j in i+1:N
-      push!(pars, Pair(mols[i],mols[j]))
-    end
-  end
-
-  pars, mols
+  Cell(
+    L, stan.positions, cell.velocity, mas, 
+    only.(syms), cell.mask, cell.PBC, cell.NC
+  )
 end

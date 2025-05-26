@@ -1,203 +1,203 @@
+"""
+JMD file IO is done using Chemfiles
 
-function readASExyz(xyz; getCell=false)
-  sys = readlines(xyz)
-  N   = length(sys) - 2
-  hed = sys[2]
-  sys = split.(sys[3:end], " ")
-  sys = deleteat!.(sys, findall.(e -> e == "", sys))
-  amu = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
-  set = MyAtoms[]
+Source repo:
+https://github.com/chemfiles/chemfiles/tree/master
 
-  for i in range(1,N)
-    props = parse.(Float64, sys[i][2:end])
-    pos   = Vector(props[1:3])
-    s     = sys[i][1]
+Julia bindings repo:
+https://github.com/chemfiles/Chemfiles.jl/tree/master
+"""
 
-    if occursin("masses", hed)
-      mas = props[4]
-      vel = Vector(props[5:7] ./ mas)
-    else
-      mas = amu[s]
-      # vel = Vector(props[4:6] ./ mas)
-      vel = zeros(3)
-    end #if-else
+atomMass(frame::Frame, i::Int) = Atom(frame, i) |> mass
+atomName(frame::Frame, i::Int) = Atom(frame, i) |> name
 
-    particle = Atom(pos, vel, mas, s[1])
-    push!(set, particle)
-  end #for loop
+getMasses(frame::Frame) = [atomMass(frame, i) for i = 0:length(frame)-1]
+getNames( frame::Frame) = [atomName(frame, i) for i = 0:length(frame)-1]
 
-  if getCell
-    tmp  = split(hed, "Lattice=")[2] |> (x -> split(x, "\"")[2]) |> (x -> split(x, " "))
-    cell = parse.(Float64, tmp)
-
-    return set, cell
+function ifProperty(frame, props, p)
+  if p in props
+    x = property(frame, p)
+    return parse(Float64, x)
+  else 
+    return 0.0
   end
-
-  set
-end #read_ase_xyz
-
-function readXyz(xyz::String)
-  stream = readlines(xyz)
-  amu    = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
-  set    = MyAtoms[]
-
-  #Skip header lines then parse file
-  for line in stream[3:end]
-    s = split(line, " ")
-    s = deleteat!(s, findall(e -> e == "", s))
-
-    pos  = parse.(Float64, s[2:4])
-    pos  = Vector(pos)
-    
-    vel  = if length(s) >= 7
-      tmp = parse.(Float64, s[5:end])
-      Vector(tmp)
-    else
-      zeros(3)
-    end
-    
-    mas  = amu[s[1]]
-    sym  = s[1][1]
-
-    atom = Atom(pos, vel, mas, sym)
-    push!(set, atom)
-  end
-
-  return set
 end
 
-function writeXyz(fileName::String, bdys)
-  f = open(fileName, "w")
-  N = length(bdys)
+function atomForces(frame, i)
+  x = property(Atom(frame, i), "forces")
+  n = length(x)
 
-  println(f, N)
-  println(f, "Made by JMD")
-
-  for j in 1:N
-
-    s          = bdys[j].s
-    x,y,z      = bdys[j].r
-    vx, vy, vz = bdys[j].v 
-
-    println(f, "$s   $x   $y   $z   $vx   $vy   $vz")
-  end 
-
-  close(f)
+  SVector{n}(x)
 end
 
-function readCell(fileName::String)
-  stream = readlines(fileName)
-  amu    = TOML.parsefile(joinpath(@__DIR__, "data/Atoms.toml"))["Mass"]
+function readSystem(file::String)
+  buf    = Trajectory(file)
+  N::Int = length(buf)
+
+  if N > 1
+    return readTraj(buf, N)
+  else
+    return read(buf) |> readFrame
+  end
+
+end
+
+function readFrame(frame::Frame)
+  N::Int = length(frame)
   bdys   = MyAtoms[]
-
-  tmp  = split(stream[2], "Lattice=")[2] |> (
-    x -> split(x, "\"")[2]) |> (x -> split(x, " "))
-  lat  = parse.(Float64, tmp) |> (x -> reshape(x, (3,3))) |> transpose
+  pos    = positions(frame)
+  n      = size(pos)[1]
+  ucell  = UnitCell(frame)
+  lat    = matrix(ucell)
   
-  for line in stream[3:end]
-    s = split(line, " ")
-    s = deleteat!(s, findall(e -> e == "", s))
+  has_velocities(frame) ? vel = velocities(frame) : vel = zero(pos)
 
-    pos  = parse.(Float64, s[2:4])
-    pos  = Vector(pos)
-    
-    vel  = if length(s) >= 7
-      tmp = parse.(Float64, s[5:end])
-      Vector(tmp)
-    else
-      zeros(3)
+  atm   = Atom(frame, 0)
+  props = list_properties(atm)
+
+  for i = 1:N
+    # C++ Indexing (ie. starts at 0)
+    atm = Atom(frame, i-1)
+
+    if "velo" in props
+      vel[:, i] .= property(atm, "velo")
     end
     
-    mas  = amu[s[1]]
-    sym  = s[1][1]
+    r = MVector{n}(pos[:, i])
+    v = MVector{n}(vel[:, i])
+    m = mass(atm)
+    s = name(atm)
 
-    atom = Atom(pos, vel, mas, sym)
-    push!(bdys, atom)
+    push!(bdys, Particle(r, v, m, s))
   end
+
+  sum(lat) == 0.0 && return bdys
 
   makeCell(bdys, lat)
 end
 
-function writeCell(fileName::String, cell)
-  f = open(fileName, "w")
-  N = length(cell.symbols)
-  
-  l = replace("$(cell.lattice)", [';', '[', ']'] => "")
-  r = getPos(cell)
+function readImage(frame::Frame)
+  pos    = positions(frame)
+  props  = list_properties(frame)
+  n      = size(pos)[1]
 
-  println(f, N)
-  println(f, "Lattice=\"$l\"")
+  forces = if "forces" in list_properties(Atom(frame, 1))
+    [atomForces(frame, i) for i = 0:length(frame)-1]
+  else
+    tmp = zero(pos)
+    [SVector{n}(tmp[:, i]) for i = 1:length(frame)]
+  end
 
-  for i in 1:N
+  # Props here must be able to be Float
+  time   = ifProperty(frame, props, "time")
+  temp   = ifProperty(frame, props, "temp")
+  energy = ifProperty(frame, props, "energy")
 
-    s          = cell.symbols[i]
-    x,y,z      = r[i]
+  # Check for velocities
+  has_velocities(frame) ? vel = velocities(frame) : vel = zero(pos)
 
-    println(f, "$s   $x   $y   $z")
-  end 
+  # Reshape pos & vel
+  pos = [SVector{n}(pos[:, i]) for i = 1:length(frame)]
+  vel = [SVector{n}(vel[:, i]) for i = 1:length(frame)]
 
-  close(f)
+  Image(pos, vel, time, temp, energy, forces)
 end
 
-function writeXyzTraj(fileName::String, solu; dt=1, lat=nothing)
-  f    = open(fileName, "w")
-  bdys = solu.prob.p.bdys
-  N    = length(bdys)
-  T    = length(solu.t)
+function readTraj(buf::Trajectory, N::Int)
+  frame   = read(buf)
+  lattice = UnitCell(frame) |> matrix
+  symbols = getNames(frame)
+  masses  = getMasses(frame)
+  images  = [readImage(frame)]
 
-  for i in 1:dt:T
-    t = solu.t[i]
-    u = solu.u[i].x[2] # x[1] -> vel || x[2] -> pos
+  for i = 2:N
+    frame = read(buf)
+    push!(images, readImage(frame))
+  end
 
-    println(f, N)
+  Traj(images, masses, symbols, lattice)
+end
 
-    if lat != nothing
-      l = replace("$(lat)", [';', '[', ']'] => "")
-      println(f, "i=$i, time=$t, Lattice=\"$l\"")
+function Base.write(file::String, bdys::Vector{MyAtoms})
+  buf   = Trajectory(file, 'w')
+  frame = Frame()
+  r     = zeros(3)
+  v     = zeros(3)
+
+  add_velocities!(frame)
+
+  for i in bdys
+    r  .= i.r
+    v  .= i.v
+    atm = Atom(i.s)
+    
+    if occursin(".xyz", file)
+      set_property!(atm, "velo", v)
+      add_atom!(frame, atm, r)
     else
-      println(f, "i=$i, time=$t")
+      add_atom!(frame, atm, r, v)
+    end
+  end
+
+  write(buf, frame)
+
+  close(buf)
+end
+
+function Base.write(file::String, cell::MyCell)
+  buf   = Trajectory(file, 'w')
+  frame = Frame()
+  ucell = Matrix(cell.lattice) |> UnitCell
+  pos   = getPos(cell)
+  r     = zeros(3)
+  v     = zeros(3)
+
+  set_cell!(buf, ucell)
+  add_velocities!(frame)
+  
+  for i = 1:length(cell.masses)
+    r .= pos[i]
+    v .= cell.velocity[i]
+    s  = cell.symbols[i]
+
+    add_atom!(frame, Atom(s), r, v)
+  end
+
+  write(buf, frame)
+
+  close(buf)
+end
+
+function Base.write(file::String, traj::MyTraj; step=1)
+  buf   = Trajectory(file, 'w')
+  ucell = Matrix(traj.lattice) |> UnitCell
+  r     = zeros(3)
+  v     = zeros(3)
+  f     = zeros(3)
+
+  set_cell!(buf, ucell)
+
+  for img in traj.images[1:step:end]
+    frame = Frame()
+    add_velocities!(frame)
+
+    # Add frame properties
+    set_property!(frame, "time", img.time)
+    set_property!(frame, "temp", img.temp)
+    set_property!(frame, "energy", img.energy)
+
+    for i = 1:length(img.pos)
+      r  .= img.pos[i]
+      v  .= img.vel[i]
+      f  .= img.forces[i]
+      atm = Atom(traj.symbols[i])
+
+      set_property!(atm, "forces", f)
+      add_atom!(frame, atm, r, v)
     end
 
-    for j in 1:N
-
-      s          = bdys[j].s
-      x,y,z      = u[j]
-      vx, vy, vz = bdys[j].v 
-
-      println(f, "$s   $x   $y   $z   $vx   $vy   $vz")
-    end 
-
+    write(buf, frame)
   end
-  close(f)
-end 
 
-function writeXyzTraj(fileName::String, tj::MyTraj; dt=1, lat=nothing)
-  f = open(fileName, "w")
-  T = length(tj.t)
-  N = length(tj.m)
-
-  for i in 1:dt:T
-    t = tj.t[i]
-    u = tj.r[i]
-
-    println(f, N)
-
-    if lat != nothing
-      l = replace("$(lat)", [';', '[', ']'] => "")
-      println(f, "i=$i, time=$t, Lattice=\"$l\"")
-    else
-      println(f, "i=$i, time=$t")
-    end
-
-    for j in 1:N
-
-      s     = tj.s[j]
-      x,y,z = u[j]
-
-      println(f, "$s   $x   $y   $z")
-    end 
-
-  end
-  close(f)
-end  
-
+  close(buf)
+end

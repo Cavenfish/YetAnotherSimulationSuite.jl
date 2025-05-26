@@ -1,12 +1,14 @@
+# TODO:
+#   - Generalize the dimensionality of optimizations
 
-struct optVars
-  potVars::PotVars
-  mols::Vector
-  pars::Vector
-  m::Vector
-  PBC::Vector{Bool}
-  NC::Vector{Int32}
-  lattice::Matrix
+struct optVars{D,B,P, I<:Int, PV<:PotVars, F<:AbstractFloat}
+  potVars::PV
+  mols::Vector{Vector{I}}
+  pars::Vector{P}
+  m::Vector{F}
+  PBC::Vector{B}
+  NC::Vector{I}
+  lattice::MMatrix{D,D,F}
 end
 
 
@@ -22,23 +24,23 @@ function prepX0(cell::MyCell)
   [j for i in r for j in i]
 end
 
-function prep4pot(EoM, bdys::Vector{MyAtoms})
+function prep4pot(builder, bdys::Vector{MyAtoms})
   m          = [i.m for i in bdys]
   x0         = prepX0(bdys)
-  potVars    = EoM(bdys)
+  potVars    = builder(bdys)
   pars, mols = getPairs(bdys)
   NC         = [0,0,0]
   PBC        = repeat([false], 3)
-  lattice    = zeros(3,3)
+  lattice    = MMatrix{3,3}(zeros(3,3))
   vars       = optVars(potVars, mols, pars, m, PBC, NC, lattice)
   
   x0, vars
 end
 
-function prep4pot(EoM, cell::MyCell)
+function prep4pot(builder, cell::MyCell)
   bdys       = makeBdys(cell)
   x0         = prepX0(cell)
-  potVars    = EoM(cell)
+  potVars    = builder(cell)
   pars, mols = getPairs(cell)
   vars       = optVars(potVars, mols, pars, cell.masses, 
                        cell.PBC, cell.NC, cell.lattice)
@@ -54,20 +56,19 @@ function getNewBdys(bdys, res)
   for i in 1:3:N*3
     j::UInt16 = (i+2) / 3
 
-    r = SVector{3}(opt[i:i+2])
+    r = MVector{3}(opt[i:i+2])
     v = bdys[j].v
     m = bdys[j].m
     s = bdys[j].s
-    push!(new, Atom(r,v,m,s))
+    push!(new, Particle(r,v,m,s))
   end
 
   new
 end
 
-function opt(EoM, algo, bdys::Vector{MyAtoms}; kwargs...)
-
-  x0, vars = prep4pot(EoM, bdys)
-  optFunc  = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
+function opt(calc::MyCalc, algo, bdys::Vector{MyAtoms}; kwargs...)
+  x0, vars = prep4pot(calc.b, bdys)
+  optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   optBdys  = getNewBdys(bdys, res)
@@ -75,15 +76,22 @@ function opt(EoM, algo, bdys::Vector{MyAtoms}; kwargs...)
   optBdys
 end
 
-function opt(EoM, algo, cell::MyCell; kwargs...)
-
-  x0, vars = prep4pot(EoM, cell)
-  optFunc  = Optim.only_fg!((F,G,x) -> EoM(F,G,x, vars))
+function opt(calc::MyCalc, algo, cell::MyCell; kwargs...)
+  x0, vars = prep4pot(calc.b, cell)
+  optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
+  spos     = [MVector(i) for i in spos]
 
-  Cell(cell.lattice, spos, cell.velocity, cell.masses, cell.symbols, cell.PBC, cell.NC)
+  # The new cell returned will have fields that point to
+  # fields in the original cell. For example, new.lattice
+  # points to old.lattice. A deepcopy needs to be done to 
+  # untangle the two, but I'm unsure if I care to do it.
+  Cell(
+    cell.lattice, spos, cell.velocity, cell.masses, 
+    cell.symbols, cell.mask, cell.PBC, cell.NC
+  )
 end
 
 function optCell(EoM, algo, cell::MyCell; kwargs...)
@@ -99,41 +107,64 @@ function optCell(EoM, algo, cell::MyCell; kwargs...)
   ret
 end
 
+struct HiddenOptVars
+  potVars::PotVars
+  cellBuf::MyCell
+  superBuf::MyCell
+  scaleEnergy::Float64
+  PBC::Vector{Bool}
+  mols::Vector
+  pars::Vector
+  T::Matrix
+end
 
-# optSuper and potPBC are good first run functions 
-# however, they are not efficient and NEED to be redone.
+function hiddenOpt(EoM, algo, cell, T; kwargs...)
 
-# Should be done without reallocating cells/potVars at
-# every iteration.
+  super   = makeSuperCell(cell, T)
+  y, vars = prep4pot(EoM, super)
+  x0      = prepX0(cell)
+  Γ       = zero(y)
 
-function optSuper(EoM, algo, cell, T; kwargs...)
+  hideVars = HiddenOptVars(
+    vars.potVars,
+    deepcopy(cell),
+    super,
+    length(cell.masses) / length(super.masses),
+    cell.PBC,
+    vars.mols,
+    vars.pars,
+    T
+  )
 
-  x0       = getPos(cell) |> (x -> vcat(x...))
-  tmp      = deepcopy(cell)
-  optFunc  = Optim.only_fg!((F,G,x) -> potPBC(F,G, EoM, tmp, T, x))
+  optFunc  = Optim.only_fg!((F,G,x) -> hiddenEoM(F,G,Γ,EoM,hideVars,x))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
 
-  Cell(cell.lattice, spos, cell.velocity, cell.masses, cell.symbols, cell.PBC, cell.NC)  
+  # The new cell returned will have fields that point to
+  # fields in the original cell. For example, new.lattice
+  # points to old.lattice. A deepcopy needs to be done to 
+  # untangle the two, but I'm unsure if I care to do it.
+  Cell(
+    cell.lattice, spos, cell.velocity, cell.masses,
+    cell.symbols, cell.mask, cell.PBC, cell.NC
+  )  
 end
 
-function potPBC(F, G, EoM, cell, T, x0)
-  spos = getScaledPos(x0, cell.lattice)
+function hiddenEoM(F, G, Γ, EoM, vars, x)
+  getScaledPos!(vars.cellBuf, x)
 
-  for i in 1:length(cell.scaled_pos)
-    cell.scaled_pos[i] .= spos[i]
-  end
+  makeSuperCell!(vars.superBuf, vars.cellBuf, vars.T)
 
-  N     = length(x0)
-  super = makeSuperCell(cell, T)
+  y = prepX0(vars.superBuf)
+  E = EoM(F, Γ, y, vars)
 
   if G != nothing
-    G .= - getForces(EoM, super) |> (x -> vcat(x...)[1:N])
+    G .= Γ[1:length(G)]
   end
   
   if F != nothing
-    return getPotEnergy(EoM, super) / det(T)
+    return E * vars.scaleEnergy
   end
 
 end

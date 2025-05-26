@@ -2,6 +2,8 @@
 TIP4P/2005f 
 """
 
+TIP4Pf() = Calculator(TIP4Pf; EF=TIP4Pf!)
+
 struct _TIP4P_PotVars{F<:Float64} <: PotVars
   D::F
   a::F
@@ -16,7 +18,7 @@ struct _TIP4P_PotVars{F<:Float64} <: PotVars
 end
 
 #PotVar building function 
-TIP4P(bdys) = _TIP4P_PotVars(
+TIP4Pf(bdys::Vector{MyAtoms}) = _TIP4P_PotVars(
   4.48339,    # eV
   2.287,      # \AA
   0.9419,     # \AA
@@ -29,13 +31,9 @@ TIP4P(bdys) = _TIP4P_PotVars(
   -2 * 2.1113635
 )
 
-function TIP4P(dv, v, u, p, t)
-
-  # initialize things
+function TIP4Pf!(F, u, p)
   E = 0.0
-  F = zero(u)
   P = p.potVars
-
 
   for mol in p.mols
     o, h1, h2 = mol
@@ -59,76 +57,13 @@ function TIP4P(dv, v, u, p, t)
     for i in [h1, h2]
       for j in [h3, h4]
         E += _Coulomb!(F, u, i, j, P.Qh, P.Qh)
-
-        if any(p.PBC)
-          L  = eachrow(p.lattice)
-          E +=_pbcInteractions!(F, u, o1, o2, _Coulomb, L, p.NC, (P.Qh, P.Qh))
-        end
-
       end
     end
 
     E += _getMforces!(F, u, par[1], par[2], P.drel, P.Qh, P.Qm)
-
   end
-
-  dv .= F ./ p.m
-  if p.NVT
-    p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
-  end
-
-  push!(p.energy, E)
-  push!(p.forces, F)
-
-end
-
-function TIP4P(F, G, y0, p)
   
-  # initialize things
-  E      = 0.0
-  u      = Vector[]
-  P      = p.potVars
-  forces = Vector[]
-  for i in 1:3:length(y0)
-    push!(u, y0[i:i+2])
-    push!(forces, [0.0, 0.0, 0.0])
-  end
-
-  for mol in p.mols
-    o, h1, h2 = mol
-
-    E += _Morse!(forces, u, o, h1, P.D, P.a, P.req)
-    E += _Morse!(forces, u, o, h2, P.D, P.a, P.req)
-    E += _harmonicBondAngle!(forces, u, h1, o, h2, P.K, P.θeq)
-  end
-
-  for par in p.pars
-    o1, h1, h2 = par[1]
-    o2, h3, h4 = par[2]
-
-    E += _vdw!(forces, u, o1, o2, P.ϵoo, P.σoo)
-
-    for i in [h1, h2]
-      for j in [h3, h4]
-        E += _Coulomb!(forces, u, i, j, P.Qh, P.Qh)
-      end
-    end
-
-    E += _getMforces!(forces, u, par[1], par[2], P.drel, P.Qh, P.Qm)
-
-  end
-
-  if G != nothing
-    tmp = [j for i in forces for j in i]
-    for i in 1:length(G)
-      G[i] = -tmp[i]
-    end
-  end
-
-  if F != nothing
-    return E
-  end
-
+  E
 end
 
 function _getMforces!(F, u, w1, w2, drel, Qh, Qm)

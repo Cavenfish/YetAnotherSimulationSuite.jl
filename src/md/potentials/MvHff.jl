@@ -2,6 +2,8 @@
 CO-CO Potential from van Hemert et al. 2015
 """
 
+MvHff() = Calculator(MvHff; EF=MvHff!)
+
 struct _MvHff_PotVars{F<:Float64} <: PotVars
   D::F
   a::F
@@ -21,7 +23,7 @@ struct _MvHff_PotVars{F<:Float64} <: PotVars
   αo::F
 end
 
-MvHff(bdys) = _MvHff_PotVars(
+MvHff(bdys::Vector{MyAtoms}) = _MvHff_PotVars(
   11.230139012256362,
   2.3281,
   1.1282058129221093,
@@ -40,11 +42,8 @@ MvHff(bdys) = _MvHff_PotVars(
   2.131611069944055
 )
 
-function MvHff(dv, v, u, p, t)
-
-  # initialize things
+function MvHff!(F, u, p)
   E = 0.0
-  F = zero(u)
   P = p.potVars
 
   for mol in p.mols
@@ -69,63 +68,9 @@ function MvHff(dv, v, u, p, t)
 
     #Special Electrostatics
     E += _electroMvH!(F, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
-
   end
 
-  dv .= F ./ p.m
-  if p.NVT
-    p.thermostat!(p.temp,dv, v, p.m, p.thermoInps)
-  end
-
-  push!(p.energy, E)
-  push!(p.forces, F)
-
-end
-
-function MvHff(F, G, y0, p)
-
-  # initialize things
-  P      = p.potVars
-  E      = 0.0
-  u      = [y0[i:i+2] for i = 1:3:length(y0)]
-  forces = [zeros(3) for i = 1:3:length(y0)]
-
-  for mol in p.mols
-    E += _Morse!(forces, u, mol[1], mol[2], P.D, P.a, P.req)
-  end
-
-  for par in p.pars
-    c1, o1 = par[1]
-    c2, o2 = par[2]
-
-    #C--C
-    E += _Buckingham!(forces, u, c1, c2, P.Acc, P.Bcc, P.Ccc)
-
-    #C--O
-    E += _Buckingham!(forces, u, c1, o2, P.Aco, P.Bco, P.Cco)
-
-    #O--C
-    E += _Buckingham!(forces, u, o1, c2, P.Aco, P.Bco, P.Cco)
-
-    #O--O
-    E += _Buckingham!(forces, u, o1, o2, P.Aoo, P.Boo, P.Coo)
-
-    #Special Electrostatics
-    E += _electroMvH!(forces, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
-
-  end
-
-  if G != nothing
-    tmp = [j for i in forces for j in i]
-    for i in 1:length(G)
-      G[i] = -tmp[i]
-    end
-  end
-
-  if F != nothing
-    return E
-  end
-
+  E
 end
 
 function _electroMvH!(F, u, par, Qc, Qo, αc, αo, req)

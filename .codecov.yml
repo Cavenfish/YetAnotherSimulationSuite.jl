@@ -1,0 +1,7 @@
+# MBX and SCME/f are external and require compiling.
+# Ignore them since we can't test them in GitHub actions.
+ignore:
+  - src/md/potentials/MBX.jl
+  - src/md/potentials/SCMEf.jl
+  - src/lib/MBX
+  - src/lib/SCMEf

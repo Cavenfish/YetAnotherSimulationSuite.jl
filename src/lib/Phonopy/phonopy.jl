@@ -71,6 +71,7 @@ function phonopy_getDisplacements(
   lat      = T * cell.lattice
   mas      = repeat(cell.masses,  n)
   sym      = repeat(cell.symbols, n)
+  mask     = repeat(cell.mask,    n)
 
   cells = MyCell[]
   for dcell in supercells
@@ -83,7 +84,7 @@ function phonopy_getDisplacements(
 
     spos = getScaledPos(vcat(pos...), lat)
     vels = zero(spos)
-    tmp  = Cell(lat, spos, vels, mas, sym, cell.PBC, cell.NC)
+    tmp  = Cell(lat, spos, vels, mas, sym, mask, cell.PBC, cell.NC)
 
     push!(cells, tmp)
   end
@@ -91,12 +92,44 @@ function phonopy_getDisplacements(
   phonon, cells
 end
 
+function phonopy_getDisplacementsDataset(
+  cell::MyCell, primitive, supercell; dist=0.02, symprec=1e-5)
+
+  # Imports
+  phonopy      = pyimport("phonopy")
+  PhonopyAtoms = phonopy.structure.atoms.PhonopyAtoms
+
+  unitcell = PhonopyAtoms(
+    symbols   = string(cell.symbols...), 
+    cell      = cell.lattice, 
+    positions = getPos(cell)
+  )
+
+  phonon   = phonopy.Phonopy(unitcell, 
+    supercell_matrix = supercell, 
+    primitive_matrix = primitive,
+    factor           = phonopy.units.VaspToEv,
+    symprec          = symprec
+  )
+
+  phonon.generate_displacements(distance=dist)
+
+  n     = hcat(supercell...) |> det
+  disps = Tuple[]
+  
+  for disp in phonon.displacement_dataset["first_atoms"]
+    i::Int = (disp["number"] / n) + 1
+    d      = disp["displacement"]
+    
+    push!(disps, (i,d))
+  end
+
+  phonon, disps
+end
+
 function phonopy_addForces(yamlFile, saveName, forces; symprec=1e-5)
   phonopy    = pyimport("phonopy")
   obj        = phonopy.load(yamlFile, symprec=symprec)
-  n::Int64   = det(obj.supercell_matrix)
-
-  reorderPhonopyForces!(forces, n)
   obj.forces = forces
   obj.save(saveName)
 end
