@@ -1,14 +1,14 @@
 # Notes to Self:
 #   Making Atom mutable allows mass to swap on fly, but this 
-#   might be too niche. Most users likely don't need that, so I
-#   am scrubbing it.
+#   might be too niche. Should not cause performance loss and
+#   it is nice for the user to have.
 #
 #   I am making r and v MVectors to restrict array size but still
 #   allow mutating the vector. This lets the user translate or add
 #   momentum to atoms.
 
 # Atoms in simulation
-struct Particle{D, F <: AbstractFloat, S <: AbstractString} <: MyAtoms
+mutable struct Particle{D, F <: AbstractFloat, S <: AbstractString} <: MyAtoms
   r::MVector{D, F}
   v::MVector{D, F}
   m::F
@@ -34,8 +34,8 @@ function swapAtoms!(bdys::Vector{MyAtoms}, i, j)
   a = bdys[i].r
   b = bdys[j].r
 
-  bdys[i].r = b
-  bdys[j].r = a
+  bdys[i].r .= b
+  bdys[j].r .= a
 end
 
 function centerBdys!(bdys::Vector{MyAtoms})
