@@ -1,23 +1,28 @@
 # Introduction
 
-!!! warning "Are you sure you want to use JMD.jl?"
-    This package has been developed with the idea that no one, other than myself, would use it. A consequence of that mentality is that JMD.jl is a bit bloated with niche code, and not all general MD utilities are available. 
+!!! warning "JMD.jl is still in the early development phase"
+    This package is still very early in its development, and there are more mature molecular dynamics packages in Julia. For instance, [Molly.jl](https://juliamolsim.github.io/Molly.jl/stable/) and [NQCDynamics.jl](https://nqcd.github.io/NQCDynamics.jl/stable/) both offer molecular dyanmics in Julia.
 
-    Consider instead using [Molly.jl](https://juliamolsim.github.io/Molly.jl/stable/) or [NQCDynamics.jl](https://nqcd.github.io/NQCDynamics.jl/stable/).
-
+Julia Molecular Dynamics (`JMD.jl`) aims to offer users a simple, intuitive and easy-to-use molecular dynamics enviornment. It draws inspiration from Python's [ASE](https://wiki.fysik.dtu.dk/ase/index.html), but is intended to be faster and offer users more flexibility. The flexibility comes from the relative ease with which users can add their own methods to dynamics or other components of `JMD.jl`.
 
 ### Installation
 
-JMD.jl is not on the general registry, so add JMD through GitHub.
+`JMD.jl` is not yet on the general registry, so for now installation can be done via GitHub.
 
 ```julia-repl
 pkg> add https://github.com/Cavenfish/JMD
 ```
 
-#### MBX add-on
+If you are more adventerous, you can consider installing the `dev` branch of `JMD.jl`. This will get updates more frequently, which gives users more features but also comes with increased chances of bugs. 
 
-If you want to use MBX within JMD then you need to compile the MBX software into a shared object binary.
+```julia-repl
+pkg> add https://github.com/Cavenfish/JMD#dev
+```
 
-#### SCME/f add-on
+### Features
 
-If you want to use SCME/f within JMD then you need to compile and install SCME/f prior to using it.
+Currently, `JMD.jl` is able to perform the following simulations/calculations on molecular systems.
+
+    - Geometry optimizations
+    - Harmonic frequency calculations
+    - Classical molecular dynamics in the NVE and NVT ensemble
