@@ -22,7 +22,7 @@ pkg> add https://github.com/Cavenfish/JMD#dev
 ### Features
 
 Currently, `JMD.jl` is able to perform the following simulations/calculations on molecular systems.
-
-    - Geometry optimizations
-    - Harmonic frequency calculations
-    - Classical molecular dynamics in the NVE and NVT ensemble
+  
+  - Geometry optimizations
+  - Harmonic frequency calculations
+  - Classical molecular dynamics in the NVE and NVT ensemble
