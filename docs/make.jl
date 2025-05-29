@@ -11,7 +11,7 @@ makedocs(;
     "Home" => "index.md",
     "Bodies" => "bodies.md",
     "Optimization" => "optimizations.md",
-    "Molecular Dynamics" => ["md/dynamics.md", "md/thermostats.md"]
+    "Molecular Dynamics" => ["md/dynamics.md", "md/thermostats.md"],
     "Potentials" => ["potentials/potList.md", "potentials/customPot.md"]
   ]
 )
