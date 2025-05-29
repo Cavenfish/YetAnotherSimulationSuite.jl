@@ -17,7 +17,8 @@ makedocs(;
   ]
 )
 
-deploydocs(
+deploydocs(;
   repo = "github.com/Cavenfish/JMD.git",
+  devbranch = "dev",
   push_preview = true
 )
