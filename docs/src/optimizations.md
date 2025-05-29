@@ -9,7 +9,7 @@ using JMD
 bdys = readSystem("./myFile.xyz")
 
 # Run a geometry optimization
-new  = opt(TIP4P(), JMD.LBFGS(), bdys)
+new  = opt(TIP4Pf(), JMD.LBFGS(), bdys)
 ```
 
 The optimization algorithms from Optim.jl are not re-exported by `JMD.jl`, for this reason you must either use `JMD.LBFGS()` (as shown above) or load `Optim.jl` within your script (as shown below). Note, for this to work you need to have already installed `Optim.jl`.
@@ -22,7 +22,7 @@ using Optim
 bdys = readSystem("./myFile.xyz")
 
 # Run a geometry optimization
-new  = opt(TIP4P(), LBFGS(), bdys)
+new  = opt(TIP4Pf(), LBFGS(), bdys)
 ```
 
 Configuerable options for `Optim.jl` optimizations can be passed as keyword arguments to the `opt` function. For a full list of algorithms and configuerable options please see the `Optim.jl` documentation. Here we only give a few key optional arguments that are typically used in geometry optimizations.
@@ -37,7 +37,7 @@ An example of passing these optional arguments to `opt` is given below.
 ```julia
 # You can also replace the ; with , but Julia convention is ;
 new  = opt(
-  TIP4P(), LBFGS(), bdys; f_abstol=1e-8, g_abstol=1e-5, 
+  TIP4Pf(), LBFGS(), bdys; f_abstol=1e-8, g_abstol=1e-5, 
   iterations=1000000, show_trace=true 
 )
 ```
