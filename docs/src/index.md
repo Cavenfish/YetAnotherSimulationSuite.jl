@@ -1,6 +1,6 @@
 # Introduction
 
-!!! warning "JMD.jl is still in the early development phase"
+!!! warning "JMD.jl is still in the pre-release phase"
     This package is still very early in its development, and there are more mature molecular dynamics packages in Julia. For instance, [Molly.jl](https://juliamolsim.github.io/Molly.jl/stable/) and [NQCDynamics.jl](https://nqcd.github.io/NQCDynamics.jl/stable/) both offer molecular dyanmics in Julia.
 
 Julia Molecular Dynamics (`JMD.jl`) aims to offer users a simple, intuitive and easy-to-use molecular dynamics enviornment. It draws inspiration from Python's [ASE](https://wiki.fysik.dtu.dk/ase/index.html), but is intended to be faster and offer users more flexibility. The flexibility comes from the relative ease with which users can add their own methods to dynamics or other components of `JMD.jl`.

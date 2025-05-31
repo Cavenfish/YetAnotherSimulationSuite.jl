@@ -13,10 +13,10 @@ using JMD
 bdys = readSystem("./myFile.xyz")
 
 # Or make it yourself
-bdys = [
-  Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, 'O'),
-  Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, 'H'),
-  Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, 'H')
+bdys::Vector{JMD.MyAtoms} = [
+  Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, "O"),
+  Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, "H"),
+  Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, "H")
 ]
 
 # Write it to an xyz file
@@ -41,7 +41,7 @@ JMD also contains some auxiliary functions that can apply changes to Atom object
 using JMD
 
 # Read it in from an xyz file
-bdys = readXyz("./myFile.xyz")
+bdys = readSystem("./myFile.xyz")
 
 # Uniformally translate all atoms
 v = [1.0, 0.0, 0.0]
