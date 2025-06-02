@@ -94,19 +94,6 @@ function opt(calc::MyCalc, algo, cell::MyCell; kwargs...)
   )
 end
 
-function optCell(EoM, algo, cell::MyCell; kwargs...)
-
-  lat0         = reshape(cell.lattice, 9)
-  optFunc      = Optim.only_fg!((F,G,x) -> EoM(F,G, cell, x))
-  convCrit     = Optim.Options(; kwargs...)
-  res          = optimize(optFunc, lat0, algo, convCrit)
-  newLat       = reshape(res.minimizer, (3,3))
-  ret          = deepcopy(cell)
-  ret.lattice .= newLat
-
-  ret
-end
-
 struct HiddenOptVars
   potVars::PotVars
   cellBuf::MyCell
@@ -118,10 +105,10 @@ struct HiddenOptVars
   T::Matrix
 end
 
-function hiddenOpt(EoM, algo, cell, T; kwargs...)
+function hiddenOpt(calc::MyCalc, algo, cell, T; kwargs...)
 
   super   = makeSuperCell(cell, T)
-  y, vars = prep4pot(EoM, super)
+  y, vars = prep4pot(calc.b, super)
   x0      = prepX0(cell)
   Γ       = zero(y)
 
@@ -136,10 +123,12 @@ function hiddenOpt(EoM, algo, cell, T; kwargs...)
     T
   )
 
-  optFunc  = Optim.only_fg!((F,G,x) -> hiddenEoM(F,G,Γ,EoM,hideVars,x))
+  optFunc  = Optim.only_fg!((F,G,x) -> hiddenEoM(F,G,Γ,calc,hideVars,x))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
+  spos     = [MVector(i) for i in spos]
+  
 
   # The new cell returned will have fields that point to
   # fields in the original cell. For example, new.lattice
@@ -151,13 +140,13 @@ function hiddenOpt(EoM, algo, cell, T; kwargs...)
   )  
 end
 
-function hiddenEoM(F, G, Γ, EoM, vars, x)
+function hiddenEoM(F, G, Γ, calc::MyCalc, vars, x)
   getScaledPos!(vars.cellBuf, x)
 
   makeSuperCell!(vars.superBuf, vars.cellBuf, vars.T)
 
   y = prepX0(vars.superBuf)
-  E = EoM(F, Γ, y, vars)
+  E = fg!(F, Γ, y, vars, calc)
 
   if G != nothing
     G .= Γ[1:length(G)]
@@ -167,4 +156,19 @@ function hiddenEoM(F, G, Γ, EoM, vars, x)
     return E * vars.scaleEnergy
   end
 
+end
+
+# No longer works after refactor
+# Need to find a proper way to include this 
+function optCell(EoM, algo, cell::MyCell; kwargs...)
+
+  lat0         = reshape(cell.lattice, 9)
+  optFunc      = Optim.only_fg!((F,G,x) -> EoM(F,G, cell, x))
+  convCrit     = Optim.Options(; kwargs...)
+  res          = optimize(optFunc, lat0, algo, convCrit)
+  newLat       = reshape(res.minimizer, (3,3))
+  ret          = deepcopy(cell)
+  ret.lattice .= newLat
+
+  ret
 end

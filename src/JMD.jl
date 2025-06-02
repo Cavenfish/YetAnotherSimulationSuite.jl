@@ -78,7 +78,7 @@ module JMD
     getHarmonicFreqs, animateMode, getModePES, getModeInteractionPES,
 
     #optimizations.jl
-    opt, optCell, hiddenOpt,
+    opt, hiddenOpt,
 
     #distributions.jl
     rdf, adf, density,
