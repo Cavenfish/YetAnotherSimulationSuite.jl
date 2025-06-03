@@ -24,6 +24,16 @@ function Particle(r::V, v::V, m::Float64, s::String) where V <: Union{Vector, SV
   Particle(rm, vm, m, s)
 end
 
+function center(bdys::Vector{MyAtoms})
+  o = zeros(3)
+
+  for i in bdys
+    o .+= i.r
+  end
+
+  o ./ length(bdys)
+end
+
 function translateBdys!(bdys::Vector{MyAtoms}, v)
   for i in bdys
     i.r .+= v

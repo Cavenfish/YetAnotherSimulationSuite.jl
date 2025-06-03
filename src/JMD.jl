@@ -81,7 +81,7 @@ module JMD
     opt, hiddenOpt,
 
     #distributions.jl
-    rdf, adf, density,
+    rdf, density,
 
     #stress.jl
     getNumericalStress, getNumericalStressOrthogonal,
