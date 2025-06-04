@@ -49,11 +49,6 @@ function TIP4Pf!(F, u, p)
 
     E += _vdw!(F, u, o1, o2, P.ϵoo, P.σoo)
 
-    if any(p.PBC)
-      L  = eachrow(p.lattice)
-      E +=_pbcInteractions!(F, u, o1, o2, _vdw, L, p.NC, (P.ϵoo, P.σoo))
-    end
-
     for i in [h1, h2]
       for j in [h3, h4]
         E += _Coulomb!(F, u, i, j, P.Qh, P.Qh)
