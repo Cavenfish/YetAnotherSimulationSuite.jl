@@ -1,6 +1,6 @@
 
 # This is copied from the ASE implementation 
-function getNumericalStress(EoM, cell::MyCell; eps=1e-6)
+function getNumericalStress(calc::MyCalc, cell::MyCell; eps=1e-6)
   stress = zeros(3,3)
   vol    = getVolume(cell)
   tmp    = deepcopy(cell)
@@ -11,11 +11,11 @@ function getNumericalStress(EoM, cell::MyCell; eps=1e-6)
 
     x[i,i]       = 1.0 + eps
     tmp.lattice .= cell.lattice * x
-    eplus        = getPotEnergy(EoM, tmp)
+    eplus        = getPotEnergy(calc, tmp)
 
     x[i,i]       = 1.0 - eps
     tmp.lattice .= cell.lattice * x
-    eminus       = getPotEnergy(EoM, tmp)
+    eminus       = getPotEnergy(calc, tmp)
 
     stress[i,i]  = (eplus - eminus) / (2 * eps * vol)
     x[i,i]       = 1.0
@@ -24,11 +24,11 @@ function getNumericalStress(EoM, cell::MyCell; eps=1e-6)
 
     x[i,j] = x[j,i] = +0.5 * eps
     tmp.lattice    .= cell.lattice * x
-    eplus           = getPotEnergy(EoM, tmp)
+    eplus           = getPotEnergy(calc, tmp)
 
     x[i,j] = x[j,i] = -0.5 * eps
     tmp.lattice    .= cell.lattice * x
-    eminus          = getPotEnergy(EoM, tmp)
+    eminus          = getPotEnergy(calc, tmp)
 
     stress[i,j] = stress[j,i] = (eplus - eminus) / (2 * eps * vol)
   end
@@ -37,7 +37,7 @@ function getNumericalStress(EoM, cell::MyCell; eps=1e-6)
 end
 
 # A version of the above that only operates on diagonal terms of matrix
-function getNumericalStressOrthogonal(EoM, cell::MyCell; eps=1e-6)
+function getNumericalStressOrthogonal(calc::MyCalc, cell::MyCell; eps=1e-6)
   stress = zeros(3,3)
   vol    = getVolume(cell)
   tmp    = deepcopy(cell)
@@ -48,11 +48,11 @@ function getNumericalStressOrthogonal(EoM, cell::MyCell; eps=1e-6)
 
     x[i,i]       = 1.0 + eps
     tmp.lattice .= cell.lattice * x
-    eplus        = getPotEnergy(EoM, tmp)
+    eplus        = getPotEnergy(calc, tmp)
 
     x[i,i]       = 1.0 - eps
     tmp.lattice .= cell.lattice * x
-    eminus       = getPotEnergy(EoM, tmp)
+    eminus       = getPotEnergy(calc, tmp)
 
     stress[i,i]  = (eplus - eminus) / (2 * eps * vol)
     x[i,i]       = 1.0
