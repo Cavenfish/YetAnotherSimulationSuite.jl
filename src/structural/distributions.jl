@@ -72,21 +72,3 @@ function adf(bdys::Vector{MyAtoms}; kwargs...)
   y = k.density
   return x,y
 end
-
-function ddf(bdys, rRange)
-
-  com = CoM(bdys)
-  d   = [norm(i.r - com) for i in bdys]
-
-  x,y = [],[]
-  for r in rRange
-    k = findall(e -> e <= r, d)
-    M = sum([bdys[i].m for i in k]) / 6.02214e23 # convert to grams
-    v = 4/3 * pi * (r * 1e-8)^3 #convert Angstrom to cm
-
-    push!(x, r)
-    push!(y, M/v)
-  end
-  
-  return x,y
-end
