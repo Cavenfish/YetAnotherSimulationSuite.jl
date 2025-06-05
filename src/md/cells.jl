@@ -106,18 +106,17 @@ function center!(cell)
   r0 = sum(r) ./ length(r)
   μ  = sum(0.5 * cell.lattice, dims=1) |> (x -> reshape(x, 3))
   x  = μ - r0
+  T  = inv(cell.lattice)
   
-  # Translate positions
+  # Translate positions and scale positions
   for i in r
     i .+= x
+    i .= T * i
   end
-  
-  # Get scaled positions
-  spos = vcat(r...) |> (x -> getScaledPos(x, cell.lattice))
 
   # Update scaled positions
-  for i in 1:length(spos)
-    cell.scaled_pos[i] .= spos[i]
+  for i in 1:length(r)
+    cell.scaled_pos[i] .= r[i]
   end 
 
 end
