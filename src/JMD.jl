@@ -47,7 +47,8 @@ module JMD
     CoM, vCoM, zeroVCoM!, getForces,
 
     #energetics.jl
-    vibExcite!, transExcite!, getPotEnergy,
+    vibExcite!, transExcite!, getPotEnergy, getRotEnergy, getTransEnergy,
+    getVibEnergy,
 
     #molsAndPairs.jl
     getMols, getPairs,
