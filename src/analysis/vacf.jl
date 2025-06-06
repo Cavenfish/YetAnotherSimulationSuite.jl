@@ -1,20 +1,19 @@
 
-struct vacfInps
-  vel::Vector
-  mas::Vector{Float64}
-  Hz::Float64
-  norm::Bool
-  win::Function
-  pad::UInt8
-  mir::Bool
+struct vacfInps{V,B,W, I<:Integer, F<:AbstractFloat}
+  vel::V
+  mas::Vector{F}
+  Hz::F
+  norm::B
+  win::W
+  pad::I
+  mir::B
 end
 
-mutable struct vacfOut
-  c::Vector{Float64}
-  C::Vector{Float64}
-  D::Float64
-  v::Vector{Float64}
-  I::Vector{Float64}
+struct vacfOut{F<:AbstractFloat}
+  c::Vector{F}
+  C::Vector{F}
+  v::Vector{F}
+  I::Vector{F}
 end
 
 Hann( i,N) = sin((pi*i)/N)^2
@@ -28,24 +27,16 @@ function window!(out, W)
   out.C .*= w
 end
 
-function padZeros!(out, f)
-  N = length(out.C)
-  z = zeros(N*f)
-
-  @views z[1:N] = out.C
-  out.C = z
-end
-
 function mirror!(out)
-  out.C = [reverse(out.C); out.C[2:end]]
+  N::Int = length(out.C) / 2 |> ceil
+
+  out.C .= [reverse(out.C[1:N]); out.C[2:N]]
 end
 
 function vacf!(inp, out; atms=nothing)
   T = length(inp.vel)       # Total timesteps 
   N = length(inp.vel[1])    # Total number of atoms
   D = length(inp.vel[1][1]) # Total number of dimensions
-  
-  out.c = zeros(Float64, T-1)
 
   if atms == nothing
     atms = 1:N
@@ -62,50 +53,47 @@ function vacf!(inp, out; atms=nothing)
     end
   end
 
-  #By default the diffusion coefficient is in units of
-  # Angstrom * sqrt(eV / amu)
-  out.D  = sum(out.c) / (D*N)
-  out.D *= 0.00982269475 # convert to cm^2/s
-
   if inp.norm
-    out.C = out.c ./ out.c[1]
+    out.C[1:T-1] .= out.c ./ out.c[1]
   else
-    out.C = out.c
+    out.C[1:T-1] .= out.c
   end
 
 end
 
 function VDOS(inp; atms=nothing)
-  dum = zeros(10)
-  out = vacfOut(dum,dum,0.0,dum,dum)
+  # Initialize output
+  k   = 29979245800.0 # Divide by this to convert from Hz to cm^-1
+  c   = length(inp.vel) - 1 |> zeros
+  C   = if inp.mir
+    (length(c)*inp.pad*2) - 1 |> zeros
+  else
+    length(c)*inp.pad |> zeros
+  end
+  N   = length(C)
+  tmp = fftfreq(N, inp.Hz) ./ k
+  n   = div(length(tmp), 2)
+  v   = abs.(tmp[1:n])
+  I   = length(v) |> zeros
+  out = vacfOut(c,C,v,I)
 
   vacf!(inp, out; atms=atms)
   window!(out, inp.win)
-  padZeros!(out, inp.pad)
   
   if inp.mir
     mirror!(out)
   end
 
-  k = 29979245800.0 # Divide by this to convert from Hz to cm^-1
-  N = length(out.C)
-  I = fft(out.C)
-  v = fftfreq(N, inp.Hz) ./ k
-  
-  n::UInt32 = div(length(v), 2)
-  @views I  = I[1:n]
-  @views v  = v[1:n]
-
-  out.v = abs.(v)
-  out.I = abs.(I)
+  tmp    = fft(out.C)
+  out.I .= abs.(tmp[1:n])
 
   out
 end
 
-function getVelMas(solu)
-  T   = length(solu.t)
-  vel = [solu.u[i].x[1] for i in 1:T]
-  mas = [i.m for i in solu.prob.p.bdys]
-  
-  vel, mas
+function getDiffusionCoefficient(out; D=3)
+  N = length(out.C)
+
+  #By default the diffusion coefficient is in units of
+  # Angstrom * sqrt(eV / amu) | 0.0098226 is conversion to cm^2/s
+  ( sum(out.c) / (D*N) ) * 0.00982269475
 end

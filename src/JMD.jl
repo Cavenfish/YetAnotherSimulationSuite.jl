@@ -60,6 +60,9 @@ module JMD
     makeCell, makeBdys, getScaledPos, getPos, wrap!, makeSuperCell,
     makeSuperCell!, getMIC, center!, getPrimitiveCell, getVolume,
 
+    #trajectories.jl
+    getVelMas,
+
     #potentials
     MvHff, HGNN, MBX, SPCF, TIP4Pf, SCMEf,
 
@@ -73,7 +76,7 @@ module JMD
     processDynamics, processTmpFiles, 
     
     #vacf.jl
-    vacfInps, VDOS, getVelMas,
+    vacfInps, VDOS, getDiffusionCoefficient,
 
     #vibrations.jl
     getHarmonicFreqs, animateMode, getModePES, getModeInteractionPES,

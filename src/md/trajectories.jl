@@ -53,3 +53,9 @@ function getBdys(tj::MyTraj, i::Int)
   
   bdys
 end
+
+function getVelMas(tj::MyTraj)
+  vel = [i.vel for i in tj.images]
+  
+  vel, tj.masses
+end
