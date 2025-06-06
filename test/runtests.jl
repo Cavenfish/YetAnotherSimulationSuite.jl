@@ -53,6 +53,10 @@ end
 
 @testset "Analysis" begin
 
+  @testset "Energetics" begin
+    include("./analysis/energetics_test.jl")
+  end
+
   @testset "Vibrations" begin
     include("./analysis/vibrations_test.jl")
   end
