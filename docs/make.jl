@@ -5,7 +5,7 @@ makedocs(;
   authors = "Brian C. Ferrari",
   format = Documenter.HTML(
     prettyurls=get(ENV, "CI", nothing) == "true",
-    canonical="https://Cavenfish.github.io/JMD.jl/"
+    canonical="https://Cavenfish.github.io/JMD/"
   ),
   pages = [
     "Home" => "index.md",
