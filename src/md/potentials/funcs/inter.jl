@@ -4,8 +4,8 @@ Intermolecular Potential Functions
 
 
 function _vdw(
-  ri::V, rj::V, ϵij::Float64, σij::Float64
-) where V <: AbstractVector
+  ri::Vi, rj::Vj, ϵij::Float64, σij::Float64
+) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
   rvec = rj - ri
   r    = norm(rvec)
@@ -33,8 +33,8 @@ function _vdw!(
 end
 
 function _Buckingham(
-  ri::V, rj::V, Aij::Float64, Bij::Float64, Cij::Float64
-) where V <: AbstractVector
+  ri::Vi, rj::Vj, Aij::Float64, Bij::Float64, Cij::Float64
+) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
   rvec = rj - ri
   r    = norm(rvec)
@@ -65,8 +65,8 @@ function _Buckingham!(
 end
 
 function _Coulomb(
-  ri::V, rj::V, Qi::Float64, Qj::Float64
-) where V <: AbstractVector
+  ri::Vi, rj::Vj, Qi::Float64, Qj::Float64
+) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
   rvec = rj - ri
   r    = norm(rvec)
@@ -92,8 +92,8 @@ function _Coulomb!(
 end
 
 function _shortDisp(
-  ri::V, rj::V, Aij::Float64, Bij::Float64
-) where V <: AbstractVector
+  ri::Vi, rj::Vj, Aij::Float64, Bij::Float64
+) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
   rvec = rj - ri
   r    = norm(rvec)
@@ -119,8 +119,8 @@ function _shortDisp!(
 end
 
 function _longDisp(
-  ri::V, rj::V, Cij::Float64; damp=nothing, p=nothing
-) where V <: AbstractVector
+  ri::Vi, rj::Vj, Cij::Float64; damp=nothing, p=nothing
+) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
   rvec = rj - ri
   r    = norm(rvec)

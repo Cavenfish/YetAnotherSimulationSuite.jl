@@ -15,7 +15,7 @@ struct _SPCF_PotVars{F<:Float64} <: PotVars
   Qh::F
 end
 
-SPCF(bdys::Vector{MyAtoms}) = _SPCF_PotVars(
+SPCF(bdys::Union{Vector{MyAtoms}, MyCell}) = _SPCF_PotVars(
   48.05913,
   1.0,
   3.97,
@@ -27,8 +27,9 @@ SPCF(bdys::Vector{MyAtoms}) = _SPCF_PotVars(
 )
 
 function SPCF!(F, u, p)
-  E = 0.0
-  P = p.potVars
+  E  = 0.0
+  P  = p.potVars
+  NC = p.PBC .* p.NC
 
   for mol in p.mols
     o, h1, h2 = mol
@@ -45,18 +46,32 @@ function SPCF!(F, u, p)
     E += _vdw!(F, u, o1, o2, P.ϵ, P.σ)
     E += _Coulomb!(F, u, o1, o2, P.Qo, P.Qo)
 
+    if any(p.PBC)
+      E += _pbc!(F, u, o1, o2, _vdw, p.lattice, NC, (P.ϵ, P.σ))
+      E += _pbc!(F, u, o1, o2, _Coulomb, p.lattice, NC, (P.Qo, P.Qo))
+    end
+
     for i in [h1, h2]
       for j in [h3, h4]
         E += _Coulomb!(F, u, i, j, P.Qh, P.Qh)
+        if any(p.PBC)
+          E += _pbc!(F, u, i, j, _Coulomb, p.lattice, NC, (P.Qh, P.Qh))
+        end
       end
     end
 
     for i in [h1,h2]
       E += _Coulomb!(F, u, o2, i, P.Qo, P.Qh)
+      if any(p.PBC)
+        E += _pbc!(F, u, o2, i, _Coulomb, p.lattice, NC, (P.Qo, P.Qh))
+      end
     end
 
     for i in [h3,h4]
       E += _Coulomb!(F, u, o1, i, P.Qo, P.Qh)
+      if any(p.PBC)
+        E += _pbc!(F, u, o1, i, _Coulomb, p.lattice, NC, (P.Qo, P.Qh))
+      end
     end
   end
 
