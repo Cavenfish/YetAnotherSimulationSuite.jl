@@ -15,6 +15,10 @@ end
   include("./helpers_test.jl")
 end
 
+@testset "Bodies" begin
+  include("./md/bodies_test.jl")
+end
+
 @testset "Cells" begin
   include("./md/cells_test.jl")
 end
@@ -39,6 +43,10 @@ end
 
   @testset "Peak Finding" begin
     include("./mathtk/peakFinding_test.jl")
+  end
+
+  @testset "SavGol Filter" begin
+    include("./mathtk/savitzkyGolay_test.jl")
   end
 
 end

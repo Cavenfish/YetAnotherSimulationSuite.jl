@@ -41,8 +41,8 @@ function translateBdys!(bdys::Vector{MyAtoms}, v)
 end
 
 function swapAtoms!(bdys::Vector{MyAtoms}, i, j)
-  a = bdys[i].r
-  b = bdys[j].r
+  a = bdys[i].r |> deepcopy
+  b = bdys[j].r |> deepcopy
 
   bdys[i].r .= b
   bdys[j].r .= a
