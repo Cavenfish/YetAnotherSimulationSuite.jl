@@ -3,5 +3,6 @@
 ignore:
   - src/md/potentials/MBX.jl
   - src/md/potentials/SCMEf.jl
+  - src/md/potentials/funcs/TTMnrg.jl
   - src/lib/MBX
   - src/lib/SCMEf
