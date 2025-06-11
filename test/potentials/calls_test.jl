@@ -22,7 +22,7 @@ function thermoTest(calc, thermo, f)
   file = joinpath(@__DIR__, f)
   bdys = readSystem(file)
 
-  run(calc, bdys, (0.0, 10fs), 1fs, NVT(thermo))
+  run(calc, bdys, (0.0, 10fs), 1fs, NVT(thermo); split=2)
 
   true
 end
