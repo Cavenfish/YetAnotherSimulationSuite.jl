@@ -7,27 +7,30 @@
 [codecov-img]: https://codecov.io/github/Cavenfish/JMD/branch/main/graph/badge.svg
 [codecov-url]: https://app.codecov.io/github/Cavenfish/JMD
 
-# JMD.jl
+[docs-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-url]: https://cavenfish.github.io/JMD/stable/
 
-[![][ci-img]][ci-url] [![][aqua-img]][aqua-url] [![][codecov-img]][codecov-url]
+[ddocs-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[ddocs-url]: https://cavenfish.github.io/JMD/dev/
 
-Julia Molecular Dynamics (JMD)
+# Julia Molecular Dynamics (JMD.jl)
 
-This package has been developed with the idea that I would be the only one using it. Since this package is used in my published research, I have made the repo public for the sake of transperancy. 
+[![][ddocs-img]][ddocs-url]
+[![][ci-img]][ci-url]
+[![][codecov-img]][codecov-url]
+[![][aqua-img]][aqua-url]
 
-Some consequences of the "no one will use this code" mentality:
-  
-  - There is currently no documentation for anything in JMD.jl
-  - JMD.jl is a bit bloated with niche code (specific to my use case)
 
-I do plan on turning this into a true to form package, with proper documentation and less bloat. I will keep track of the progress in the roadmap check list below. If you do wish to use JMD.jl and the docs don't yet exist, then your best bet is to take a look at the scripts directory in the repo. I'll try to be proactive about adding scripts I use in my research into the directory. 
+**`JMD.jl` is still in the pre-release phase.** The roadmap below tracks the development process of `JMD.jl`.
+
+`JMD.jl` aims to offer users a simple, intuitive and easy-to-use molecular dynamics enviornment. It draws inspiration from Python's [ASE](https://wiki.fysik.dtu.dk/ase/index.html), but is intended to be faster and offer users more flexibility. The flexibility comes from the relative ease with which users can add their own methods to dynamics or other components of `JMD.jl`.
 
 # Roadmap to Becoming a True Package
 
   - [x] Clear out niche code
   - [ ] Make documentation
   - [ ] Add example scripts
-  - [ ] Get codecov above 70%
+  - [x] Get codecov above 70%
   - [ ] Rewrite code to use Unitful.jl?
   - [x] Use Chemfiles for file IO
 
