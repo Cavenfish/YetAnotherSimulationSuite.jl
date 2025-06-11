@@ -79,7 +79,7 @@ function dyn!(dv, v, u, p, t, calc)
   dv .= F ./ p.m
   T   = getTemp(p.m, v)
 
-  if typeof(p.ensemble) == NVT
+  if isa(p.ensemble, NVT)
     thermostat = p.ensemble.thermostat
     thermostat.act!(dv, v, p.m, T, thermostat)
   end
