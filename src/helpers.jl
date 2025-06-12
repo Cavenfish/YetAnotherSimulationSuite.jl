@@ -26,9 +26,12 @@ function myRepeat(A::Vector{MVector{D,Float64}}, count::Integer, mask::Vector{Bo
 end
 
 function CoM(bdys)
-  M = sum([i.m for i in bdys])
-  r = sum([i.m*i.r for i in bdys])
-  return r ./ M
+  o  = zeros(3)
+  M  = sum([i.m for i in bdys])
+  r  = sum([i.m*i.r for i in bdys])
+  o .= r ./ M
+
+  o
 end
 
 function CoM(pos,mas)

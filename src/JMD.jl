@@ -88,6 +88,9 @@ module JMD
     #distributions.jl
     rdf, density,
 
+    #geometric_operations.jl
+    translate!, rotate!, randRotate!, 
+
     #stress.jl
     getNumericalStress, getNumericalStressOrthogonal,
 
@@ -174,6 +177,7 @@ module JMD
   include("./mathtk/peakFinding.jl")
   include("./mathtk/stress.jl")
   include("./mathtk/basicMath.jl")
+  include("./mathtk/geometric_operations.jl")
 
   include("./building/anneal.jl")
   include("./building/hitAndStick.jl")

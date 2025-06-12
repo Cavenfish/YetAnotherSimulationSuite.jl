@@ -30,22 +30,6 @@ function randVector()
   r
 end
 
-function randRotate!(mol)
-  α = rand(-pi:1e-10:pi)
-  γ = rand(-pi:1e-10:pi)
-  β  = rand(0:1e-10:pi)
-
-  Rz = [cos(α) -sin(α) 0; sin(α) cos(α) 0; 0 0 1]
-  Ry = [cos(β) 0 sin(β); 0 1 0; -sin(β) 0 cos(β)]
-  Rx = [1 0 0; 0 cos(γ) -sin(γ); 0 sin(γ) cos(γ)]
-
-  R  = Rz*Ry*Rx
-
-  for i in mol
-    i.r = R * i.r
-  end
-end
-
 function spawnMol(mol, bdys, com)
   v     = randVector()
   d     = maximum([dot(i.r-com, v) for i in bdys]) + 8

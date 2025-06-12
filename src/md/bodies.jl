@@ -34,12 +34,6 @@ function center(bdys::Vector{MyAtoms})
   o ./ length(bdys)
 end
 
-function translateBdys!(bdys::Vector{MyAtoms}, v)
-  for i in bdys
-    i.r .+= v
-  end
-end
-
 function swapAtoms!(bdys::Vector{MyAtoms}, i, j)
   a = bdys[i].r |> deepcopy
   b = bdys[j].r |> deepcopy
