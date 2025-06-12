@@ -11,7 +11,7 @@
   a = h2o[2].r |> deepcopy
   b = h2o[3].r |> deepcopy
 
-  translate!(h2o, [1,0,0])
+  translate!(h2o, [1.0,0.0,0.0])
   swapAtoms!(h2o, 2, 3)
 
   @test isapprox(a, h2o[3].r .- [1,0,0]; atol=1e-8)

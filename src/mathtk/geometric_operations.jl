@@ -5,24 +5,24 @@ function translate!(bdys::Vector{MyAtoms}, v::Vector{Float64})
   end
 end
 
-function rotate!(bdys::Vector{MyAtoms}, R::Matrix)
+function LinearAlgebra.rotate!(bdys::Vector{MyAtoms}, R::Matrix)
   for i in bdys
     i.r .= R * i.r
   end
 end
 
-function rotate!(bdys::Vector{MyAtoms}, R::Matrix, about::Vector{Float64})
+function LinearAlgebra.rotate!(bdys::Vector{MyAtoms}, R::Matrix, about::Vector{Float64})
   translate!(bdys, -about)
   rotate!(bdys, R)
   translate!(bdys, about)
 end
 
-function rotate!(bdys::Vector{MyAtoms}, abc::Tuple{3,Float64})
+function LinearAlgebra.rotate!(bdys::Vector{MyAtoms}, abc::Tuple{F,F,F}) where F <: AbstractFloat
   R = getRotationMatrix(abc...)
   rotate!(bdys, R)
 end
 
-function rotate!(bdys::Vector{MyAtoms}, abc::Tuple{3,F}, about::Vector{F}) where F<:AbstractFloat
+function LinearAlgebra.rotate!(bdys::Vector{MyAtoms}, abc::Tuple{F,F,F}, about::Vector{F}) where F<:AbstractFloat
   R = getRotationMatrix(abc...)
   rotate!(bdys, R, about)
 end

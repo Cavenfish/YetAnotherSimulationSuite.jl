@@ -54,7 +54,7 @@ module JMD
     getMols, getPairs,
 
     #bodies.jl
-    Particle, swapIso!, pickRandomMol, centerBdys!, translateBdys!,
+    Particle, swapIso!, pickRandomMol, centerBdys!,
     swapAtoms!, center,
 
     #cells.jl

@@ -49,6 +49,10 @@ end
     include("./mathtk/savitzkyGolay_test.jl")
   end
 
+  @testset "Geometric Operations" begin
+    include("./mathtk/geometric_operations_test.jl")
+  end
+
 end
 
 @testset "Structural" begin

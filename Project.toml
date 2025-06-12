@@ -31,7 +31,7 @@ Clustering = "0.15.8"
 DataFrames = "^1.7.0"
 Distances = "0.10.12"
 Distributions = "0.25.119"
-FFTW = "1.8.1"
+FFTW = "^1.9.0"
 FiniteDiff = "2.27.0"
 JLD2 = "0.5.12"
 KernelDensity = "0.6.9"
@@ -40,7 +40,6 @@ LinearAlgebra = "^1.11.0"
 Optim = "^1.12.0"
 OrdinaryDiffEq = "^6.93.0"
 PyCall = "1.96.4"
-SHA = "0.7.0"
 Serialization = "1.11.0"
 Spglib = "0.9.4"
 StaticArrays = "1.9.13"
@@ -52,8 +51,7 @@ julia = "^1.9.0"
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "Test", "SHA", "LinearAlgebra"]
+test = ["Aqua", "Test", "LinearAlgebra"]
