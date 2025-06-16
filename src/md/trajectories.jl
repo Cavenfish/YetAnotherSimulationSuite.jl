@@ -39,7 +39,7 @@ function getImage(solu::SciMLBase.ODESolution, i::Int, dt::Float64)
   Image(r, v, t, T, E, F)
 end
 
-function getBdys(tj::MyTraj, i::Int)
+function makeBdys(tj::MyTraj, i::Int)
   bdys = MyAtoms[]
 
   for j = 1:length(tj.masses)
