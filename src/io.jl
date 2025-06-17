@@ -156,11 +156,17 @@ function Base.write(file::String, cell::MyCell)
   add_velocities!(frame)
   
   for i = 1:length(cell.masses)
-    r .= pos[i]
-    v .= cell.velocity[i]
-    s  = cell.symbols[i]
+    r  .= pos[i]
+    v  .= cell.velocity[i]
+    s   = cell.symbols[i]
+    atm = Atom(s)
 
-    add_atom!(frame, Atom(s), r, v)
+    if occursin(".xyz", file)
+      set_property!(atm, "velo", v)
+      add_atom!(frame, atm, r)
+    else
+      add_atom!(frame, atm, r, v)
+    end
   end
 
   write(buf, frame)
@@ -193,7 +199,13 @@ function Base.write(file::String, traj::MyTraj; step=1)
       atm = Atom(traj.symbols[i])
 
       set_property!(atm, "forces", f)
-      add_atom!(frame, atm, r, v)
+      
+      if occursin(".xyz", file)
+        set_property!(atm, "velo", v)
+        add_atom!(frame, atm, r)
+      else
+        add_atom!(frame, atm, r, v)
+      end
     end
 
     write(buf, frame)
