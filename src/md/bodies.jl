@@ -105,14 +105,14 @@ function getMIC(bdys::Vector{MyAtoms}, lattice)
   v      = repeat([i.v for i in bdys], 27)
 
   # I think it is
-  f = [i*a + j*b + k*c + bdys[q].r
+  f = [MVector(i*a + j*b + k*c + bdys[q].r)
         for i = -1:1 
           for j = -1:1 
             for k = -1:1 
               for q = 1:length(bdys)]
 
   for i = 1:length(f)
-    push!(new, Atom(f[i], v[i], m[i], s[i]))
+    push!(new, Particle(f[i], v[i], m[i], s[i]))
   end
 
   new

@@ -183,22 +183,8 @@ function replicate!(super, cell, N)
 end
 
 function getMIC(cell::MyCell)
-  a,b,c  = eachrow(cell.lattice)
-  new    = MyAtoms[]
-  s      = repeat([i.s for i in bdys], 27)
-  m      = repeat([i.m for i in bdys], 27)
-  v      = repeat([i.v for i in bdys], 27)
-
-  # I think it is
-  f = [i*a + j*b + k*c + bdys[q].r
-        for i = -1:1 
-          for j = -1:1 
-            for k = -1:1 
-              for q = 1:length(bdys)]
-
-  for i = 1:length(f)
-    push!(new, Particle(f[i], v[i], m[i], s[i]))
-  end
+  bdys = makeBdys(cell)
+  new  = getMIC(bdys, cell.lattice)
 
   makeCell(new, cell.lattice*3, mask=cell.mask, PBC=cell.PBC, NC=cell.NC)
 end
