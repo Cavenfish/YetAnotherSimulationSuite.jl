@@ -31,9 +31,8 @@ function getPairs(bdys::Vector{MyAtoms})
   pars, mols
 end
 
-function getMols(cell::MyCell, rmax; D=3)
+function getMols(cell::MyCell, rmax)
   n = length(cell.scaled_pos)
-  m = length(cell.scaled_pos[1])
   p = PeriodicEuclidean(1.0)
   D = zeros(n, n)
 
