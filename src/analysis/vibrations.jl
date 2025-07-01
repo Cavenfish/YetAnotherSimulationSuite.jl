@@ -34,7 +34,7 @@ function getHarmonicFreqs(calc::MyCalc, bdys; kwargs...)
   (freqs, modes)
 end
 
-function animateMode(bdys, mode, fileName)
+function animateMode(bdys::Vector{MyAtoms}, mode, fileName; c=1.0)
   f = open(fileName, "w")
   N = length(bdys)
 
@@ -52,7 +52,7 @@ function animateMode(bdys, mode, fileName)
       for k in 1:N
         
         s     = bdys[k].s
-        x,y,z = bdys[k].r .+ sin(j) .* m[k]
+        x,y,z = bdys[k].r .+ (sin(j) .* m[k] .* c)
 
         println(f, "$s   $x   $y   $z")
       end
