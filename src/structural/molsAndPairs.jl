@@ -59,7 +59,7 @@ function getPairs(cell::MyCell)
 
   # Get mols and N
   mols = if n <= 3
-    getMols(cell, 1.5, D=n-1) 
+    getMols(cell, 1.5) 
   else
     getMols(cell, 1.5)
   end
