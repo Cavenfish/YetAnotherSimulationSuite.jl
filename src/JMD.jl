@@ -60,6 +60,7 @@ module JMD
     #cells.jl
     makeCell, makeBdys, getScaledPos, getPos, wrap!, makeSuperCell,
     makeSuperCell!, getMIC, center!, getPrimitiveCell, getVolume,
+    reorder!,
 
     #trajectories.jl
     getVelMas,

@@ -28,6 +28,14 @@ function Cell(
   )
 end
 
+function reorder!(cell::MyCell, order::Vector{Int})
+  cell.scaled_pos .= cell.scaled_pos[order]
+  cell.velocity   .= cell.velocity[order]
+  cell.masses     .= cell.masses[order]
+  cell.symbols    .= cell.symbols[order]
+  cell.mask       .= cell.mask[order]
+end
+
 function makeCell(bdys::Vector{MyAtoms}, lattice::AbstractMatrix; 
   mask=repeat([false], length(bdys)), PBC=repeat([true], 3), NC=[1,1,1])
 
