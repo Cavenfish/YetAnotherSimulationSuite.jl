@@ -69,9 +69,8 @@ function getPairs(cell::MyCell)
 end
 
 function getDistanceMatrix(cell::MyCell)
-  trans = transpose(cell.lattice)
 
-  if isapporx(cell.lattice, cell.lattice * trans; atol=1e-8)
+  if isdiag(cell.lattice)
     D = distanceMatrixOrthorhombicCell(cell)
   else
     D = distanceMatrixAnyCell(cell)
