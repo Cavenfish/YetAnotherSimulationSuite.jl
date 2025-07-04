@@ -1,5 +1,5 @@
 
-struct Calculator{B, E, F, EF} <: MyCalc
+struct Calculator{B, E, F, EF, C} <: MyCalc
   b::B
   e::E
   f!::F
@@ -33,7 +33,7 @@ function fg!(F, G, x, p, calc::MyCalc)
       calc.e(u, p)
     end
 
-    if clac.constraints != nothing
+    if calc.constraints != nothing
       for c in calc.constraints
         c.apply!(forces, c.inds)
       end
