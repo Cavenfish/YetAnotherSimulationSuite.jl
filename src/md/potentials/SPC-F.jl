@@ -2,7 +2,7 @@
 SPC-F
 """
 
-SPCF() = Calculator(SPCF; EF=SPCF!)
+SPCF(; constraints=nothing) = Calculator(SPCF; EF=SPCF!, constraints=constraints)
 
 struct _SPCF_PotVars{F<:Float64} <: PotVars
   Kb::F

@@ -28,3 +28,6 @@ abstract type MyCalc end
 
 # Thermostat
 abstract type MyThermostat end
+
+# Constraints
+abstract type MyConstraint end

@@ -46,7 +46,7 @@ potential (ie. md simulations) this significantly speeds up the
 code by reducing allocations.
 """
 
-HGNN() = Calculator(HGNN; EF=HGNN!)
+HGNN(; constraints=nothing) = Calculator(HGNN; EF=HGNN!, constraints=constraints)
 
 struct _HGNN_PotVars{MV,PV,D1,D2,D3, F<:AbstractFloat} <: PotVars
   A::Matrix{F}
