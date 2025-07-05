@@ -57,11 +57,15 @@ function TIP4Pf!(F, u, p)
 
     E += _getMforces!(F, u, par[1], par[2], P.drel, P.Qh, P.Qm)
   end
-  
+
+  if any(p.PBC)
+    #TODO
+  end
+
   E
 end
 
-function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
+function getMsiteVars(u, w1, w2)
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
@@ -98,6 +102,15 @@ function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
   # Get m site vectors
   m1 = u[o1] + wh1*r1o + wh2*r2o
   m2 = u[o2] + wh3*r3o + wh4*r4o
+
+  (wh1, wh2, wh3, w4), (m1, m2)
+end
+
+function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
+  o1, h1, h2 = w1
+  o2, h3, h4 = w2
+
+  (wh1, wh2, wh3, w4), (m1, m2) = getMsiteVars(u, w1, w2)
 
   # H1 -- M2
   E,f    = _Coulomb(u[h1], m2, Qh, Qm)
@@ -139,6 +152,60 @@ function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
   F[h3] += f * wh3
   F[h4] += f * wh4
   F[o2] += f * (1 - wh3 - wh4)
+
+  E
+end
+
+function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm)
+
+  for w2 in w2s
+
+    o1, h1, h2 = w1
+    o2, h3, h4 = w2
+
+    (wh1, wh2, wh3, w4), (m1, m2) = getMsiteVars(u, w1, w2)
+
+    # H1 -- M2
+    E,f    = _Coulomb(u[h1], m2, Qh, Qm)
+    F[h1] -= f
+    F[h3] += f * wh3
+    F[h4] += f * wh4
+    F[o2] += f * (1 - wh3 - wh4)
+
+    # H2 -- M2
+    e,f    = _Coulomb(u[h2], m2, Qh, Qm)
+    E     += e
+    F[h2] -= f
+    F[h3] += f * wh3
+    F[h4] += f * wh4
+    F[o2] += f * (1 - wh3 - wh4)
+
+    # H3 -- M1
+    e,f    = _Coulomb(u[h3], m1, Qh, Qm)
+    E     += e
+    F[h3] -= f
+    F[h1] += f * wh1
+    F[h2] += f * wh2
+    F[o1] += f * (1 - wh1 - wh2)
+
+    # H4 -- M1
+    e,f    = _Coulomb(u[h4], m1, Qh, Qm)
+    E     += e
+    F[h4] -= f
+    F[h1] += f * wh1
+    F[h2] += f * wh2
+    F[o1] += f * (1 - wh1 - wh2)
+
+    # M1 -- M2
+    e,f    = _Coulomb(m1, m2, Qm, Qm)
+    E     += e
+    F[h1] -= f * wh1
+    F[h2] -= f * wh2
+    F[o1] -= f * (1 - wh1 - wh2)
+    F[h3] += f * wh3
+    F[h4] += f * wh4
+    F[o2] += f * (1 - wh3 - wh4)
+  end
 
   E
 end
