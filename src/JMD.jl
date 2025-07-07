@@ -61,6 +61,9 @@ module JMD
     makeCell, makeBdys, getScaledPos, getPos, wrap!, makeSuperCell,
     makeSuperCell!, getMIC, center!, getPrimitiveCell, getVolume,
 
+    #constraints.jl
+    fixAtoms,
+
     #trajectories.jl
     getVelMas,
 
