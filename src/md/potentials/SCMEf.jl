@@ -12,7 +12,7 @@ SCME/f Paper:
 https://pubs.acs.org/doi/full/10.1021/acs.jctc.2c00598
 """
 
-SCMEf() = Calculator(SCMEf; EF=SCMEf!)
+SCMEf(; constraints=nothing) = Calculator(SCMEf; EF=SCMEf!, constraints=constraints)
 
 struct _SCMEf_PotVars{T, F<:Float64} <: JMD.PotVars
   lat::Vector{F}

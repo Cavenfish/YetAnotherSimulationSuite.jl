@@ -10,7 +10,7 @@ MBX Paper:
 https://pubs.aip.org/aip/jcp/article/159/5/054802/2904909/MBX-A-many-body-energy-and-force-calculator-for
 """
 
-MBX() = Calculator(MBX; E=MBX, EF=MBX!)
+MBX(;constraints=nothing) = Calculator(MBX; E=MBX, EF=MBX!, constraints=constraints)
 
 struct _MBX_PotVars{X,J,NA,AN,NM,MN} <: PotVars
   xyz::X

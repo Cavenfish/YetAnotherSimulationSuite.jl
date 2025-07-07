@@ -143,6 +143,7 @@ module JMD
   include("./md/bodies.jl")
   include("./md/simulation.jl")
   include("./md/calculators.jl")
+  include("./md/constraints.jl")
   include("./md/thermostats.jl")
   include("./md/trajectories.jl")
   include("./md/post-processing.jl")
