@@ -180,45 +180,47 @@ function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm, NC, L)
 
     (wh1, wh2, wh3, wh4), (m1, m2) = getMsiteVars(u, w1, w2, drel)
 
-    for i = 1:3
-      for j = -NC[i]:NC[i]
-        j == 0 && continue
+    for i = -NC[1]:NC[1]
+      for j = -NC[2]:NC[2]
+        for k = -NC[3]:NC[3]
+          (i,j,k) == (0,0,0) && continue
 
-        t   = L[i, :] .* j
-        m2t = m2 .+ t
-        h3t = u[h3] .+ t
-        h4t = u[h4] .+ t
+          t   = (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
+          m2t = m2 .+ t
+          h3t = u[h3] .+ t
+          h4t = u[h4] .+ t
 
-        # H1 -- M2
-        e,f    = _Coulomb(u[h1], m2t, Qh, Qm)
-        E     += e
-        F[h1] -= f
+          # H1 -- M2
+          e,f    = _Coulomb(u[h1], m2t, Qh, Qm)
+          E     += e
+          F[h1] -= f
 
-        # H2 -- M2
-        e,f    = _Coulomb(u[h2], m2t, Qh, Qm)
-        E     += e
-        F[h2] -= f
+          # H2 -- M2
+          e,f    = _Coulomb(u[h2], m2t, Qh, Qm)
+          E     += e
+          F[h2] -= f
 
-        # H3 -- M1
-        e,f    = _Coulomb(h3t, m1, Qh, Qm)
-        E     += e
-        F[h1] += f * wh1
-        F[h2] += f * wh2
-        F[o1] += f * (1 - wh1 - wh2)
+          # H3 -- M1
+          e,f    = _Coulomb(h3t, m1, Qh, Qm)
+          E     += e
+          F[h1] += f * wh1
+          F[h2] += f * wh2
+          F[o1] += f * (1 - wh1 - wh2)
 
-        # H4 -- M1
-        e,f    = _Coulomb(h4t, m1, Qh, Qm)
-        E     += e
-        F[h1] += f * wh1
-        F[h2] += f * wh2
-        F[o1] += f * (1 - wh1 - wh2)
+          # H4 -- M1
+          e,f    = _Coulomb(h4t, m1, Qh, Qm)
+          E     += e
+          F[h1] += f * wh1
+          F[h2] += f * wh2
+          F[o1] += f * (1 - wh1 - wh2)
 
-        # M1 -- M2
-        e,f    = _Coulomb(m1, m2t, Qm, Qm)
-        E     += e
-        F[h1] -= f * wh1
-        F[h2] -= f * wh2
-        F[o1] -= f * (1 - wh1 - wh2)
+          # M1 -- M2
+          e,f    = _Coulomb(m1, m2t, Qm, Qm)
+          E     += e
+          F[h1] -= f * wh1
+          F[h2] -= f * wh2
+          F[o1] -= f * (1 - wh1 - wh2)
+        end
       end
     end
   end
