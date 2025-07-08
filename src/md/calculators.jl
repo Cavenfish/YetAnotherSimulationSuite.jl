@@ -88,3 +88,23 @@ function dyn!(dv, v, u, p, t, calc)
   push!(p.energy, E)
   push!(p.forces, F)
 end
+
+function st!(F, G, x, cell::MyCell, calc::MyCalc; precon=nothing, diag=false)
+  cell.lattice .= reshape(x, (3,3))
+
+  if precon != nothing
+    precon(cell)
+  end
+
+  if G != nothing
+    if diag
+      G .= getNumericalStressOrthogonal(calc, cell) |> (x -> reshape(x, 9))
+    else
+      G .= getNumericalStress(calc, cell) |> (x -> reshape(x, 9))
+    end
+  end
+
+  if F != nothing
+    return getPotEnergy(calc, cell)
+  end
+end

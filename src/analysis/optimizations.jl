@@ -160,14 +160,14 @@ end
 
 # No longer works after refactor
 # Need to find a proper way to include this 
-function optCell(EoM, algo, cell::MyCell; kwargs...)
+function optCell(calc::MyCalc, algo, cell::MyCell; kwargs...)
 
+  ret          = deepcopy(cell)
   lat0         = reshape(cell.lattice, 9)
-  optFunc      = Optim.only_fg!((F,G,x) -> EoM(F,G, cell, x))
+  optFunc      = Optim.only_fg!((F,G,x) -> st!(F,G,x, cell, calc))
   convCrit     = Optim.Options(; kwargs...)
   res          = optimize(optFunc, lat0, algo, convCrit)
   newLat       = reshape(res.minimizer, (3,3))
-  ret          = deepcopy(cell)
   ret.lattice .= newLat
 
   ret
