@@ -2,7 +2,7 @@
 CO-CO Potential from van Hemert et al. 2015
 """
 
-MvHff() = Calculator(MvHff; EF=MvHff!)
+MvHff(; constraints=nothing) = Calculator(MvHff; EF=MvHff!, constraints=constraints)
 
 struct _MvHff_PotVars{F<:Float64} <: PotVars
   D::F

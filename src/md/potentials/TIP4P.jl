@@ -2,7 +2,7 @@
 TIP4P/2005f 
 """
 
-TIP4Pf() = Calculator(TIP4Pf; EF=TIP4Pf!)
+TIP4Pf(; constraints=nothing) = Calculator(TIP4Pf; EF=TIP4Pf!, constraints=constraints)
 
 struct _TIP4P_PotVars{F<:Float64} <: PotVars
   D::F

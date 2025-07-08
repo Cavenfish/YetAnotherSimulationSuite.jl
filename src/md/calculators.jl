@@ -1,12 +1,13 @@
 
-struct Calculator{B, E, F, EF} <: MyCalc
+struct Calculator{B, E, F, EF, C} <: MyCalc
   b::B
   e::E
   f!::F
   ef!::EF
+  constraints::C
 end
 
-function Calculator(b; E=nothing, F=nothing, EF=nothing)
+function Calculator(b; E=nothing, F=nothing, EF=nothing, constraints=nothing)
   if E == nothing && EF == nothing
     throw()
   end
@@ -15,7 +16,7 @@ function Calculator(b; E=nothing, F=nothing, EF=nothing)
     throw()
   end
 
-  Calculator(b, E, F, EF)
+  Calculator(b, E, F, EF, constraints)
 end
 
 function fg!(F, G, x, p, calc::MyCalc)
@@ -30,6 +31,12 @@ function fg!(F, G, x, p, calc::MyCalc)
     else
       calc.f!(forces, u, p)
       calc.e(u, p)
+    end
+
+    if calc.constraints != nothing
+      for c in calc.constraints
+        c.apply!(forces, c.inds)
+      end
     end
 
     tmp = [j for i in forces for j in i]
@@ -56,6 +63,12 @@ function fg!(F, G, x, p, calc::MyCalc)
       calc.ef!(forces, u, p)
     end
 
+    if calc.constraints != nothing
+      for c in calc.constraints
+        c.apply!(forces, c.inds)
+      end
+    end
+
     tmp = [j for i in forces for j in i]
     for i in 1:length(G)
       G[i] = -tmp[i]
@@ -74,6 +87,12 @@ function dyn!(dv, v, u, p, t, calc)
   else
     calc.f!(F, u, p)
     calc.e(u, p)
+  end
+
+  if calc.constraints != nothing
+    for c in calc.constraints
+      c.apply!(F, c.inds)
+    end
   end
 
   dv .= F ./ p.m
