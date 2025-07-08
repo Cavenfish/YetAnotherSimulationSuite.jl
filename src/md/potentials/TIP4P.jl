@@ -18,7 +18,7 @@ struct _TIP4P_PotVars{F<:Float64} <: PotVars
 end
 
 #PotVar building function 
-TIP4Pf(bdys::Vector{MyAtoms}) = _TIP4P_PotVars(
+TIP4Pf(bdys::Union{MyCell, Vector{MyAtoms}}) = _TIP4P_PotVars(
   4.48339,    # eV
   2.287,      # \AA
   0.9419,     # \AA
@@ -60,17 +60,27 @@ function TIP4Pf!(F, u, p)
 
   if any(p.PBC)
     all_o = collect(1:3:length(u))
+    all_h = [i for i = 1:3:length(u) if !(i in all_o)]
+
     for i in all_o
       E += pbc_vdw!(F, u, i, all_o, P.ϵoo, P.σoo, p.NC, p.lattice)
     end
-    
-    #TODO
+
+    for i in all_h
+      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, p.NC, p.lattice)
+    end
+
+    for mol in p.mols
+      E += pbc_Mforces!(F, u, mol, p.mols, P.drel, P.Qh, P.Qm, p.NC, p.lattice)
+    end
+
+    E /= (p.NC .* 2) .+ 1 |> prod
   end
 
   E
 end
 
-function getMsiteVars(u, w1, w2)
+function getMsiteVars(u, w1, w2, drel)
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
@@ -108,14 +118,14 @@ function getMsiteVars(u, w1, w2)
   m1 = u[o1] + wh1*r1o + wh2*r2o
   m2 = u[o2] + wh3*r3o + wh4*r4o
 
-  (wh1, wh2, wh3, w4), (m1, m2)
+  (wh1, wh2, wh3, wh4), (m1, m2)
 end
 
 function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
-  (wh1, wh2, wh3, w4), (m1, m2) = getMsiteVars(u, w1, w2)
+  (wh1, wh2, wh3, wh4), (m1, m2) = getMsiteVars(u, w1, w2, drel)
 
   # H1 -- M2
   E,f    = _Coulomb(u[h1], m2, Qh, Qm)
@@ -161,21 +171,20 @@ function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
   E
 end
 
-function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm, L, NC)
+function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm, NC, L)
   E = 0.0
+  o1, h1, h2 = w1
 
   for w2 in w2s
-
-    o1, h1, h2 = w1
     o2, h3, h4 = w2
 
-    (wh1, wh2, wh3, w4), (m1, m2) = getMsiteVars(u, w1, w2)
+    (wh1, wh2, wh3, wh4), (m1, m2) = getMsiteVars(u, w1, w2, drel)
 
     for i = 1:3
       for j = -NC[i]:NC[i]
         j == 0 && continue
 
-        t   = (L[i, :] .* j)
+        t   = L[i, :] .* j
         m2t = m2 .+ t
         h3t = u[h3] .+ t
         h4t = u[h4] .+ t
