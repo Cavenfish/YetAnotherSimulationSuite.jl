@@ -59,6 +59,11 @@ function TIP4Pf!(F, u, p)
   end
 
   if any(p.PBC)
+    all_o = collect(1:3:length(u))
+    for i in all_o
+      E += pbc_vdw!(F, u, i, all_o, P.ϵoo, P.σoo, p.NC, p.lattice)
+    end
+    
     #TODO
   end
 
@@ -157,6 +162,7 @@ function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
 end
 
 function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm, L, NC)
+  E = 0.0
 
   for w2 in w2s
 
@@ -169,48 +175,41 @@ function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm, L, NC)
       for j = -NC[i]:NC[i]
         j == 0 && continue
 
-        #TODO: translate vectors and only modify real mol force
+        t   = (L[i, :] .* j)
+        m2t = m2 .+ t
+        h3t = u[h3] .+ t
+        h4t = u[h4] .+ t
 
         # H1 -- M2
-        E,f    = _Coulomb(u[h1], m2, Qh, Qm)
+        e,f    = _Coulomb(u[h1], m2t, Qh, Qm)
+        E     += e
         F[h1] -= f
-        F[h3] += f * wh3
-        F[h4] += f * wh4
-        F[o2] += f * (1 - wh3 - wh4)
 
         # H2 -- M2
-        e,f    = _Coulomb(u[h2], m2, Qh, Qm)
+        e,f    = _Coulomb(u[h2], m2t, Qh, Qm)
         E     += e
         F[h2] -= f
-        F[h3] += f * wh3
-        F[h4] += f * wh4
-        F[o2] += f * (1 - wh3 - wh4)
 
         # H3 -- M1
-        e,f    = _Coulomb(u[h3], m1, Qh, Qm)
+        e,f    = _Coulomb(h3t, m1, Qh, Qm)
         E     += e
-        F[h3] -= f
         F[h1] += f * wh1
         F[h2] += f * wh2
         F[o1] += f * (1 - wh1 - wh2)
 
         # H4 -- M1
-        e,f    = _Coulomb(u[h4], m1, Qh, Qm)
+        e,f    = _Coulomb(h4t, m1, Qh, Qm)
         E     += e
-        F[h4] -= f
         F[h1] += f * wh1
         F[h2] += f * wh2
         F[o1] += f * (1 - wh1 - wh2)
 
         # M1 -- M2
-        e,f    = _Coulomb(m1, m2, Qm, Qm)
+        e,f    = _Coulomb(m1, m2t, Qm, Qm)
         E     += e
         F[h1] -= f * wh1
         F[h2] -= f * wh2
         F[o1] -= f * (1 - wh1 - wh2)
-        F[h3] += f * wh3
-        F[h4] += f * wh4
-        F[o2] += f * (1 - wh3 - wh4)
       end
     end
   end
