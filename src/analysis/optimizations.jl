@@ -158,8 +158,6 @@ function hiddenEoM(F, G, Γ, calc::MyCalc, vars, x)
 
 end
 
-# No longer works after refactor
-# Need to find a proper way to include this 
 function optCell(calc::MyCalc, algo, cell::MyCell; precon=nothing, kwargs...)
 
   ret          = deepcopy(cell)
