@@ -59,22 +59,23 @@ function TIP4Pf!(F, u, p)
   end
 
   if any(p.PBC)
+    NC    = p.NC .* p.PBC
     all_o = collect(1:3:length(u))
-    all_h = [i for i = 1:3:length(u) if !(i in all_o)]
+    all_h = [i for i = 1:length(u) if !(i in all_o)]
 
     for i in all_o
-      E += pbc_vdw!(F, u, i, all_o, P.ϵoo, P.σoo, p.NC, p.lattice)
+      E += pbc_vdw!(F, u, i, all_o, P.ϵoo, P.σoo, NC, p.lattice)
     end
 
     for i in all_h
-      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, p.NC, p.lattice)
+      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, NC, p.lattice)
     end
 
     for mol in p.mols
-      E += pbc_Mforces!(F, u, mol, p.mols, P.drel, P.Qh, P.Qm, p.NC, p.lattice)
+      E += pbc_Mforces!(F, u, mol, p.mols, P.drel, P.Qh, P.Qm, NC, p.lattice)
     end
 
-    E /= (p.NC .* 2) .+ 1 |> prod
+    # E /= (p.NC .* 2) .+ 1 |> prod
   end
 
   E
@@ -186,9 +187,9 @@ function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm, NC, L)
           (i,j,k) == (0,0,0) && continue
 
           t   = (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
-          m2t = m2 .+ t
-          h3t = u[h3] .+ t
-          h4t = u[h4] .+ t
+          m2t = m2 + t
+          h3t = u[h3] + t
+          h4t = u[h4] + t
 
           # H1 -- M2
           e,f    = _Coulomb(u[h1], m2t, Qh, Qm)

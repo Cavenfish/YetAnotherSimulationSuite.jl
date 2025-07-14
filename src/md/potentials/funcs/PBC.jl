@@ -6,7 +6,7 @@ function _pbc!(F, u, a, b, func, L, NC, p)
       for k = -NC[3]:NC[3]
         (i,j,k) == (0,0,0) && continue
 
-        r2 = u[b] + (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
+        r2     = u[b] + (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
         e,f    = func(u[a], r2, p...)
         E     += e
         F[a] .-= f
@@ -18,13 +18,13 @@ end
 
 function pbc_vdw!(
   F::Vector{Vf}, u::Vector{Vu}, i::Int64, js::Vector{Int64}, 
-  eij::Float64, oij::Float64, NC::Vector{Int64}, L::AbstractMatrix
+  ϵij::Float64, σij::Float64, NC::Vector{Int64}, L::AbstractMatrix
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   E = 0.0
 
   for j in js
-    E += _pbc!(F, u, i, j, _vdw, L, NC, (eij, oij))
+    E += _pbc!(F, u, i, j, _vdw, L, NC, (ϵij, σij))
   end
 
   E
