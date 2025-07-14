@@ -18,7 +18,7 @@ struct _TIP4P_PotVars{F<:Float64} <: PotVars
 end
 
 #PotVar building function 
-TIP4Pf(bdys::Vector{MyAtoms}) = _TIP4P_PotVars(
+TIP4Pf(bdys::Union{MyCell, Vector{MyAtoms}}) = _TIP4P_PotVars(
   4.48339,    # eV
   2.287,      # \AA
   0.9419,     # \AA
@@ -57,23 +57,75 @@ function TIP4Pf!(F, u, p)
 
     E += _getMforces!(F, u, par[1], par[2], P.drel, P.Qh, P.Qm)
   end
-  
+
+  if any(p.PBC)
+    NC    = p.NC .* p.PBC
+    all_o = collect(1:3:length(u))
+    all_h = [i for i = 1:length(u) if !(i in all_o)]
+
+    for i in all_o
+      E += pbc_vdw!(F, u, i, all_o, P.ϵoo, P.σoo, NC, p.lattice; cutoff=35.0)
+    end
+
+    for i in all_h
+      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, NC, p.lattice; cutoff=35.0)
+    end
+
+    for mol in p.mols
+      E += pbc_Mforces!(F, u, mol, p.mols, P.drel, P.Qh, P.Qm, NC, p.lattice; cutoff=35.0)
+    end
+    
+  end
+
   E
 end
 
-function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
-  o1, h1, h2 = w1
-  o2, h3, h4 = w2
+function getMsiteVar(
+  o::V, h1::V, h2::V, drel::Float64
+) where {V <: AbstractVector{Float64}}
+  
+  # Get r vectors
+  r1o = h1 - o
+  r2o = h2 - o
 
   # Get Angle
-  θ1  = getAngle(u[h1] - u[o1], u[h2] - u[o1])
-  θ2  = getAngle(u[h3] - u[o2], u[h4] - u[o2])
+  θ = getAngle(r1o, r2o)
+
+  # Get Norms
+  d1o = norm(r1o)
+  d2o = norm(r2o)
+
+  # Get dm
+  dm = drel * (d1o*cos(θ/2) + d2o*cos(θ/2))
+
+  # Get bisector
+  rbi = r1o/d1o + r2o/d2o
+
+  # Get weights
+  wh1 = dm / d1o / norm(rbi)
+  wh2 = dm / d2o / norm(rbi)
+
+  # Get m site vector
+  m = o + wh1*r1o + wh2*r2o
+
+  m, wh1, wh2
+end
+
+function getMsiteVars(
+  u::Vector{A}, w1::V, w2::V, drel::Float64
+) where {V <: Vector{Int64}, A <: AbstractVector}
+  o1, h1, h2 = w1
+  o2, h3, h4 = w2
 
   # Get r vectors
   r1o  = u[h1] - u[o1]
   r2o  = u[h2] - u[o1]
   r3o  = u[h3] - u[o2]
   r4o  = u[h4] - u[o2]
+
+  # Get Angle
+  θ1  = getAngle(r1o, r2o)
+  θ2  = getAngle(r3o, r4o)
 
   # Get Norms
   d1o  = norm(r1o)
@@ -99,46 +151,128 @@ function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
   m1 = u[o1] + wh1*r1o + wh2*r2o
   m2 = u[o2] + wh3*r3o + wh4*r4o
 
+  (wh1, wh2, wh3, wh4), (m1, m2)
+end
+
+function _getMforces!(
+  F::Vector{Af}, u::Vector{Au}, w1::V, w2::V, drel::Fl, Qh::Fl, Qm::Fl
+) where {Af <: AbstractVector, Au <: AbstractVector, V <: Vector{Int64}, Fl <: Float64}
+  o1, h1, h2 = w1
+  o2, h3, h4 = w2
+
+  (wh1, wh2, wh3, wh4), (m1, m2) = getMsiteVars(u, w1, w2, drel)
+
   # H1 -- M2
-  E,f    = _Coulomb(u[h1], m2, Qh, Qm)
-  F[h1] -= f
-  F[h3] += f * wh3
-  F[h4] += f * wh4
-  F[o2] += f * (1 - wh3 - wh4)
+  E,f     = _Coulomb(u[h1], m2, Qh, Qm)
+  F[h1] .-= f
+  F[h3] .+= f * wh3
+  F[h4] .+= f * wh4
+  F[o2] .+= f * (1 - wh3 - wh4)
 
   # H2 -- M2
-  e,f    = _Coulomb(u[h2], m2, Qh, Qm)
-  E     += e
-  F[h2] -= f
-  F[h3] += f * wh3
-  F[h4] += f * wh4
-  F[o2] += f * (1 - wh3 - wh4)
+  e,f     = _Coulomb(u[h2], m2, Qh, Qm)
+  E      += e
+  F[h2] .-= f
+  F[h3] .+= f * wh3
+  F[h4] .+= f * wh4
+  F[o2] .+= f * (1 - wh3 - wh4)
 
   # H3 -- M1
-  e,f    = _Coulomb(u[h3], m1, Qh, Qm)
-  E     += e
-  F[h3] -= f
-  F[h1] += f * wh1
-  F[h2] += f * wh2
-  F[o1] += f * (1 - wh1 - wh2)
+  e,f     = _Coulomb(u[h3], m1, Qh, Qm)
+  E      += e
+  F[h3] .-= f
+  F[h1] .+= f * wh1
+  F[h2] .+= f * wh2
+  F[o1] .+= f * (1 - wh1 - wh2)
 
   # H4 -- M1
-  e,f    = _Coulomb(u[h4], m1, Qh, Qm)
-  E     += e
-  F[h4] -= f
-  F[h1] += f * wh1
-  F[h2] += f * wh2
-  F[o1] += f * (1 - wh1 - wh2)
+  e,f     = _Coulomb(u[h4], m1, Qh, Qm)
+  E      += e
+  F[h4] .-= f
+  F[h1] .+= f * wh1
+  F[h2] .+= f * wh2
+  F[o1] .+= f * (1 - wh1 - wh2)
 
   # M1 -- M2
-  e,f    = _Coulomb(m1, m2, Qm, Qm)
-  E     += e
-  F[h1] -= f * wh1
-  F[h2] -= f * wh2
-  F[o1] -= f * (1 - wh1 - wh2)
-  F[h3] += f * wh3
-  F[h4] += f * wh4
-  F[o2] += f * (1 - wh3 - wh4)
+  e,f     = _Coulomb(m1, m2, Qm, Qm)
+  E      += e
+  F[h1] .-= f * wh1
+  F[h2] .-= f * wh2
+  F[o1] .-= f * (1 - wh1 - wh2)
+  F[h3] .+= f * wh3
+  F[h4] .+= f * wh4
+  F[o2] .+= f * (1 - wh3 - wh4)
+
+  E
+end
+
+function pbc_Mforces!(
+  F::Vector{Af}, u::Vector{Au}, w1::V, w2s::Vector{V}, 
+  drel::Fl, Qh::Fl, Qm::Fl, NC::V, L::AbstractMatrix;
+  cutoff=20.0
+) where {Af, Au, V <: Vector{Int64}, Fl <: Float64}
+  E = 0.0
+  o1, h1, h2 = w1
+
+  # buffers
+  t   = zeros(3)
+  m2t = zeros(3)
+  h3t = zeros(3)
+  h4t = zeros(3)
+
+  m1, wh1, wh2 = getMsiteVar(u[o1], u[h1], u[h2], drel)
+
+  for w2 in w2s
+    o2, h3, h4 = w2
+
+    m2, wh3, wh4 = getMsiteVar(u[o2], u[h3], u[h4], drel)
+
+    for i = -NC[1]:NC[1]
+      for j = -NC[2]:NC[2]
+        for k = -NC[3]:NC[3]
+          (i,j,k) == (0,0,0) && continue
+
+          t   .= (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
+          m2t .= m2 + t
+          h3t .= u[h3] + t
+          h4t .= u[h4] + t
+
+          norm(m1 - m2t) > cutoff && continue
+
+          # H1 -- M2
+          e,f     = _Coulomb(u[h1], m2t, Qh, Qm)
+          E      += e/2
+          F[h1] .-= f
+
+          # H2 -- M2
+          e,f     = _Coulomb(u[h2], m2t, Qh, Qm)
+          E      += e/2
+          F[h2] .-= f
+
+          # H3 -- M1
+          e,f     = _Coulomb(h3t, m1, Qh, Qm)
+          E      += e/2
+          F[h1] .+= f * wh1
+          F[h2] .+= f * wh2
+          F[o1] .+= f * (1 - wh1 - wh2)
+
+          # H4 -- M1
+          e,f     = _Coulomb(h4t, m1, Qh, Qm)
+          E      += e/2
+          F[h1] .+= f * wh1
+          F[h2] .+= f * wh2
+          F[o1] .+= f * (1 - wh1 - wh2)
+
+          # M1 -- M2
+          e,f     = _Coulomb(m1, m2t, Qm, Qm)
+          E      += e/2
+          F[h1] .-= f * wh1
+          F[h2] .-= f * wh2
+          F[o1] .-= f * (1 - wh1 - wh2)
+        end
+      end
+    end
+  end
 
   E
 end

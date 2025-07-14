@@ -46,33 +46,37 @@ function SPCF!(F, u, p)
     E += _vdw!(F, u, o1, o2, P.ϵ, P.σ)
     E += _Coulomb!(F, u, o1, o2, P.Qo, P.Qo)
 
-    if any(p.PBC)
-      E += _pbc!(F, u, o1, o2, _vdw, p.lattice, NC, (P.ϵ, P.σ))
-      E += _pbc!(F, u, o1, o2, _Coulomb, p.lattice, NC, (P.Qo, P.Qo))
-    end
 
     for i in [h1, h2]
       for j in [h3, h4]
         E += _Coulomb!(F, u, i, j, P.Qh, P.Qh)
-        if any(p.PBC)
-          E += _pbc!(F, u, i, j, _Coulomb, p.lattice, NC, (P.Qh, P.Qh))
-        end
       end
     end
 
     for i in [h1,h2]
       E += _Coulomb!(F, u, o2, i, P.Qo, P.Qh)
-      if any(p.PBC)
-        E += _pbc!(F, u, o2, i, _Coulomb, p.lattice, NC, (P.Qo, P.Qh))
-      end
     end
 
     for i in [h3,h4]
       E += _Coulomb!(F, u, o1, i, P.Qo, P.Qh)
-      if any(p.PBC)
-        E += _pbc!(F, u, o1, i, _Coulomb, p.lattice, NC, (P.Qo, P.Qh))
-      end
     end
+  end
+
+  if any(p.PBC)
+    NC    = p.NC .* p.PBC
+    all_o = collect(1:3:length(u))
+    all_h = [i for i = 1:length(u) if !(i in all_o)]
+
+    for i in all_o
+      E += pbc_vdw!(F, u, i, all_o, P.ϵ, P.σ, NC, p.lattice; cutoff=35.0)
+      E += pbc_Coulomb!(F, u, i, all_h, P.Qo, P.Qh, NC, p.lattice; cutoff=35.00)
+    end
+
+    for i in all_h
+      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, NC, p.lattice; cutoff=35.00)
+      E += pbc_Coulomb!(F, u, i, all_o, P.Qh, P.Qo, NC, p.lattice; cutoff=35.00)
+    end
+
   end
 
   E

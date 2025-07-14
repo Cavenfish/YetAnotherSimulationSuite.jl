@@ -161,10 +161,10 @@ end
 function optCell(calc::MyCalc, algo, cell::MyCell; precon=nothing, kwargs...)
 
   ret          = deepcopy(cell)
-  diag         = isdiag(cell.lattice)
-  lat0         = reshape(cell.lattice, 9) |> Vector
+  diag         = isdiag(ret.lattice)
+  lat0         = reshape(ret.lattice, 9) |> Vector
   optFunc      = Optim.only_fg!(
-    (F,G,x) -> st!(F,G,x, cell, calc; precon=precon, diag=diag)
+    (F,G,x) -> st!(F,G,x, ret, calc; precon=precon, diag=diag)
   )
   convCrit     = Optim.Options(; kwargs...)
   res          = optimize(optFunc, lat0, algo, convCrit)

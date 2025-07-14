@@ -9,7 +9,7 @@ function _vdw(
 
   rvec = rj - ri
   r    = norm(rvec)
-  a    = σij / (r)
+  a    = σij / r
   E    = 4ϵij * ((a)^12 - (a)^6)
   F    = @. 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rvec
 
