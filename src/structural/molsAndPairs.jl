@@ -28,21 +28,7 @@ function getPairs(bdys::Vector{MyAtoms})
 end
 
 function getMols(cell::MyCell, rmax::Float64)
-  n = length(cell.scaled_pos)
-  p = PeriodicEuclidean(1.0)
-  D = zeros(n, n)
-
-  for i = 1:n
-    for j = i+1:n
-      sr = [
-        p(cell.scaled_pos[i][1], cell.scaled_pos[j][1]),
-        p(cell.scaled_pos[i][2], cell.scaled_pos[j][2]),
-        p(cell.scaled_pos[i][3], cell.scaled_pos[j][3])
-      ]
-      D[i,j] = cell.lattice * sr |> norm
-      D[j,i] = D[i,j]
-    end
-  end
+  D   = getDistanceMatrix(cell)
 
   ret = dbscan(D, rmax, metric=nothing)
 
@@ -115,7 +101,7 @@ function distanceMatrixAnyCell(cell::MyCell)
   D
 end
 
-function periodicDistance(x::Vector{Float64}, y::Vector{Float64}, vects)
+function periodicDistance(x::AbstractArray, y::AbstractArray, vects)
   r = norm(x - y)
 
   for v in vects

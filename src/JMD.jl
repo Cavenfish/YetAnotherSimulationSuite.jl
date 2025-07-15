@@ -60,6 +60,10 @@ module JMD
     #cells.jl
     makeCell, makeBdys, getScaledPos, getPos, wrap!, makeSuperCell,
     makeSuperCell!, getMIC, center!, getPrimitiveCell, getVolume,
+    reorder!,
+
+    #constraints.jl
+    fixAtoms,
 
     #trajectories.jl
     getVelMas,
@@ -83,7 +87,7 @@ module JMD
     getHarmonicFreqs, animateMode, getModePES, getModeInteractionPES,
 
     #optimizations.jl
-    opt, hiddenOpt,
+    opt, hiddenOpt, optCell,
 
     #distributions.jl
     rdf, density,
