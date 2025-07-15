@@ -87,15 +87,15 @@ function getMsiteVars(
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
-  # Get Angle
-  θ1  = getAngle(u[h1] - u[o1], u[h2] - u[o1])
-  θ2  = getAngle(u[h3] - u[o2], u[h4] - u[o2])
-
   # Get r vectors
   r1o  = u[h1] - u[o1]
   r2o  = u[h2] - u[o1]
   r3o  = u[h3] - u[o2]
   r4o  = u[h4] - u[o2]
+
+  # Get Angle
+  θ1  = getAngle(r1o, r2o)
+  θ2  = getAngle(r3o, r4o)
 
   # Get Norms
   d1o  = norm(r1o)
