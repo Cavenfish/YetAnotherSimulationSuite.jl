@@ -130,44 +130,44 @@ function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
 
   # H1 -- M2
   E,f    = _Coulomb(u[h1], m2, Qh, Qm)
-  F[h1] -= f
-  F[h3] += f * wh3
-  F[h4] += f * wh4
-  F[o2] += f * (1 - wh3 - wh4)
+  F[h1] .-= f
+  F[h3] .+= f * wh3
+  F[h4] .+= f * wh4
+  F[o2] .+= f * (1 - wh3 - wh4)
 
   # H2 -- M2
   e,f    = _Coulomb(u[h2], m2, Qh, Qm)
   E     += e
-  F[h2] -= f
-  F[h3] += f * wh3
-  F[h4] += f * wh4
-  F[o2] += f * (1 - wh3 - wh4)
+  F[h2] .-= f
+  F[h3] .+= f * wh3
+  F[h4] .+= f * wh4
+  F[o2] .+= f * (1 - wh3 - wh4)
 
   # H3 -- M1
   e,f    = _Coulomb(u[h3], m1, Qh, Qm)
   E     += e
-  F[h3] -= f
-  F[h1] += f * wh1
-  F[h2] += f * wh2
-  F[o1] += f * (1 - wh1 - wh2)
+  F[h3] .-= f
+  F[h1] .+= f * wh1
+  F[h2] .+= f * wh2
+  F[o1] .+= f * (1 - wh1 - wh2)
 
   # H4 -- M1
   e,f    = _Coulomb(u[h4], m1, Qh, Qm)
   E     += e
-  F[h4] -= f
-  F[h1] += f * wh1
-  F[h2] += f * wh2
-  F[o1] += f * (1 - wh1 - wh2)
+  F[h4] .-= f
+  F[h1] .+= f * wh1
+  F[h2] .+= f * wh2
+  F[o1] .+= f * (1 - wh1 - wh2)
 
   # M1 -- M2
   e,f    = _Coulomb(m1, m2, Qm, Qm)
   E     += e
-  F[h1] -= f * wh1
-  F[h2] -= f * wh2
-  F[o1] -= f * (1 - wh1 - wh2)
-  F[h3] += f * wh3
-  F[h4] += f * wh4
-  F[o2] += f * (1 - wh3 - wh4)
+  F[h1] .-= f * wh1
+  F[h2] .-= f * wh2
+  F[o1] .-= f * (1 - wh1 - wh2)
+  F[h3] .+= f * wh3
+  F[h4] .+= f * wh4
+  F[o2] .+= f * (1 - wh3 - wh4)
 
   E
 end
@@ -175,6 +175,12 @@ end
 function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm, NC, L)
   E = 0.0
   o1, h1, h2 = w1
+
+  # buffers
+  t   = zeros(3)
+  m2t = zeros(3)
+  h3t = zeros(3)
+  h4t = zeros(3)
 
   for w2 in w2s
     o2, h3, h4 = w2
@@ -186,41 +192,41 @@ function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm, NC, L)
         for k = -NC[3]:NC[3]
           (i,j,k) == (0,0,0) && continue
 
-          t   = (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
-          m2t = m2 + t
-          h3t = u[h3] + t
-          h4t = u[h4] + t
+          t   .= (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
+          m2t .= m2 + t
+          h3t .= u[h3] + t
+          h4t .= u[h4] + t
 
           # H1 -- M2
           e,f    = _Coulomb(u[h1], m2t, Qh, Qm)
           E     += e
-          F[h1] -= f
+          F[h1] .-= f
 
           # H2 -- M2
           e,f    = _Coulomb(u[h2], m2t, Qh, Qm)
           E     += e
-          F[h2] -= f
+          F[h2] .-= f
 
           # H3 -- M1
           e,f    = _Coulomb(h3t, m1, Qh, Qm)
           E     += e
-          F[h1] += f * wh1
-          F[h2] += f * wh2
-          F[o1] += f * (1 - wh1 - wh2)
+          F[h1] .+= f * wh1
+          F[h2] .+= f * wh2
+          F[o1] .+= f * (1 - wh1 - wh2)
 
           # H4 -- M1
           e,f    = _Coulomb(h4t, m1, Qh, Qm)
           E     += e
-          F[h1] += f * wh1
-          F[h2] += f * wh2
-          F[o1] += f * (1 - wh1 - wh2)
+          F[h1] .+= f * wh1
+          F[h2] .+= f * wh2
+          F[o1] .+= f * (1 - wh1 - wh2)
 
           # M1 -- M2
           e,f    = _Coulomb(m1, m2t, Qm, Qm)
           E     += e
-          F[h1] -= f * wh1
-          F[h2] -= f * wh2
-          F[o1] -= f * (1 - wh1 - wh2)
+          F[h1] .-= f * wh1
+          F[h2] .-= f * wh2
+          F[o1] .-= f * (1 - wh1 - wh2)
         end
       end
     end
