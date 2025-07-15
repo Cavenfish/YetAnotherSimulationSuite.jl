@@ -81,7 +81,9 @@ function TIP4Pf!(F, u, p)
   E
 end
 
-function getMsiteVars(u, w1, w2, drel)
+function getMsiteVars(
+  u::Vector{A}, w1::V, w2::V, drel::Float64
+) where {V <: Vector{Int64}, A <: AbstractVector}
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
@@ -122,7 +124,9 @@ function getMsiteVars(u, w1, w2, drel)
   (wh1, wh2, wh3, wh4), (m1, m2)
 end
 
-function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
+function _getMforces!(
+  F::Vector{A}, u::Vector{A}, w1::V, w2::V, drel::Fl, Qh::Fl, Qm::Fl
+) where {A <: AbstractVector, V <: Vector{Int64}, Fl <: Float64}
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
@@ -172,7 +176,10 @@ function _getMforces!(F, u, w1, w2, drel, Qh, Qm)
   E
 end
 
-function pbc_Mforces!(F, u, w1, w2s, drel, Qh, Qm, NC, L)
+function pbc_Mforces!(
+  F::Vector{A}, u::Vector{A}, w1::V, w2s::Vector{V}, 
+  drel::Fl, Qh::Fl, Qm::Fl, NC::V, L::AbstractMatrix
+) where {A <: AbstractVector, V <: Vector{Int64}, Fl <: Float64}
   E = 0.0
   o1, h1, h2 = w1
 
