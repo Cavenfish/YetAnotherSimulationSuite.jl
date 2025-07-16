@@ -64,15 +64,15 @@ function TIP4Pf!(F, u, p)
     all_h = [i for i = 1:length(u) if !(i in all_o)]
 
     for i in all_o
-      E += pbc_vdw!(F, u, i, all_o, P.ϵoo, P.σoo, NC, p.lattice)
+      E += pbc_vdw!(F, u, i, all_o, P.ϵoo, P.σoo, NC, p.lattice; cutoff=12.0)
     end
 
     for i in all_h
-      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, NC, p.lattice)
+      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, NC, p.lattice; cutoff=35.0)
     end
 
     for mol in p.mols
-      E += pbc_Mforces!(F, u, mol, p.mols, P.drel, P.Qh, P.Qm, NC, p.lattice)
+      E += pbc_Mforces!(F, u, mol, p.mols, P.drel, P.Qh, P.Qm, NC, p.lattice; cutoff=35.0)
     end
 
     # E /= (p.NC .* 2) .+ 1 |> prod
@@ -178,7 +178,8 @@ end
 
 function pbc_Mforces!(
   F::Vector{A}, u::Vector{A}, w1::V, w2s::Vector{V}, 
-  drel::Fl, Qh::Fl, Qm::Fl, NC::V, L::AbstractMatrix
+  drel::Fl, Qh::Fl, Qm::Fl, NC::V, L::AbstractMatrix;
+  cutoff=20.0
 ) where {A <: AbstractVector, V <: Vector{Int64}, Fl <: Float64}
   E = 0.0
   o1, h1, h2 = w1
@@ -192,8 +193,6 @@ function pbc_Mforces!(
   for w2 in w2s
     o2, h3, h4 = w2
 
-    o1 == o2 && continue
-
     (wh1, wh2, wh3, wh4), (m1, m2) = getMsiteVars(u, w1, w2, drel)
 
     for i = -NC[1]:NC[1]
@@ -206,7 +205,7 @@ function pbc_Mforces!(
           h3t .= u[h3] + t
           h4t .= u[h4] + t
 
-          norm(m1 - m2t) > 20.0 && continue
+          norm(m1 - m2t) > cutoff && continue
 
           # H1 -- M2
           e,f     = _Coulomb(u[h1], m2t, Qh, Qm)

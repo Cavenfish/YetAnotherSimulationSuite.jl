@@ -28,8 +28,6 @@ function pbc_vdw!(
   E = 0.0
 
   for j in js
-    i == j && continue 
-    
     E += _pbc!(F, u, i, j, _vdw, L, NC, (ϵij, σij); cutoff=cutoff)
   end
 
@@ -45,8 +43,6 @@ function pbc_Coulomb!(
   E = 0.0
 
   for j in js
-    i == j && continue 
-
     E += _pbc!(F, u, i, j, _Coulomb, L, NC, (Qi, Qj); cutoff=cutoff)
   end
 
