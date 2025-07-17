@@ -64,21 +64,51 @@ function TIP4Pf!(F, u, p)
     all_h = [i for i = 1:length(u) if !(i in all_o)]
 
     for i in all_o
-      E += pbc_vdw!(F, u, i, all_o, P.ϵoo, P.σoo, NC, p.lattice; cutoff=12.0)
+      E += pbc_vdw!(F, u, i, all_o, P.ϵoo, P.σoo, NC, p.lattice; cutoff=15.0)
     end
 
     for i in all_h
-      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, NC, p.lattice; cutoff=35.0)
+      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, NC, p.lattice; cutoff=15.0)
     end
 
     for mol in p.mols
-      E += pbc_Mforces!(F, u, mol, p.mols, P.drel, P.Qh, P.Qm, NC, p.lattice; cutoff=35.0)
+      E += pbc_Mforces!(F, u, mol, p.mols, P.drel, P.Qh, P.Qm, NC, p.lattice; cutoff=15.0)
     end
-
-    # E /= (p.NC .* 2) .+ 1 |> prod
+    
   end
 
   E
+end
+
+function getMsiteVar(
+  o::V, h1::V, h2::V, drel::Float64
+) where {V <: AbstractVector{Float64}}
+  
+  # Get r vectors
+  r1o = h1 - o
+  r2o = h2 - o
+
+  # Get Angle
+  θ = getAngle(r1o, r2o)
+
+  # Get Norms
+  d1o = norm(r1o)
+  d2o = norm(r2o)
+
+  # Get dm
+  dm = drel * (d1o*cos(θ/2) + d2o*cos(θ/2))
+
+  # Get bisector
+  rbi = r1o/d1o + r2o/d2o
+
+  # Get weights
+  wh1 = dm / d1o / norm(rbi)
+  wh2 = dm / d2o / norm(rbi)
+
+  # Get m site vector
+  m = o + wh1*r1o + wh2*r2o
+
+  m, wh1, wh2
 end
 
 function getMsiteVars(
@@ -125,8 +155,8 @@ function getMsiteVars(
 end
 
 function _getMforces!(
-  F::Vector{A}, u::Vector{A}, w1::V, w2::V, drel::Fl, Qh::Fl, Qm::Fl
-) where {A <: AbstractVector, V <: Vector{Int64}, Fl <: Float64}
+  F::Vector{Af}, u::Vector{Au}, w1::V, w2::V, drel::Fl, Qh::Fl, Qm::Fl
+) where {Af <: AbstractVector, Au <: AbstractVector, V <: Vector{Int64}, Fl <: Float64}
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
@@ -177,10 +207,10 @@ function _getMforces!(
 end
 
 function pbc_Mforces!(
-  F::Vector{A}, u::Vector{A}, w1::V, w2s::Vector{V}, 
+  F::Vector{Af}, u::Vector{Au}, w1::V, w2s::Vector{V}, 
   drel::Fl, Qh::Fl, Qm::Fl, NC::V, L::AbstractMatrix;
   cutoff=20.0
-) where {A <: AbstractVector, V <: Vector{Int64}, Fl <: Float64}
+) where {Af, Au, V <: Vector{Int64}, Fl <: Float64}
   E = 0.0
   o1, h1, h2 = w1
 
@@ -190,10 +220,12 @@ function pbc_Mforces!(
   h3t = zeros(3)
   h4t = zeros(3)
 
+  m1, wh1, wh2 = getMsiteVar(u[o1], u[h1], u[h2], drel)
+
   for w2 in w2s
     o2, h3, h4 = w2
 
-    (wh1, wh2, wh3, wh4), (m1, m2) = getMsiteVars(u, w1, w2, drel)
+    m2, wh3, wh4 = getMsiteVar(u[o2], u[h3], u[h4], drel)
 
     for i = -NC[1]:NC[1]
       for j = -NC[2]:NC[2]
