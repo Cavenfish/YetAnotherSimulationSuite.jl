@@ -11,7 +11,7 @@ function _pbc!(F, u, a, b, func, L, NC, p; cutoff=20.0)
         norm(u[a] - r2) > cutoff && continue
 
         e,f    = func(u[a], r2, p...)
-        E     += e
+        E     += e/2
         F[a] .-= f
       end
     end
