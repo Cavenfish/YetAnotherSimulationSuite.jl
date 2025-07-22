@@ -241,31 +241,31 @@ function pbc_Mforces!(
 
           # H1 -- M2
           e,f     = _Coulomb(u[h1], m2t, Qh, Qm)
-          E      += e
+          E      += e/2
           F[h1] .-= f
 
           # H2 -- M2
           e,f     = _Coulomb(u[h2], m2t, Qh, Qm)
-          E      += e
+          E      += e/2
           F[h2] .-= f
 
           # H3 -- M1
           e,f     = _Coulomb(h3t, m1, Qh, Qm)
-          E      += e
+          E      += e/2
           F[h1] .+= f * wh1
           F[h2] .+= f * wh2
           F[o1] .+= f * (1 - wh1 - wh2)
 
           # H4 -- M1
           e,f     = _Coulomb(h4t, m1, Qh, Qm)
-          E      += e
+          E      += e/2
           F[h1] .+= f * wh1
           F[h2] .+= f * wh2
           F[o1] .+= f * (1 - wh1 - wh2)
 
           # M1 -- M2
           e,f     = _Coulomb(m1, m2t, Qm, Qm)
-          E      += e
+          E      += e/2
           F[h1] .-= f * wh1
           F[h2] .-= f * wh2
           F[o1] .-= f * (1 - wh1 - wh2)
