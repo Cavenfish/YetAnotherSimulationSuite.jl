@@ -69,8 +69,11 @@ function SPCF!(F, u, p)
     all_h = [i for i = 1:length(u) if !(i in all_o)]
 
     for i = 1:length(all_o)
+      a = all_o[i]
+
+      E += _pbc!(F, u, a, a, _vdw, lat, NC, (P.ϵ, P.σ); cutoff=45.0) / 2
+      E += _pbc!(F, u, a, a, _Coulomb, lat, NC, (P.Qo, P.Qh); cutoff=45.0) / 2
       for j = i+1:length(all_o)
-        a = all_o[i]
         b = all_o[j]
 
         E += _pbc!(F, u, a, b, _vdw, lat, NC, (P.ϵ, P.σ); cutoff=45.0)
@@ -79,8 +82,10 @@ function SPCF!(F, u, p)
     end
 
     for i = 1:length(all_h)
+      a = all_h[i]
+
+      E += _pbc!(F, u, a, a, _Coulomb, lat, NC, (P.Qh, P.Qh); cutoff=45.0) / 2
       for j = i+1:length(all_h)
-        a = all_h[i]
         b = all_h[j]
 
         E += _pbc!(F, u, a, b, _Coulomb, lat, NC, (P.Qh, P.Qh); cutoff=45.0)
@@ -88,8 +93,10 @@ function SPCF!(F, u, p)
     end
 
     for i = 1:length(all_h)
+      a = all_h[i]
+
+      E += _pbc!(F, u, a, a, _Coulomb, lat, NC, (P.Qh, P.Qo); cutoff=45.0) / 2
       for j = 1:length(all_o)
-        a = all_h[i]
         b = all_o[j]
 
         E += _pbc!(F, u, a, b, _Coulomb, lat, NC, (P.Qh, P.Qo); cutoff=45.0)
