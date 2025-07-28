@@ -54,6 +54,8 @@ function TIP4Pf!(F, u, p)
     o1, h1, h2 = par[1]
     o2, h3, h4 = par[2]
 
+    norm(u[o1] - u[o2]) > 20.0 && continue
+
     E += _vdw!(F, u, o1, o2, P.ϵoo, P.σoo)
 
     for i in [h1, h2]
@@ -74,33 +76,33 @@ function TIP4Pf!(F, u, p)
     for i = 1:length(all_o)
       a = all_o[i]
 
-      E += _pbc!(F, u, a, a, _vdw, lat, NC, (P.ϵoo, P.σoo); cutoff=45.0) / 2
+      E += _pbc!(F, u, a, a, _vdw, lat, NC, (P.ϵoo, P.σoo); cutoff=20.0) / 2
       for j = i+1:length(all_o)
         b = all_o[j]
 
-        E += _pbc!(F, u, a, b, _vdw, lat, NC, (P.ϵoo, P.σoo); cutoff=45.0)
+        E += _pbc!(F, u, a, b, _vdw, lat, NC, (P.ϵoo, P.σoo); cutoff=20.0)
       end
     end
 
     for i = 1:length(all_h)
       a = all_h[i]
 
-      E += _pbc!(F, u, a, a, _Coulomb, lat, NC, (P.Qh, P.Qh); cutoff=45.0) / 2
+      E += _pbc!(F, u, a, a, _Coulomb, lat, NC, (P.Qh, P.Qh); cutoff=20.0) / 2
       for j = i+1:length(all_h)
         b = all_h[j]
 
-        E += _pbc!(F, u, a, b, _Coulomb, lat, NC, (P.Qh, P.Qh); cutoff=45.0)
+        E += _pbc!(F, u, a, b, _Coulomb, lat, NC, (P.Qh, P.Qh); cutoff=20.0)
       end
     end
 
     for i = 1:length(p.mols)
       a = p.mols[i]
 
-      E += pbc_Mforces!(F, u, a, a, P.drel, P.Qh, P.Qm, NC, lat; cutoff=45.0) / 2
+      E += pbc_Mforces!(F, u, a, a, P.drel, P.Qh, P.Qm, NC, lat; cutoff=20.0) / 2
       for j = i+1:length(p.mols)
         b = p.mols[j]
 
-        E += pbc_Mforces!(F, u, a, b, P.drel, P.Qh, P.Qm, NC, lat; cutoff=45.0)
+        E += pbc_Mforces!(F, u, a, b, P.drel, P.Qh, P.Qm, NC, lat; cutoff=20.0)
       end
     end
   end
