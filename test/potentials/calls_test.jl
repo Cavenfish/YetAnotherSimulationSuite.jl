@@ -34,6 +34,7 @@ end
 @testset "Test Potential Function Calls" begin
   co  = "../testingFiles/xyzFiles/co-dimer.xyz"
   h2o = "../testingFiles/xyzFiles/h2o-dimer.xyz"
+  ice = "../testingFiles/xyzFiles/iceIh.xyz"
   
   # MvHff
   @test staticTest(MvHff(), co)
@@ -46,10 +47,14 @@ end
   # TIP4P
   @test staticTest(TIP4Pf(), h2o)
   @test dynamicTest(TIP4Pf(), h2o)
+  @test staticTest(TIP4Pf(), ice)
+  @test dynamicTest(TIP4Pf(), ice)
 
   # SPCF
   @test staticTest(SPCF(), h2o)
   @test dynamicTest(SPCF(), h2o)
+  @test staticTest(SPCF(), ice)
+  @test dynamicTest(SPCF(), ice)
 
 end
 
