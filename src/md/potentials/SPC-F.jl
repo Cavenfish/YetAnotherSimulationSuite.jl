@@ -73,8 +73,8 @@ function SPCF!(F, u, p)
         a = all_o[i]
         b = all_o[j]
 
-        E += _pbc!(F, u, a, b, _vdw, p.lattice, NC, (P.ϵ, P.σ); cutoff=45.0)
-        E += _pbc!(F, u, a, b, _Coulomb, p.lattice, NC, (P.Qo, P.Qh); cutoff=45.0)
+        E += _pbc!(F, u, a, b, _vdw, lat, NC, (P.ϵ, P.σ); cutoff=45.0)
+        E += _pbc!(F, u, a, b, _Coulomb, lat, NC, (P.Qo, P.Qh); cutoff=45.0)
       end
     end
 
@@ -83,7 +83,7 @@ function SPCF!(F, u, p)
         a = all_h[i]
         b = all_h[j]
 
-        E += _pbc!(F, u, a, b, _Coulomb, p.lattice, NC, (P.Qh, P.Qh); cutoff=45.0)
+        E += _pbc!(F, u, a, b, _Coulomb, lat, NC, (P.Qh, P.Qh); cutoff=45.0)
       end
     end
 
@@ -92,7 +92,7 @@ function SPCF!(F, u, p)
         a = all_h[i]
         b = all_o[j]
 
-        E += _pbc!(F, u, a, b, _Coulomb, p.lattice, NC, (P.Qh, P.Qo); cutoff=45.0)
+        E += _pbc!(F, u, a, b, _Coulomb, lat, NC, (P.Qh, P.Qo); cutoff=45.0)
       end
     end
 

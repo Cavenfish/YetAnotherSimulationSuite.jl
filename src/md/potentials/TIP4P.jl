@@ -74,33 +74,33 @@ function TIP4Pf!(F, u, p)
     for i = 1:length(all_o)
       a = all_o[i]
 
-      E += _pbc!(F, u, a, a, _vdw, p.lattice, NC, (P.ϵoo, P.σoo); cutoff=45.0) / 2
+      E += _pbc!(F, u, a, a, _vdw, lat, NC, (P.ϵoo, P.σoo); cutoff=45.0) / 2
       for j = i+1:length(all_o)
         b = all_o[j]
 
-        E += _pbc!(F, u, a, b, _vdw, p.lattice, NC, (P.ϵoo, P.σoo); cutoff=45.0)
+        E += _pbc!(F, u, a, b, _vdw, lat, NC, (P.ϵoo, P.σoo); cutoff=45.0)
       end
     end
 
     for i = 1:length(all_h)
       a = all_h[i]
 
-      E += _pbc!(F, u, a, a, _Coulomb, p.lattice, NC, (P.Qh, P.Qh); cutoff=45.0) / 2
+      E += _pbc!(F, u, a, a, _Coulomb, lat, NC, (P.Qh, P.Qh); cutoff=45.0) / 2
       for j = i+1:length(all_h)
         b = all_h[j]
 
-        E += _pbc!(F, u, a, b, _Coulomb, p.lattice, NC, (P.Qh, P.Qh); cutoff=45.0)
+        E += _pbc!(F, u, a, b, _Coulomb, lat, NC, (P.Qh, P.Qh); cutoff=45.0)
       end
     end
 
     for i = 1:length(p.mols)
       a = p.mols[i]
 
-      E += pbc_Mforces!(F, u, a, a, P.drel, P.Qh, P.Qm, NC, p.lattice; cutoff=45.0) / 2
+      E += pbc_Mforces!(F, u, a, a, P.drel, P.Qh, P.Qm, NC, lat; cutoff=45.0) / 2
       for j = i+1:length(p.mols)
         b = p.mols[j]
 
-        E += pbc_Mforces!(F, u, a, b, P.drel, P.Qh, P.Qm, NC, p.lattice; cutoff=45.0)
+        E += pbc_Mforces!(F, u, a, b, P.drel, P.Qh, P.Qm, NC, lat; cutoff=45.0)
       end
     end
   end
