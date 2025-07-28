@@ -13,7 +13,11 @@ function dynamicTest(calc, f)
   file = joinpath(@__DIR__, f)
   bdys = readSystem(file)
 
-  run(calc, bdys, (0.0, 10fs), 1fs, NVE())
+  if isa(bdys, JMD.Cell)
+    run(calc, bdys, (0.0, 10fs), 1fs, NVE(bdys))
+  else
+    run(calc, bdys, (0.0, 10fs), 1fs, NVE())
+  end
 
   true
 end
@@ -34,7 +38,7 @@ end
 @testset "Test Potential Function Calls" begin
   co  = "../testingFiles/xyzFiles/co-dimer.xyz"
   h2o = "../testingFiles/xyzFiles/h2o-dimer.xyz"
-  ice = "../testingFiles/xyzFiles/iceIh.xyz"
+  ice = "../testingFiles/xyzFiles/iceIh_small.xyz"
   
   # MvHff
   @test staticTest(MvHff(), co)

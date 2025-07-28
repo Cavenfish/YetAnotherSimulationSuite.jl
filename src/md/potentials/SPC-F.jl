@@ -64,17 +64,18 @@ function SPCF!(F, u, p)
 
   if any(p.PBC)
     NC    = p.NC .* p.PBC
+    lat   = isa(p, optVars) ? p.lattice : p.ensemble.lattice
     all_o = collect(1:3:length(u))
     all_h = [i for i = 1:length(u) if !(i in all_o)]
 
     for i in all_o
-      E += pbc_vdw!(F, u, i, all_o, P.ϵ, P.σ, NC, p.lattice; cutoff=35.0)
-      E += pbc_Coulomb!(F, u, i, all_h, P.Qo, P.Qh, NC, p.lattice; cutoff=35.00)
+      E += pbc_vdw!(F, u, i, all_o, P.ϵ, P.σ, NC, lat; cutoff=35.0)
+      E += pbc_Coulomb!(F, u, i, all_h, P.Qo, P.Qh, NC, lat; cutoff=35.00)
     end
 
     for i in all_h
-      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, NC, p.lattice; cutoff=35.00)
-      E += pbc_Coulomb!(F, u, i, all_o, P.Qh, P.Qo, NC, p.lattice; cutoff=35.00)
+      E += pbc_Coulomb!(F, u, i, all_h, P.Qh, P.Qh, NC, lat; cutoff=35.00)
+      E += pbc_Coulomb!(F, u, i, all_o, P.Qh, P.Qo, NC, lat; cutoff=35.00)
     end
 
   end
