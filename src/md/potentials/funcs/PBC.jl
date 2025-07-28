@@ -1,5 +1,8 @@
 
-function _pbc!(F, u, a, b, func, L, NC, p; cutoff=20.0)
+function _pbc!(
+  F::AbstractVector, u::AbstractVector, a::Int64, b::Int64,
+  func::FT, L::AbstractMatrix, NC::Vector{Int64}, p::PT; cutoff=20.0
+) where {FT, PT}
   E = 0.0
   for i = -NC[1]:NC[1]
     for j = -NC[2]:NC[2]
@@ -11,40 +14,11 @@ function _pbc!(F, u, a, b, func, L, NC, p; cutoff=20.0)
         norm(u[a] - r2) > cutoff && continue
 
         e,f    = func(u[a], r2, p...)
-        E     += e/2
+        E     += e
         F[a] .-= f
+        F[b] .+= f
       end
     end
   end
-  E
-end
-
-function pbc_vdw!(
-  F::Vector{Vf}, u::Vector{Vu}, i::Int64, js::Vector{Int64}, 
-  ϵij::Float64, σij::Float64, NC::Vector{Int64}, L::AbstractMatrix;
-  cutoff=20.0
-) where {Vf <: AbstractVector, Vu <: AbstractVector}
-
-  E = 0.0
-
-  for j in js
-    E += _pbc!(F, u, i, j, _vdw, L, NC, (ϵij, σij); cutoff=cutoff)
-  end
-
-  E
-end
-
-function pbc_Coulomb!(
-  F::Vector{Vf}, u::Vector{Vu}, i::Int64, js::Vector{Int64}, 
-  Qi::Float64, Qj::Float64, NC::Vector{Int64}, L::AbstractMatrix;
-  cutoff=20.0
-) where {Vf <: AbstractVector, Vu <: AbstractVector}
-
-  E = 0.0
-
-  for j in js
-    E += _pbc!(F, u, i, j, _Coulomb, L, NC, (Qi, Qj); cutoff=cutoff)
-  end
-
   E
 end
