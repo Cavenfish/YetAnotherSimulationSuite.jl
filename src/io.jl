@@ -187,10 +187,13 @@ function Base.write(file::String, traj::MyTraj; step=1)
     frame = Frame()
     add_velocities!(frame)
 
+    # Kinectic Energy
+    K = 0.5 .* traj.masses .* [v'v for v in img.vel] |> sum
+
     # Add frame properties
     set_property!(frame, "time", img.time)
     set_property!(frame, "temp", img.temp)
-    set_property!(frame, "energy", img.energy)
+    set_property!(frame, "energy", img.energy + K)
 
     for i = 1:length(img.pos)
       r  .= img.pos[i]

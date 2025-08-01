@@ -25,7 +25,7 @@ function _vdw!(
   r     = norm(rvec)
   a     = σij / r
   E     = 4ϵij * ((a)^12 - (a)^6)
-  f     = @. 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rvec
+  f     = 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rvec
   F[i] .-= f
   F[j] .+= f
 
@@ -71,7 +71,7 @@ function _Coulomb(
   rvec = rj - ri
   r    = norm(rvec)
   E    = Qi*Qj / r
-  F    = @. Qi*Qj * rvec / r^3
+  F    = @. Qi*Qj / r^3 * rvec
 
   E,F
 end
@@ -84,7 +84,7 @@ function _Coulomb!(
   rvec  = u[j] - u[i]
   r     = norm(rvec)
   E     = Qi*Qj / r
-  f     = @. Qi*Qj * rvec / r^3
+  f     = @. Qi*Qj / r^3 * rvec
   F[i] .-= f
   F[j] .+= f
 
