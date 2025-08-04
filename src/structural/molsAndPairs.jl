@@ -66,18 +66,20 @@ function getDistanceMatrix(cell::MyCell)
 end
 
 function distanceMatrixOrthorhombicCell(cell::MyCell)
-  n = length(cell.scaled_pos)
-  D = zeros(n,n)
-  p = PeriodicEuclidean(1.0)
+  n  = length(cell.scaled_pos)
+  D  = zeros(n,n)
+  p  = PeriodicEuclidean(1.0)
+  r  = zeros(3)
+  sr = zeros(3)
 
   for i = 1:n
     for j = i+1:n
-      sr = [
-        p(cell.scaled_pos[i][1], cell.scaled_pos[j][1]),
-        p(cell.scaled_pos[i][2], cell.scaled_pos[j][2]),
-        p(cell.scaled_pos[i][3], cell.scaled_pos[j][3])
-      ]
-      D[i,j] = cell.lattice * sr |> norm
+      sr[1] = p(cell.scaled_pos[i][1], cell.scaled_pos[j][1])
+      sr[2] = p(cell.scaled_pos[i][2], cell.scaled_pos[j][2])
+      sr[3] = p(cell.scaled_pos[i][3], cell.scaled_pos[j][3])
+      mul!(r, cell.lattice, sr)
+      
+      D[i,j] = norm(r)
       D[j,i] = D[i,j]
     end
   end

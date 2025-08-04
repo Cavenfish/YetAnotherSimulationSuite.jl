@@ -18,7 +18,7 @@ end
 
 function _vdw!(
   F::Vector{Vf}, u::Vector{Vu},
-  i::Int64, j::Int64, ϵij::Float64, σij::Float64
+  i::Int64, j::Int64, ϵij::Float64, σij::Float64; S=1.0
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   rvec  = u[j] - u[i]
@@ -26,8 +26,24 @@ function _vdw!(
   a     = σij / r
   E     = 4ϵij * ((a)^12 - (a)^6)
   f     = 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rvec
-  F[i] .-= f
-  F[j] .+= f
+  @. F[i] -= f * S
+  @. F[j] += f * S
+
+  E
+end
+
+function _vdw!(
+  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF,
+  i::Int64, j::Int64, ϵij::Float64, σij::Float64; S=1.0
+) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+
+  @. rbuf = u[j] - u[i]
+  r     = norm(rbuf)
+  a     = σij / r
+  E     = 4ϵij * ((a)^12 - (a)^6)
+  @. Fbuf  = 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rbuf
+  @. F[i] -= Fbuf * S
+  @. F[j] += Fbuf * S
 
   E
 end
@@ -77,16 +93,43 @@ function _Coulomb(
 end
 
 function _Coulomb!(
+  F::BUF, rbuf::BUF, ri::Vi, rj::Vj, Qi::Float64, Qj::Float64
+) where {Vi <: AbstractVector, Vj <: AbstractVector, BUF<:AbstractVector}
+
+  rbuf = rj - ri
+  r    = norm(rbuf)
+  E    = Qi*Qj / r
+  @. F = Qi*Qj / r^3 * rbuf
+
+  E
+end
+
+function _Coulomb!(
   F::Vector{Vf}, u::Vector{Vu}, 
-  i::Int64, j::Int64, Qi::Float64, Qj::Float64
+  i::Int64, j::Int64, Qi::Float64, Qj::Float64; S=1.0
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
   E     = Qi*Qj / r
   f     = @. Qi*Qj / r^3 * rvec
-  F[i] .-= f
-  F[j] .+= f
+  @. F[i] .-= f * S
+  @. F[j] .+= f * S
+
+  E
+end
+
+function _Coulomb!(
+  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF,
+  i::Int64, j::Int64, Qi::Float64, Qj::Float64; S=1.0
+) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+
+  @. rbuf   = u[j] - u[i]
+  r         = norm(rbuf)
+  E         = Qi*Qj / r
+  @. Fbuf   = Qi*Qj / r^3 * rbuf
+  @. F[i] .-= Fbuf * S
+  @. F[j] .+= Fbuf * S
 
   E
 end

@@ -31,6 +31,23 @@ function _Morse!(
   E
 end
 
+function _Morse!(
+  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF,
+  i::Int64, j::Int64, D::Float64, a::Float64, req::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+  
+  @. rbuf  = u[j] - u[i]
+  r     = norm(rbuf)
+  c     = exp(-a*(r-req))
+  E     = D * (1 - c)^2
+  @. Fbuf  = -2D * a * c * (1 - c) * rbuf / r
+
+  F[i] .-= Fbuf
+  F[j] .+= Fbuf
+
+  E
+end
+
 function _harmonicBond(
   r::Float64, rvec::V, K::Float64, req::Float64
 ) where V <: AbstractVector
@@ -53,6 +70,22 @@ function _harmonicBond!(
 
   F[i] .-= f
   F[j] .+= f
+
+  E
+end
+
+function _harmonicBond!(
+  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF,
+  i::Int64, j::Int64, K::Float64, req::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+
+  @. rbuf  = u[j] - u[i]
+  r     = norm(rbuf)
+  E     = 0.5 * K * (r - req)^2
+  @. Fbuf = -K * (r - req) * rbuf / r
+
+  F[i] .-= Fbuf
+  F[j] .+= Fbuf
 
   E
 end
@@ -85,7 +118,7 @@ function _harmonicBondAngle!(
   Fj    = pre * (ri - (rj * (dot(ri, rj) / dot(rj,rj))))
   F[i] .+= Fi
   F[j] .+= Fj
-  F[o] .-= (Fi + Fj)
+  @. F[o] -= (Fi + Fj)
 
   E
 end

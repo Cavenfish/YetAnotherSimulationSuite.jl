@@ -61,7 +61,7 @@ function TIP4Pf!(F, u, p)
     o1, h1, h2 = par[1]
     o2, h3, h4 = par[2]
 
-    roo = norm(u[o1] - u[o2])
+    roo = norm(u[o2] - u[o1])
     srhat = (u[o2] - u[o1]) ./ roo
     switchSR!(S, roo, P.rs, P.rc)
 
@@ -71,22 +71,22 @@ function TIP4Pf!(F, u, p)
 
     e = 0.0
 
-    e += _vdw!(F, u, o1, o2, P.ϵoo, P.σoo)
+    e += _vdw!(F, u, o1, o2, P.ϵoo, P.σoo; S=S[1])
 
     for i in [h1, h2]
       for j in [h3, h4]
-        e += _Coulomb!(F, u, i, j, P.Qh, P.Qh)
+        e += _Coulomb!(F, u, i, j, P.Qh, P.Qh; S=S[1])
       end
     end
 
-    e += _getMforces!(F, u, par[1], par[2], P.drel, P.Qh, P.Qm)
+    e += _getMforces!(F, u, par[1], par[2], P.drel, P.Qh, P.Qm, S)
 
     E += S[1] * e
 
     if S[2] != 0.0
       f .= -S[2] * e .* srhat
-      spreadForce!(F,  f, par[1], wa)
-      spreadForce!(F, -f, par[2], wa)
+      spreadForce!(F, -f, par[1], wa)
+      spreadForce!(F,  f, par[2], wa)
     end
   end
 
@@ -97,17 +97,11 @@ function TIP4Pf!(F, u, p)
     for i = 1:length(p.mols)
       a = p.mols[i]
 
-      # vdw and H-H Coulomb
-      E += tip4pf_selfInter_pbc!(F, u, a, S, NC, lat, P)
-
-      # M-site Coulomb
-      E += pbc_Mforces!(F, u, a, a, P.drel, P.Qh, P.Qm, NC, lat, P.rs, P.rc, S) / 2
-
       for j = i+1:length(p.mols)
         b = p.mols[j]
 
         # vdw and H-H Coulomb
-        E += tip4pf_inter_pbc!(F, u, a, b, S, NC, lat, P)
+        E += tip4pf_pbc!(F, u, a, b, S, NC, lat, P)
 
         # M-site Coulomb
         E += pbc_Mforces!(F, u, a, b, P.drel, P.Qh, P.Qm, NC, lat, P.rs, P.rc, S)
@@ -125,168 +119,94 @@ function getMsiteVars(
   o2, h3, h4 = w2
 
   # Get r vectors
-  r1o  = u[h1] - u[o1]
-  r2o  = u[h2] - u[o1]
-  r3o  = u[h3] - u[o2]
-  r4o  = u[h4] - u[o2]
+  r1o = u[h1] - u[o1]
+  r2o = u[h2] - u[o1]
+  r12 = u[h2] - u[h1]
+  r3o = u[h3] - u[o2]
+  r4o = u[h4] - u[o2]
+  r34 = u[h4] - u[h3]
 
-  # Get Angle
-  θ1  = getAngle(r1o, r2o)
-  θ2  = getAngle(r3o, r4o)
+  # Get a
+  a1 = 1 / (1 + (norm(r2o) / norm(r1o)))
+  a2 = 1 / (1 + (norm(r4o) / norm(r3o)))
 
-  # Get Norms
-  d1o  = norm(r1o)
-  d2o  = norm(r2o)
-  d3o  = norm(r3o)
-  d4o  = norm(r4o)
+  # Get M-sites
+  x1 = r1o .+ (a1 * r12)
+  m1 = u[o1] + drel * (x1 / norm(x1))
+  x2 = r3o .+ (a2 * r34)
+  m2 = u[o2] + drel * (x2 / norm(x2))
 
-  # Get dm
-  dm1 = drel * (d1o*cos(θ1/2) + d2o*cos(θ1/2))
-  dm2 = drel * (d3o*cos(θ2/2) + d4o*cos(θ2/2))
+  # Get Gamma
+  γ1 = drel / norm(x1)
+  γ2 = drel / norm(x2)
 
-  # Get bisectors
-  rbi1 = r1o/d1o + r2o/d2o
-  rbi2 = r3o/d3o + r4o/d4o
+  (a1, a2, γ1, γ2), (m1, m2)
+end
 
-  # Get weights
-  wh1 = dm1 / d1o / norm(rbi1)
-  wh2 = dm1 / d2o / norm(rbi1)
-  wh3 = dm2 / d3o / norm(rbi2)
-  wh4 = dm2 / d4o / norm(rbi2)
+function spreadMforces!(
+  F::AbstractVector, Fd::AbstractVector, rid::AbstractVector,
+  w::Vector{Int64}, γ::Float64, a::Float64
+)
 
-  # Get m site vectors
-  m1 = u[o1] + wh1*r1o + wh2*r2o
-  m2 = u[o2] + wh3*r3o + wh4*r4o
+  F1 = dot(rid, Fd) / dot(rid, rid) * rid
+  X  = Fd - F1
 
-  (wh1, wh2, wh3, wh4), (m1, m2)
+  F[w[1]] .+= Fd - γ * X
+  F[w[2]] .+= (1 - a) * γ * X
+  F[w[3]] .+= a * γ * X
+
 end
 
 function _getMforces!(
   F::Vector{Af}, u::Vector{Au}, w1::V, w2::V, 
-  drel::Fl, Qh::Fl, Qm::Fl
+  drel::Fl, Qh::Fl, Qm::Fl, S::AbstractVector
 ) where {Af <: AbstractVector, Au <: AbstractVector, V <: Vector{Int64}, Fl <: Float64}
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
-  (wh1, wh2, wh3, wh4), (m1, m2) = getMsiteVars(u, w1, w2, drel)
+  (a1, a2, γ1, γ2), (m1, m2) = getMsiteVars(u, w1, w2, drel)
+
+  rid1 = m1 - u[o1]
+  rid2 = m2 - u[o2]
 
   # H1 -- M2
   E,f     = _Coulomb(u[h1], m2, Qh, Qm)
+  f     .*= S[1]
   F[h1] .-= f
-  F[h3] .+= f * wh3
-  F[h4] .+= f * wh4
-  F[o2] .+= f * (1 - wh3 - wh4)
+  spreadMforces!(F, f, rid2, w2, γ2, a2)
 
   # H2 -- M2
   e,f     = _Coulomb(u[h2], m2, Qh, Qm)
+  f     .*= S[1]
   E      += e
   F[h2] .-= f
-  F[h3] .+= f * wh3
-  F[h4] .+= f * wh4
-  F[o2] .+= f * (1 - wh3 - wh4)
+  spreadMforces!(F, f, rid2, w2, γ2, a2)
 
   # H3 -- M1
   e,f     = _Coulomb(u[h3], m1, Qh, Qm)
+  f     .*= S[1]
   E      += e
   F[h3] .-= f
-  F[h1] .+= f * wh1
-  F[h2] .+= f * wh2
-  F[o1] .+= f * (1 - wh1 - wh2)
+  spreadMforces!(F, f, rid1, w1, γ1, a1)
 
   # H4 -- M1
   e,f     = _Coulomb(u[h4], m1, Qh, Qm)
+  f     .*= S[1]
   E      += e
   F[h4] .-= f
-  F[h1] .+= f * wh1
-  F[h2] .+= f * wh2
-  F[o1] .+= f * (1 - wh1 - wh2)
+  spreadMforces!(F, f, rid1, w1, γ1, a1)
 
   # M1 -- M2
   e,f     = _Coulomb(m1, m2, Qm, Qm)
+  f     .*= S[1]
   E      += e
-  F[h1] .-= f * wh1
-  F[h2] .-= f * wh2
-  F[o1] .-= f * (1 - wh1 - wh2)
-  F[h3] .+= f * wh3
-  F[h4] .+= f * wh4
-  F[o2] .+= f * (1 - wh3 - wh4)
+  spreadMforces!(F, -f, rid1, w1, γ1, a1)
+  spreadMforces!(F,  f, rid2, w2, γ2, a2)
 
   E
 end
 
-function tip4pf_selfInter_pbc!(
-  F::Vector{Af}, u::Vector{Au}, w::Vector{Int64}, S::AbstractVector,
-  NC::Vector{Int64}, L::AbstractMatrix, p::P
-) where {Af, Au, P}
-
-  E = 0.0
-  wa = [-1.0, 0.5, 0.5]
-  Fs = zeros(3)
-  o, h1, h2 = w
-
-  for i = 0:NC[1]
-    for j = 0:NC[2]
-      for k = 0:NC[3]
-        (i,j,k) == (0,0,0) && continue
-
-        ot  = u[o] + (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
-        roo = norm(u[o] - ot)
-        srhat = (ot - u[o]) ./ roo
-        switchSR!(S, roo, p.rs, p.rc)
-
-        if iszero(S)
-          continue
-        end
-
-        h1t = u[h1] + (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
-        h2t = u[h2] + (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
-
-        # O-O VDW
-        e,f    = _vdw(u[o], ot, p.ϵoo, p.σoo)
-        E     += e * S[1]
-        Fs    .= -S[2] * e .* srhat
-        F[o] .-= f
-        F[o] .+= f
-
-        # H1-H1 Coulomb
-        e,f    = _Coulomb(u[h1], h1t, p.Qh, p.Qh)
-        E      += e * S[1]
-        Fs    .+= -S[2] * e .* srhat
-        F[h1] .-= f
-        F[h1] .+= f
-
-        # H2-H2 Coulomb
-        e,f    = _Coulomb(u[h2], h2t, p.Qh, p.Qh)
-        E      += e * S[1]
-        Fs    .+= -S[2] * e .* srhat
-        F[h2] .-= f
-        F[h2] .+= f
-
-        # H1-H2 Coulomb
-        e,f    = _Coulomb(u[h1], h2t, p.Qh, p.Qh)
-        E      += e * S[1]
-        Fs    .+= -S[2] * e .* srhat
-        F[h1] .-= f
-        F[h2] .+= f
-
-        # H2-H1 Coulomb (needed since loops are 0:NC not -NC:NC)
-        e,f    = _Coulomb(u[h2], h1t, p.Qh, p.Qh)
-        E      += e * S[1]
-        Fs    .+= -S[2] * e .* srhat
-        F[h2] .-= f
-        F[h1] .+= f
-
-        # Spread dS force
-        spreadForce!(F,  Fs, w, wa)
-        spreadForce!(F, -Fs, w, wa)
-      end
-    end
-  end      
-
-  E
-end
-
-function tip4pf_inter_pbc!(
+function tip4pf_pbc!(
   F::Vector{Af}, u::Vector{Au}, w1::Vi, w2::Vi, S::AbstractVector,
   NC::Vector{Int64}, L::AbstractMatrix, p::P
 ) where {Af, Au, Vi <: Vector{Int64}, P}
@@ -318,40 +238,40 @@ function tip4pf_inter_pbc!(
         e,f    = _vdw(u[o1], ot, p.ϵoo, p.σoo)
         E      += e * S[1]
         Fs     .= -S[2] * e .* srhat
-        F[o1] .-= f
-        F[o2] .+= f
+        F[o1] .-= f * S[1]
+        F[o2] .+= f * S[1]
 
         # H1-H3 Coulomb
         e,f    = _Coulomb(u[h1], h3t, p.Qh, p.Qh)
         E      += e * S[1]
         Fs    .+= -S[2] * e .* srhat
-        F[h1] .-= f
-        F[h3] .+= f
+        F[h1] .-= f * S[1]
+        F[h3] .+= f * S[1]
 
         # H2-H4 Coulomb
         e,f    = _Coulomb(u[h1], h4t, p.Qh, p.Qh)
         E      += e * S[1]
         Fs    .+= -S[2] * e .* srhat
-        F[h1] .-= f
-        F[h4] .+= f
+        F[h1] .-= f * S[1]
+        F[h4] .+= f * S[1]
 
         # H2-H3 Coulomb
         e,f    = _Coulomb(u[h2], h3t, p.Qh, p.Qh)
         E      += e * S[1]
         Fs    .+= -S[2] * e .* srhat
-        F[h2] .-= f
-        F[h3] .+= f
+        F[h2] .-= f * S[1]
+        F[h3] .+= f * S[1]
 
         # H2-H4 Coulomb
         e,f    = _Coulomb(u[h2], h4t, p.Qh, p.Qh)
         E      += e * S[1]
         Fs    .+= -S[2] * e .* srhat
-        F[h2] .-= f
-        F[h4] .+= f
+        F[h2] .-= f * S[1]
+        F[h4] .+= f * S[1]
 
         # Spread dS force
-        spreadForce!(F,  Fs, w1, wa)
-        spreadForce!(F, -Fs, w2, wa)
+        spreadForce!(F, -Fs, w1, wa)
+        spreadForce!(F,  Fs, w2, wa)
       end
     end
   end      
@@ -376,7 +296,10 @@ function pbc_Mforces!(
   h3t = zeros(3)
   h4t = zeros(3)
 
-  (wh1, wh2, wh3, wh4), (m1, m2) = getMsiteVars(u, w1, w2, drel)
+  (a1, a2, γ1, γ2), (m1, m2) = getMsiteVars(u, w1, w2, drel)
+
+  rid1 = m1 - u[o1]
+  rid2 = m2 - u[o2]
 
   for i = -NC[1]:NC[1]
     for j = -NC[2]:NC[2]
@@ -384,7 +307,7 @@ function pbc_Mforces!(
         (i,j,k) == (0,0,0) && continue
 
         ot  = u[o2] + (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
-        roo = norm(u[o1] - ot)
+        roo = norm(ot - u[o1])
         srhat = (ot - u[o1]) ./ roo
         switchSR!(S, roo, rs, rc)
 
@@ -401,52 +324,45 @@ function pbc_Mforces!(
         e,f     = _Coulomb(u[h1], m2t, Qh, Qm)
         E      += e * S[1]
         Fs     .= -S[2] * e .* srhat
+        f     .*= S[1]
         F[h1] .-= f
-        F[h3] .+= f * wh3
-        F[h4] .+= f * wh4
-        F[o2] .+= f * (1 - wh3 - wh4)
+        spreadMforces!(F, f, rid2, w2, γ2, a2)
 
         # H2 -- M2
         e,f     = _Coulomb(u[h2], m2t, Qh, Qm)
         E      += e * S[1]
         Fs    .+= -S[2] * e .* srhat
+        f     .*= S[1]
         F[h2] .-= f
-        F[h3] .+= f * wh3
-        F[h4] .+= f * wh4
-        F[o2] .+= f * (1 - wh3 - wh4)
+        spreadMforces!(F, f, rid2, w2, γ2, a2)
 
         # H3 -- M1
         e,f     = _Coulomb(h3t, m1, Qh, Qm)
         E      += e * S[1]
         Fs    .+= -S[2] * e .* srhat
+        f     .*= S[1]
         F[h3] .-= f
-        F[h1] .+= f * wh1
-        F[h2] .+= f * wh2
-        F[o1] .+= f * (1 - wh1 - wh2)
+        spreadMforces!(F, f, rid1, w1, γ1, a1)
 
         # H4 -- M1
         e,f     = _Coulomb(h4t, m1, Qh, Qm)
         E      += e * S[1]
         Fs    .+= -S[2] * e .* srhat
+        f     .*= S[1]
         F[h4] .-= f
-        F[h1] .+= f * wh1
-        F[h2] .+= f * wh2
-        F[o1] .+= f * (1 - wh1 - wh2)
+        spreadMforces!(F, f, rid1, w1, γ1, a1)
 
         # M1 -- M2
         e,f     = _Coulomb(m1, m2t, Qm, Qm)
         E      += e * S[1]
         Fs    .+= -S[2] * e .* srhat
-        F[h1] .-= f * wh1
-        F[h2] .-= f * wh2
-        F[o1] .-= f * (1 - wh1 - wh2)
-        F[h3] .+= f * wh3
-        F[h4] .+= f * wh4
-        F[o2] .+= f * (1 - wh3 - wh4)
+        f     .*= S[1]
+        spreadMforces!(F, -f, rid1, w1, γ1, a1)
+        spreadMforces!(F,  f, rid2, w2, γ2, a2)
 
         # Spread dS force
-        spreadForce!(F,  Fs, w1, wa)
-        spreadForce!(F, -Fs, w2, wa)
+        spreadForce!(F, -Fs, w1, wa)
+        spreadForce!(F,  Fs, w2, wa)
       end
     end
   end
