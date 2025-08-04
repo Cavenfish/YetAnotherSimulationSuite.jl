@@ -167,14 +167,14 @@ function getMsiteVars!(
   a2 = 1 / (1 + (norm(P.r4o) / norm(P.r3o)))
 
   # Get M1 stuff
-  @. P.rbuf = P.r1o .+ (a1 * P.r12)
+  @. P.rbuf = P.r1o + (a1 * P.r12)
   γ1        = P.drel / norm(P.rbuf)
-  @. P.m1   = u[o1] + P.drel * (P.rbuf / norm(P.rbuf))
+  P.m1     .= u[o1] .+ P.drel .* (P.rbuf ./ norm(P.rbuf))
 
   # Get M2 stuff
-  @. P.rbuf = P.r3o .+ (a2 * P.r34)
+  @. P.rbuf = P.r3o + (a2 * P.r34)
   γ2        = P.drel / norm(P.rbuf)
-  @. P.m2   = u[o2] + P.drel * (P.rbuf / norm(P.rbuf))
+  P.m2     .= u[o2] .+ P.drel .* (P.rbuf ./ norm(P.rbuf))
 
   a1, a2, γ1, γ2
 end
@@ -187,12 +187,12 @@ function spreadMforces!(
   # I'm reusing some 3D vectors to save on
   # memory allocations.
 
-  @. P.r12 = dot(rid, Fd) / dot(rid, rid) .* rid
+  P.r12 .= dot(rid, Fd) / dot(rid, rid) .* rid
   @. P.r34 = Fd - P.r12
 
-  @. F[w[1]] .+= Fd - γ * P.r34
-  @. F[w[2]] .+= (1 - a) * γ * P.r34
-  @. F[w[3]] .+= a * γ * P.r34
+  @. F[w[1]] += Fd - γ * P.r34
+  @. F[w[2]] += (1 - a) * γ * P.r34
+  @. F[w[3]] += a * γ * P.r34
 
 end
 
