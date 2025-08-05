@@ -188,7 +188,7 @@ function Base.write(file::String, traj::MyTraj; step=1)
     add_velocities!(frame)
 
     # Kinectic Energy
-    K = 0.5 .* traj.masses .* [v'v for v in img.vel] |> sum
+    K = 0.5 * sum( traj.masses .* dot.(img.vel, img.vel))
 
     # Add frame properties
     set_property!(frame, "time", img.time)
