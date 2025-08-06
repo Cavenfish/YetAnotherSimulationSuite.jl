@@ -162,26 +162,22 @@ function getMsiteVars!(
   @. P.r4o = u[h4] - u[o2]
   @. P.r34 = u[h4] - u[h3]
 
-  # Get a
-  a1 = 1 / (1 + (norm(P.r2o) / norm(P.r1o)))
-  a2 = 1 / (1 + (norm(P.r4o) / norm(P.r3o)))
-
   # Get M1 stuff
-  @. P.rbuf = P.r1o + (a1 * P.r12)
+  @. P.rbuf = P.r1o + (0.5 * P.r12)
   γ1        = P.drel / norm(P.rbuf)
   P.m1     .= u[o1] .+ P.drel .* (P.rbuf ./ norm(P.rbuf))
 
   # Get M2 stuff
-  @. P.rbuf = P.r3o + (a2 * P.r34)
+  @. P.rbuf = P.r3o + (0.5 * P.r34)
   γ2        = P.drel / norm(P.rbuf)
   P.m2     .= u[o2] .+ P.drel .* (P.rbuf ./ norm(P.rbuf))
 
-  a1, a2, γ1, γ2
+  γ1, γ2
 end
 
 function spreadMforces!(
   F::AbstractVector, Fd::AbstractVector, rid::AbstractVector,
-  P::T, w::Vector{Int64}, γ::Float64, a::Float64
+  P::T, w::Vector{Int64}, γ::Float64
 ) where {T}
 
   # I'm reusing some 3D vectors to save on
@@ -191,8 +187,8 @@ function spreadMforces!(
   @. P.r34 = Fd - P.r12
 
   @. F[w[1]] += Fd - γ * P.r34
-  @. F[w[2]] += (1 - a) * γ * P.r34
-  @. F[w[3]] += a * γ * P.r34
+  @. F[w[2]] += 0.5 * γ * P.r34
+  @. F[w[3]] += 0.5 * γ * P.r34
 
 end
 
@@ -202,7 +198,7 @@ function _getMforces!(
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
-  a1, a2, γ1, γ2 = getMsiteVars!(P, u, w1, w2)
+  γ1, γ2 = getMsiteVars!(P, u, w1, w2)
 
   @. P.r1o = P.m1 - u[o1]
   @. P.r2o = P.m2 - u[o2]
@@ -211,36 +207,36 @@ function _getMforces!(
   E,f     = _Coulomb(u[h1], P.m2, P.Qh, P.Qm)
   f     .*= P.S[1]
   F[h1] .-= f
-  spreadMforces!(F, f, P.r2o, P, w2, γ2, a2)
+  spreadMforces!(F, f, P.r2o, P, w2, γ2)
 
   # H2 -- M2
   e,f     = _Coulomb(u[h2], P.m2, P.Qh, P.Qm)
   f     .*= P.S[1]
   E      += e
   F[h2] .-= f
-  spreadMforces!(F, f, P.r2o, P, w2, γ2, a2)
+  spreadMforces!(F, f, P.r2o, P, w2, γ2)
 
   # H3 -- M1
   e,f     = _Coulomb(u[h3], P.m1, P.Qh, P.Qm)
   f     .*= P.S[1]
   E      += e
   F[h3] .-= f
-  spreadMforces!(F, f, P.r1o, P, w1, γ1, a1)
+  spreadMforces!(F, f, P.r1o, P, w1, γ1)
 
   # H4 -- M1
   e,f     = _Coulomb(u[h4], P.m1, P.Qh, P.Qm)
   f     .*= P.S[1]
   E      += e
   F[h4] .-= f
-  spreadMforces!(F, f, P.r1o, P, w1, γ1, a1)
+  spreadMforces!(F, f, P.r1o, P, w1, γ1)
 
   # M1 -- M2
   e,f       = _Coulomb(P.m1, P.m2, P.Qm, P.Qm)
   @. P.Fbuf = f * P.S[1]
   E        += e
-  spreadMforces!(F, P.Fbuf, P.r2o, P, w2, γ2, a2)
+  spreadMforces!(F, P.Fbuf, P.r2o, P, w2, γ2)
   P.Fbuf .*= -1
-  spreadMforces!(F, P.Fbuf, P.r1o, P, w1, γ1, a1)
+  spreadMforces!(F, P.Fbuf, P.r1o, P, w1, γ1)
 
   E
 end
@@ -327,7 +323,7 @@ function pbc_Mforces!(
   o1, h1, h2 = w1
   o2, h3, h4 = w2
 
-  a1, a2, γ1, γ2 = getMsiteVars!(P, u, w1, w2)
+  γ1, γ2 = getMsiteVars!(P, u, w1, w2)
 
   @. P.r1o = P.m1 - u[o1]
   @. P.r2o = P.m2 - u[o2]
@@ -358,7 +354,7 @@ function pbc_Mforces!(
         P.Fbuf .= -P.S[2] * e .* P.rbuf
         f     .*= P.S[1]
         F[h1] .-= f
-        spreadMforces!(F, f, P.r2o, P, w2, γ2, a2)
+        spreadMforces!(F, f, P.r2o, P, w2, γ2)
 
         # H2 -- M2
         e,f      = _Coulomb(u[h2], P.m2t, P.Qh, P.Qm)
@@ -366,7 +362,7 @@ function pbc_Mforces!(
         P.Fbuf .+= -P.S[2] * e .* P.rbuf
         f      .*= P.S[1]
         F[h2]  .-= f
-        spreadMforces!(F, f, P.r2o, P, w2, γ2, a2)
+        spreadMforces!(F, f, P.r2o, P, w2, γ2)
 
         # H3 -- M1
         e,f      = _Coulomb(P.h3t, P.m1, P.Qh, P.Qm)
@@ -374,7 +370,7 @@ function pbc_Mforces!(
         P.Fbuf .+= -P.S[2] * e .* P.rbuf
         f      .*= P.S[1]
         F[h3]  .-= f
-        spreadMforces!(F, f, P.r1o, P, w1, γ1, a1)
+        spreadMforces!(F, f, P.r1o, P, w1, γ1)
 
         # H4 -- M1
         e,f      = _Coulomb(P.h4t, P.m1, P.Qh, P.Qm)
@@ -382,16 +378,16 @@ function pbc_Mforces!(
         P.Fbuf .+= -P.S[2] * e .* P.rbuf
         f      .*= P.S[1]
         F[h4]  .-= f
-        spreadMforces!(F, f, P.r1o, P, w1, γ1, a1)
+        spreadMforces!(F, f, P.r1o, P, w1, γ1)
 
         # M1 -- M2
         e,f      = _Coulomb(P.m1, P.m2t, P.Qm, P.Qm)
         E       += e * P.S[1]
         P.Fbuf .+= -P.S[2] * e .* P.rbuf
         f      .*= P.S[1]
-        spreadMforces!(F, f, P.r2o, P, w2, γ2, a2)
+        spreadMforces!(F, f, P.r2o, P, w2, γ2)
         f .*= -1
-        spreadMforces!(F, f, P.r1o, P, w1, γ1, a1)
+        spreadMforces!(F, f, P.r1o, P, w1, γ1)
 
         # Spread dS force
         F[o1] .-= P.Fbuf
