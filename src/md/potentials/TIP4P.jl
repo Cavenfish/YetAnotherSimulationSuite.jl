@@ -47,7 +47,7 @@ end
 #PotVar building function 
 TIP4Pf(bdys::Union{MyCell, Vector{MyAtoms}}) = _TIP4P_PotVars(
   4.48339,    # eV
-  2.287,      # \AA
+  2.287,      # \AA^-1
   0.9419,     # \AA
   3.81209321, # eV rad^-2  1.16123e-3 * (360/2pi)^2
   1.87448,    # rad        107.4  * (2pi/360)
