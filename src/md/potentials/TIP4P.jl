@@ -8,7 +8,6 @@ TIP4P/2005. The Journal of chemical physics, 135(22).
 Link:
 https://pubs.aip.org/aip/jcp/article/135/22/224516/190786
 """
-
 TIP4Pf(; constraints=nothing) = Calculator(TIP4Pf; EF=TIP4Pf!, constraints=constraints)
 
 struct _TIP4P_PotVars{

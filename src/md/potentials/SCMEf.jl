@@ -11,7 +11,6 @@ https://pubs.rsc.org/en/content/articlehtml/2013/cp/c3cp52097h
 SCME/f Paper:
 https://pubs.acs.org/doi/full/10.1021/acs.jctc.2c00598
 """
-
 SCMEf(; constraints=nothing) = Calculator(SCMEf; EF=SCMEf!, constraints=constraints)
 
 struct _SCMEf_PotVars{T, F<:Float64} <: JMD.PotVars

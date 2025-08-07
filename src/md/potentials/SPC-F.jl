@@ -1,7 +1,13 @@
 """
 SPC-F
-"""
 
+Based on:
+Toukan, Kahled, and Aneesur Rahman. "Molecular-dynamics study of atomic
+motions in water." Physical Review B 31.5 (1985): 2643.
+
+Link:
+https://journals.aps.org/prb/abstract/10.1103/PhysRevB.31.2643
+"""
 SPCF(; constraints=nothing) = Calculator(SPCF; EF=SPCF!, constraints=constraints)
 
 struct _SPCF_PotVars{

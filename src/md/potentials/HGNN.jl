@@ -1,5 +1,5 @@
 """
-CO-CO Potential from Chen 2020
+------ My Notes While Coding ------
 
 Notation
   - Symmetry functions Vector => P
@@ -10,10 +10,6 @@ Notation
 Units
   - Energy  --> cm-1
   - Spatial --> Bohr
-
-Author: Brian C. Ferrari
-
------- My Notes While Coding ------
 
 dgemv('t',n0,n1,1.d0,w1,n0,r,1,1.d0,rt1,1) 
     -> 1.d0 * Transpose(w1) * r + 1.d0 * rt1
@@ -28,24 +24,20 @@ Essentially:
     dPdr = P[7] * dr[6]
      ^      ^       ^
   matrix  column   row
-          vector  vector 
-
-Switching to PotVars struct has changed allocations in two ways
-  1) Significantly increased allocations during for calls
-     to the potential. This comes from loading the molVars
-     and pairVars during the call rather than at module load.
-  2) Significantly decreased allocations associated with the
-     following vars: A, P, dPdr, rhats. This comes from them
-     acting like a cache now rather than being reallocated at
-     each new call.
-
-The overall result is that for quick uses of the potential
-(ie. single point energy) this method is slower and allocates
-more than the previous method. However, for longer uses of the
-potential (ie. md simulations) this significantly speeds up the
-code by reducing allocations.
+          vector  vector
 """
 
+"""
+CO-CO Potential
+
+Based on:
+Chen, Jun, et al. "Energy transfer between vibrationally excited carbon monoxide
+based on a highly accurate six-dimensional potential energy surface." The 
+Journal of Chemical Physics 153.5 (2020).
+
+Link:
+https://pubs.aip.org/aip/jcp/article/153/5/054310/1065758
+"""
 HGNN(; constraints=nothing) = Calculator(HGNN; EF=HGNN!, constraints=constraints)
 
 struct _HGNN_PotVars{MV,PV,D1,D2,D3, F<:AbstractFloat} <: PotVars

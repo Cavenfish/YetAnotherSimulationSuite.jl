@@ -1,7 +1,14 @@
 """
-CO-CO Potential from van Hemert et al. 2015
-"""
+CO-CO Potential
 
+Based on:
+van Hemert, Marc C., Junko Takahashi, and Ewine F. van Dishoeck. "Molecular
+dynamics study of the photodesorption of CO ice." The Journal of Physical
+Chemistry A 119.24 (2015): 6354-6369.
+
+Link:
+https://pubs.acs.org/doi/full/10.1021/acs.jpca.5b02611
+"""
 MvHff(; constraints=nothing) = Calculator(MvHff; EF=MvHff!, constraints=constraints)
 
 struct _MvHff_PotVars{F<:Float64} <: PotVars
