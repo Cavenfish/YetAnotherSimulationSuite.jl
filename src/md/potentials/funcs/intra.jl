@@ -52,8 +52,8 @@ function _harmonicBond(
   r::Float64, rvec::V, K::Float64, req::Float64
 ) where V <: AbstractVector
 
-  E     = 0.5 * K * (r - req)^2
-  f     = @. - K * (r - req) * revc / r
+  E = 0.5 * K * (r - req)^2
+  F = @. - K * (r - req) * rvec / r
 
   E, F
 end

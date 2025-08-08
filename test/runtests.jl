@@ -25,6 +25,10 @@ end
 
 @testset "Potentials" begin
 
+  @testset "Intra Funcs" begin
+    include("./potentials/funcs/intra_test.jl")
+  end
+
   @testset "Call Test" begin
     include("./potentials/calls_test.jl")
   end
