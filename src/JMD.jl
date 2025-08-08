@@ -1,9 +1,7 @@
 """
 Julia Molecular Dynamics
 
-A very minimal package for me to do MD.
-
-author: Brian C. Ferrari
+A simulation suite for molecular dynamics in Julia. 
 """
 module JMD
 

@@ -1,6 +1,5 @@
 name = "JMD"
 uuid = "d3ec4d54-14c5-4f6e-8d2e-82ae0926cfed"
-authors = ["brian <ferraribrian1996@gmail.com>"]
 version = "0.1.0"
 
 [deps]
