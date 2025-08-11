@@ -52,7 +52,7 @@ TIP4Pf(bdys::Union{MyCell, Vector{MyAtoms}}) = _TIP4P_PotVars(
   1.87448,    # rad        107.4  * (2pi/360)
   8.03e-3,    # eV
   3.1644,     # \AA
-  0.13194,    # \AA
+  0.1546,    # \AA
   2.1113635,  #  qh * Hartree^0.5 * Bohr^0.5
   -2 * 2.1113635, #
   11.0,       # \AA
