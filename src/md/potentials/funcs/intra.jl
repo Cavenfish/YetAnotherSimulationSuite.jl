@@ -111,7 +111,7 @@ function _harmonicBondAngle!(
 
   ri    = u[i] - u[o]
   rj    = u[j] - u[o]
-  θ     = dot(ri, rj) / (norm(ri) * norm(rj)) |> (x -> round(x, digits=10)) |> acos
+  θ     = dot(ri, rj) / (norm(ri) * norm(rj)) |> (x -> clamp(x, -1, 1)) |> acos
   E     = 0.5 * K * (θ - θeq)^2
   pre   = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * norm(ri) * norm(rj))
   Fi    = pre * (rj - (ri * (dot(ri, rj) / dot(ri,ri))))
