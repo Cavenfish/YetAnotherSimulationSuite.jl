@@ -98,6 +98,15 @@ function mbx_get_total_dipole(μ)
 
 end
 
+function mbx_get_induced_dipoles(μ)
+
+  ccall(
+    (:get_induced_dipoles_, libmbx), Cvoid,
+    (Ptr{Cdouble},), μ
+  )
+
+end
+
 function mbx_finalize_system()
 
   ccall(
@@ -123,6 +132,7 @@ function mbx_getDipole(cell::MyCell)
   μ = zeros(3)
 
   mbx_get_total_dipole(μ)
+  mbx_finalize_system()
 
   μ
 end
@@ -132,6 +142,32 @@ function mbx_getDipole(bdys::Vector{MyAtoms})
   μ = zeros(3)
 
   mbx_get_total_dipole(μ)
+  mbx_finalize_system()
 
   μ
+end
+
+function mbx_getInducedDipoles(cell::MyCell)
+  _ = getPotEnergy(MBX(), cell)
+  N = length(cell.masses) * 4 |> Int
+  μ = zeros(N)
+
+  mbx_get_induced_dipoles(μ)
+  mbx_finalize_system()
+
+  μ = [μ[i:i+2] for i = 1:3:length(μ)]
+  deleteat!(μ, 4:4:length(μ))
+
+  μ
+end
+
+function mbx_getInducedDipoles(bdys::Vector{MyAtoms})
+  _ = getPotEnergy(MBX(), bdys)
+  N = length(bdys) * 3 |> Int
+  μ = zeros(N)
+
+  mbx_get_induced_dipoles(μ)
+  mbx_finalize_system()
+
+  [μ[i:i+2] for i = 1:3:length(μ)]
 end
