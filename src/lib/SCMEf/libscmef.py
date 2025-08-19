@@ -81,3 +81,15 @@ def scmef_get_induced_dipoles(pos, cell, pbc=True, **kwargs):
     bdys.get_potential_energy()
 
     return bdys.calc.results["induced_dipoles"]
+
+def scmef_get_constituent_energies(pos, cell, pbc=True, **kwargs):
+    
+    bdys = scmef_init(pos, cell, pbc=pbc)
+    bdys.get_potential_energy()
+
+    E_elec  = bdys.calc.results["electrostatic_energy"]
+    E_disp  = bdys.calc.results["dispersion_energy"]
+    E_core  = bdys.calc.results["core_energy"]
+    E_intra = bdys.calc.results["monomer_energy"]
+
+    return E_elec, E_disp, E_core, E_intra
