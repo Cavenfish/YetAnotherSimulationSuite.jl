@@ -1,9 +1,9 @@
 """
-Julia Molecular Dynamics
+Yet Another Simulation Suite (YASS.jl)
 
 A simulation suite for molecular dynamics in Julia. 
 """
-module JMD
+module YASS
 
   # These are part of the Julia Standard Library
   using TOML

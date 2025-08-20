@@ -1,11 +1,11 @@
 using Documenter
 
 makedocs(;
-  sitename = "JMD.jl",
+  sitename = "YASS.jl",
   authors = "Brian C. Ferrari",
   format = Documenter.HTML(
     prettyurls=get(ENV, "CI", nothing) == "true",
-    canonical="https://Cavenfish.github.io/JMD/"
+    canonical="https://Cavenfish.github.io/YASS/"
   ),
   pages = [
     "Home" => "index.md",
@@ -18,7 +18,7 @@ makedocs(;
 )
 
 deploydocs(;
-  repo = "github.com/Cavenfish/JMD.git",
+  repo = "github.com/Cavenfish/YASS.git",
   devbranch = "dev",
   push_preview = true
 )

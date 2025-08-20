@@ -1,6 +1,6 @@
 # Thermostats
 
-`JMD.jl` includes some pre-written thermostats for use in molecular dyunamics simulations. However, it is also fairly easy to create a custom thermostat to use in simulations. 
+`YASS.jl` includes some pre-written thermostats for use in molecular dyunamics simulations. However, it is also fairly easy to create a custom thermostat to use in simulations. 
 
 The included thermostats are:
 

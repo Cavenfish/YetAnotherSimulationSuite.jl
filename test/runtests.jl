@@ -1,10 +1,10 @@
 using Aqua
 using Test
-using JMD
+using YASS
 using LinearAlgebra
 
 @testset "Aqua.jl" begin
-  Aqua.test_all(JMD)
+  Aqua.test_all(YASS)
 end
 
 @testset "IO" begin

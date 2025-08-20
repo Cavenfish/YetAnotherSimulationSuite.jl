@@ -13,7 +13,7 @@ function dynamicTest(calc, f)
   file = joinpath(@__DIR__, f)
   bdys = readSystem(file)
 
-  if isa(bdys, JMD.Cell)
+  if isa(bdys, YASS.Cell)
     run(calc, bdys, (0.0, 10fs), 1fs, NVE(bdys))
   else
     run(calc, bdys, (0.0, 10fs), 1fs, NVE())

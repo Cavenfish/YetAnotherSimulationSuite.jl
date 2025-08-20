@@ -13,7 +13,7 @@ https://pubs.acs.org/doi/full/10.1021/acs.jctc.2c00598
 """
 SCMEf(; constraints=nothing) = Calculator(SCMEf; EF=SCMEf!, constraints=constraints)
 
-struct _SCMEf_PotVars{T, F<:Float64} <: JMD.PotVars
+struct _SCMEf_PotVars{T, F<:Float64} <: PotVars
   lat::Vector{F}
   kwargs::T
 end
@@ -53,7 +53,7 @@ function SCMEf!(F, u, p)
   E
 end
 
-function SCMEf(F, G, cell::JMD.MyCell, lat)
+function SCMEf(F, G, cell::MyCell, lat)
   tmp          = deepcopy(cell)
   tmp.lattice .= reshape(lat, (3,3))
 

@@ -1,6 +1,6 @@
 # Available Potentials
 
-JMD contains a few potentials.
+YASS contains a few potentials.
 
 ## CO Potentials
 
