@@ -10,13 +10,13 @@ Yet Another Simulation Suite (`YASS.jl`) aims to offer users a simple, intuitive
 `YASS.jl` is not yet on the general registry, so for now installation can be done via GitHub.
 
 ```julia-repl
-pkg> add https://github.com/Cavenfish/YASS
+pkg> add https://github.com/Cavenfish/YASS.jl
 ```
 
 If you are more adventerous, you can consider installing the `dev` branch of `YASS.jl`. This will get updates more frequently, which gives users more features but also comes with increased chances of bugs. 
 
 ```julia-repl
-pkg> add https://github.com/Cavenfish/YASS#dev
+pkg> add https://github.com/Cavenfish/YASS.jl#dev
 ```
 
 ### Features
