@@ -1,6 +1,6 @@
 # Geometry Optimizations
 
-YASS uses [Optim.jl](https://julianlsolvers.github.io/Optim.jl/stable/) for optimizations. You can optimize the geometry of molecular systems just `using YASS`. 
+`YASS.jl` uses [Optim.jl](https://julianlsolvers.github.io/Optim.jl/stable/) for optimizations. You can optimize the geometry of molecular systems just `using YASS`. 
 
 ```julia
 using YASS

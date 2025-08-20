@@ -68,7 +68,7 @@ using YASS
 cell = readSystem("./myFile.xyz")
 
 # Or make it yourself
-bdys = [
+bdys::Vector{YASS.MyAtoms} = [
   Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, 'O'),
   Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, 'H'),
   Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, 'H')

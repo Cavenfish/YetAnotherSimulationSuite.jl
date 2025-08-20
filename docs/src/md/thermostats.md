@@ -14,7 +14,7 @@ The included thermostats are:
 Here the `Berendsen` thermostat is shown to illustrate how to create a custom thermostat. Custom thermostats require a struct for their parameters and an action function.
 
 ```julia
-struct Berendsen{F<:AbstractFloat} <:ThermoVars
+struct Berendsen{F<:AbstractFloat} <: YASS.ThermoVars
   gamma::F
 end
 
