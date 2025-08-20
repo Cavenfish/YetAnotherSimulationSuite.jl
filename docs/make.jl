@@ -13,7 +13,8 @@ makedocs(;
     "Optimization" => "optimizations.md",
     "Vibrations" => "vibrations.md",
     "Molecular Dynamics" => ["md/dynamics.md", "md/thermostats.md"],
-    "Potentials" => ["potentials/potList.md", "potentials/customPot.md"]
+    "Potentials" => ["potentials/potList.md", "potentials/customPot.md"],
+    "Credits" => "dependencies.md"
   ]
 )
 
