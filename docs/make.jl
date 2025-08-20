@@ -5,7 +5,7 @@ makedocs(;
   authors = "Brian C. Ferrari",
   format = Documenter.HTML(
     prettyurls=get(ENV, "CI", nothing) == "true",
-    canonical="https://Cavenfish.github.io/YASS/"
+    canonical="https://Cavenfish.github.io/YASS.jl/"
   ),
   pages = [
     "Home" => "index.md",
@@ -18,7 +18,7 @@ makedocs(;
 )
 
 deploydocs(;
-  repo = "github.com/Cavenfish/YASS.git",
+  repo = "github.com/Cavenfish/YASS.jl.git",
   devbranch = "dev",
   push_preview = true
 )

@@ -1,17 +1,17 @@
-[ci-img]: https://github.com/Cavenfish/YASS/actions/workflows/CI.yml/badge.svg
-[ci-url]: https://github.com/Cavenfish/YASS/actions/workflows/CI.yml
+[ci-img]: https://github.com/Cavenfish/YASS.jl/actions/workflows/CI.yml/badge.svg
+[ci-url]: https://github.com/Cavenfish/YASS.jl/actions/workflows/CI.yml
 
 [aqua-img]: https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg
 [aqua-url]: https://github.com/JuliaTesting/Aqua.jl
 
-[codecov-img]: https://codecov.io/github/Cavenfish/YASS/branch/main/graph/badge.svg
-[codecov-url]: https://app.codecov.io/github/Cavenfish/YASS
+[codecov-img]: https://codecov.io/github/Cavenfish/YASS.jl/branch/main/graph/badge.svg
+[codecov-url]: https://app.codecov.io/github/Cavenfish/YASS.jl
 
 [docs-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-url]: https://cavenfish.github.io/YASS/stable/
+[docs-url]: https://cavenfish.github.io/YASS.jl/stable/
 
 [ddocs-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[ddocs-url]: https://cavenfish.github.io/YASS/dev/
+[ddocs-url]: https://cavenfish.github.io/YASS.jl/dev/
 
 # Yet Another Simulation Suite (YASS.jl)
 
