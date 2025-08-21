@@ -47,7 +47,7 @@ function trajTesting(f, N)
   @test length(new.images) == N
 end
 
-@testset "JMD Style File IO" begin
+@testset "YASS Style File IO" begin
 
   bdysTesting(
     "testingFiles/xyzFiles/co.xyz",

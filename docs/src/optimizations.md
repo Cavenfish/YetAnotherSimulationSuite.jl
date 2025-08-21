@@ -1,21 +1,21 @@
 # Geometry Optimizations
 
-JMD uses [Optim.jl](https://julianlsolvers.github.io/Optim.jl/stable/) for optimizations. You can optimize the geometry of molecular systems just `using JMD`. 
+`YASS.jl` uses [Optim.jl](https://julianlsolvers.github.io/Optim.jl/stable/) for optimizations. You can optimize the geometry of molecular systems just `using YASS`. 
 
 ```julia
-using JMD
+using YASS
 
 # Read in bdys
 bdys = readSystem("./myFile.xyz")
 
 # Run a geometry optimization
-new  = opt(TIP4Pf(), JMD.LBFGS(), bdys)
+new  = opt(TIP4Pf(), YASS.LBFGS(), bdys)
 ```
 
-The optimization algorithms from Optim.jl are not re-exported by `JMD.jl`, for this reason you must either use `JMD.LBFGS()` (as shown above) or load `Optim.jl` within your script (as shown below). Note, for this to work you need to have already installed `Optim.jl`.
+The optimization algorithms from Optim.jl are not re-exported by `YASS.jl`, for this reason you must either use `YASS.LBFGS()` (as shown above) or load `Optim.jl` within your script (as shown below). Note, for this to work you need to have already installed `Optim.jl`.
 
 ```julia
-using JMD
+using YASS
 using Optim
 
 # Read in bdys

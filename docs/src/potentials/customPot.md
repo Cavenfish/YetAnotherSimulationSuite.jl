@@ -1,6 +1,6 @@
 # Custom Potentials
 
-Using a custom potential within `JMD.jl` is fairly straightforward. You need to make the following components.
+Using a custom potential within `YASS.jl` is fairly straightforward. You need to make the following components.
 
   - `PotVars` struct
   - Initializer function (minimum 1, maximum 2)
@@ -8,27 +8,27 @@ Using a custom potential within `JMD.jl` is fairly straightforward. You need to 
 
 ### Potential Variables Struct
 
-This struct should hold all parameters (outside of particle positions, velocities, etc.) needed to evaluate your potential. The name of this struct is not important but the type must be the `PotVars` type from `JMD`. 
+This struct should hold all parameters (outside of particle positions, velocities, etc.) needed to evaluate your potential. The name of this struct is not important but the type must be the `PotVars` type from `YASS`. 
 
 ```julia
-using JMD 
+using YASS 
 
-struct MyExamplePotVars{F<:Float64} <: JMD.PotVars
+struct MyExamplePotVars{F<:Float64} <: YASS.PotVars
   gamma::F
 end
 ```
 
 ### Initializer Function
 
-This function needs to initialize the variables used within your custom potential. The function should take a single parameter, either a vector of `Particle` or a `JMD cell` object, and return your custom `PotVars` struct initialized with your potential's parameters.
+This function needs to initialize the variables used within your custom potential. The function should take a single parameter, either a vector of `Particle` or a `YASS cell` object, and return your custom `PotVars` struct initialized with your potential's parameters.
 
 ```julia
-MyExamplePotential(x::Union{Vector{JMD.MyAtoms}, JMD.MyCell}) = MyExamplePotVars(16.0)
+MyExamplePotential(x::Union{Vector{YASS.MyAtoms}, YASS.MyCell}) = MyExamplePotVars(16.0)
 ```
 
 ### Evaluation functions
 
-`JMD.jl` calculators can have 3 different evaluation functions: 
+`YASS.jl` calculators can have 3 different evaluation functions: 
 
   1) Energy only evaluation
   2) Inplace forces only evaluation

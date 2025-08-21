@@ -1,6 +1,6 @@
 # Thermostats
 
-`JMD.jl` includes some pre-written thermostats for use in molecular dyunamics simulations. However, it is also fairly easy to create a custom thermostat to use in simulations. 
+`YASS.jl` includes some pre-written thermostats for use in molecular dyunamics simulations. However, it is also fairly easy to create a custom thermostat to use in simulations. 
 
 The included thermostats are:
 
@@ -14,7 +14,7 @@ The included thermostats are:
 Here the `Berendsen` thermostat is shown to illustrate how to create a custom thermostat. Custom thermostats require a struct for their parameters and an action function.
 
 ```julia
-struct Berendsen{F<:AbstractFloat} <:ThermoVars
+struct Berendsen{F<:AbstractFloat} <: YASS.ThermoVars
   gamma::F
 end
 

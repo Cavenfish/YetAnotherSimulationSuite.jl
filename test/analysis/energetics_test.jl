@@ -3,7 +3,7 @@
   file = joinpath(@__DIR__, "../testingFiles/xyzFiles/h2o.xyz")
   bdys = readSystem(file)
   calc = SPCF()
-  new1 = opt(calc, JMD.LBFGS(), bdys; g_tol=1e-9, iterations=500)
+  new1 = opt(calc, YASS.LBFGS(), bdys; g_tol=1e-9, iterations=500)
   new2 = deepcopy(new1)
 
   @test isapprox(0.0, getRotEnergy(new1); atol=1e-8)

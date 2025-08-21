@@ -1,19 +1,19 @@
 # Bodies
 
-There are two types of simulation objects within JMD, the Atom and Cell objects. A Cell object is self-contained and is passed as-is to simulation functions, whereas the Atom object is only a single Atom. For simulations with more than one Atom, you must use a vector of Atom objects.
+There are two types of simulation objects within YASS, the Atom and Cell objects. A Cell object is self-contained and is passed as-is to simulation functions, whereas the Atom object is only a single Atom. For simulations with more than one Atom, you must use a vector of Atom objects.
 
 ### Atom
 
-In JMD you have an Atom object, which contains the position, velocity, mass and symbol of the atom. As mentioned above, you will typically be working with a vector of Atoms. You can create this vector of Atoms manually or read them in from an xyz file.
+In YASS you have an Atom object, which contains the position, velocity, mass and symbol of the atom. As mentioned above, you will typically be working with a vector of Atoms. You can create this vector of Atoms manually or read them in from an xyz file.
 
 ```julia
-using JMD
+using YASS
 
 # Read it in from an xyz file
 bdys = readSystem("./myFile.xyz")
 
 # Or make it yourself
-bdys::Vector{JMD.MyAtoms} = [
+bdys::Vector{YASS.MyAtoms} = [
   Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, "O"),
   Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, "H"),
   Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, "H")
@@ -23,10 +23,10 @@ bdys::Vector{JMD.MyAtoms} = [
 write("./h2o.xyz", bdys)
 ```
 
-Within JMD the Atom struct is mutable, this is to allow on-the-fly swapping of atomic masses. 
+Within YASS the Atom struct is mutable, this is to allow on-the-fly swapping of atomic masses. 
 
 ```julia
-using JMD
+using YASS
 
 # Read it in from an xyz file
 bdys = readSystem("./myFile.xyz")
@@ -35,10 +35,10 @@ bdys = readSystem("./myFile.xyz")
 bdys[1].m = 2.00
 ```
 
-JMD also contains some auxiliary functions that can apply changes to Atom objects.
+YASS also contains some auxiliary functions that can apply changes to Atom objects.
 
 ```julia
-using JMD
+using YASS
 
 # Read it in from an xyz file
 bdys = readSystem("./myFile.xyz")
@@ -59,16 +59,16 @@ swapIso!(bdys, [1,2], [4.0, 5.0])
 
 ### Cell
 
-The Cell object within JMD holds the lattice, scaled positions, velocities, masses, symbols, and some PBC criteria. Making the Cell object completely from sctratch is possible but not typical. 
+The Cell object within YASS holds the lattice, scaled positions, velocities, masses, symbols, and some PBC criteria. Making the Cell object completely from sctratch is possible but not typical. 
 
 ```julia
-using JMD
+using YASS
 
 # Read it in from an xyz file
 cell = readSystem("./myFile.xyz")
 
 # Or make it yourself
-bdys = [
+bdys::Vector{YASS.MyAtoms} = [
   Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, 'O'),
   Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, 'H'),
   Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, 'H')
@@ -80,10 +80,10 @@ cell = makeCell(bdys, lat)
 write("./myCell.xyz", cell)
 ```
 
-JMD also contians some basic auxiliary functions for cells. 
+YASS also contians some basic auxiliary functions for cells. 
 
 ```julia
-using JMD
+using YASS
 
 # Read it in from an xyz file
 cell = readSystem("./myFile.xyz")
