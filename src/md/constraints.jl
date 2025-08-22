@@ -22,9 +22,9 @@ function fixAtoms!(forces, pos, mas, inds, buff)
   end
 end
 
-struct SHAKE_BUF{F<:Float64, RO<:AbstractVector, AV3D<:AbstractVector}
+struct SHAKE_BUF{F<:Float64, AV3D<:AbstractVector}
   req::F
-  rold::RO
+  rold::AV3D
   rnew::AV3D
 end
 
@@ -33,7 +33,7 @@ SHAKE(bonds, req) = StaticConstraint(
   SHAKE!,
   SHAKE_BUF(
     req,
-    [zeros(3) for i = 1:length(bonds)],
+    MVector{3}(zeros(3)),
     MVector{3}(zeros(3))
   ) 
 )
@@ -45,32 +45,36 @@ function SHAKE!(
 
   maxIter = 25
 
-  for (n,(i,j)) in enumerate(bonds)
+  for (i,j) in bonds
 
-    μ = 1 / ((1/m[i]) + (1/m[j]))
-    
-    # Set x to skip while loop if this is the first step
-    x = if iszero(buff.rold[n])
-      @. buff.rnew = u[j] - u[i]
-      1e-9
-    else
-      1
-    end
+    μ = 1 / ((1/m[i]) + (1/m[j]))    
 
+    @. buff.rold = u[j] - u[i]
+
+    x    = 1.0
     iter = 0
     while abs(x) > 1e-8 && iter < maxIter
 
       @. buff.rnew = u[j] - u[i]
 
-      x = 0.5 * (buff.req^2 - dot(buff.rnew, buff.rnew)) / dot(buff.rold[n], buff.rnew)
-
-      u[i] .-= x * μ / m[i] .* buff.rold[n]
-      u[j] .+= x * μ / m[j] .* buff.rold[n]
+      x = 0.5 * (buff.req^2 - dot(buff.rnew, buff.rnew)) / dot(buff.rold, buff.rnew)
+      
+      u[i] .-= x * μ / m[i] .* buff.rold
+      u[j] .+= x * μ / m[j] .* buff.rold
 
       iter += 1
     end
 
-    buff.rold[n] .= buff.rnew
-  end
+    @. buff.rold = u[j] - u[i]
+    x    = 1.0
+    iter = 0
+    while abs(x) > 1e-8 && iter < maxIter
+      @. buff.rnew = F[j] / m[j] - F[i] / m[i]
 
+      x = -dot(buff.rnew, buff.rold) / buff.req^2
+
+      F[i] .-= x * μ .* buff.rold
+      F[j] .+= x * μ .* buff.rold
+    end
+  end
 end
