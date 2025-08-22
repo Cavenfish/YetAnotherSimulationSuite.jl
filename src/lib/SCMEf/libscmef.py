@@ -87,7 +87,7 @@ def scmef_get_induced_dipoles(pos, cell, pbc=True, **kwargs):
     bdys = scmef_init(pos, cell, pbc=pbc)
     bdys.get_potential_energy()
 
-    return bdys.calc.results["induced_dipoles"]
+    return bdys.calc.scme.dipole_moments
 
 def scmef_get_constituent_energies(pos, cell, pbc=True, **kwargs):
     
