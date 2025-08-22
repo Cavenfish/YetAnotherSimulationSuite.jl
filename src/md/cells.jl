@@ -28,6 +28,8 @@ function Cell(
   )
 end
 
+Base.length(cell::MyCell) = length(cell.masses)  
+
 function reorder!(cell::MyCell, order::Vector{Int})
   cell.scaled_pos .= cell.scaled_pos[order]
   cell.velocity   .= cell.velocity[order]

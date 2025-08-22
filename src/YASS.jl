@@ -156,10 +156,13 @@ module YASS
 
   include("./md/potentials/MvHff.jl")
   include("./md/potentials/HGNN.jl")
-  include("./md/potentials/TIP4P.jl")
   include("./md/potentials/SPC-F.jl")
   include("./md/potentials/MBX.jl")
   include("./md/potentials/SCMEf.jl")
+
+  include("./md/potentials/TIPnP/base.jl")
+  include("./md/potentials/TIPnP/TIP4P.jl")
+  include("./md/potentials/TIPnP/TIP4Pf.jl")
 
   include("./md/potentials/funcs/PBC.jl")
   include("./md/potentials/funcs/intra.jl")

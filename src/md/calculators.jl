@@ -35,7 +35,9 @@ function fg!(F, G, x, p, calc::MyCalc)
 
     if calc.constraints != nothing
       for c in calc.constraints
-        c.apply!(forces, c.inds)
+        isa(c, MyDynamicConstraint) && continue
+
+        c.apply!(forces, u, p.m, c.inds, c.buff)
       end
     end
 
@@ -65,7 +67,9 @@ function fg!(F, G, x, p, calc::MyCalc)
 
     if calc.constraints != nothing
       for c in calc.constraints
-        c.apply!(forces, c.inds)
+        isa(c, MyDynamicConstraint) && continue
+
+        c.apply!(forces, u, p.m, c.inds, c.buff)
       end
     end
 
