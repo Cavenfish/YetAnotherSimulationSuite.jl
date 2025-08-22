@@ -18,26 +18,33 @@ def scmef_init(pos, cell, pbc=True, **kwargs):
 
     # SCME params
     para_dict = {
-        "te": 1.1045 / Bohr,
-        "td": 7.5548 * Bohr,
-        "Ar": 8149.63 / Hartree,
-        "Br": -0.5515,
-        "Cr": -3.4695 * Bohr,
-        "r_Br": 1.0 / Bohr,
-        "rc_Disp": 8.0 / Bohr,
-        "rc_Core": 7.5 / Bohr,
-        "rc_Elec": 9.0 / Bohr,
-        "w_rc_Elec": 2.0 / Bohr,
-        "w_rc_Core": 2.0 / Bohr,
-        "w_rc_Disp": 2.0 / Bohr,
-        "C6": 46.4430e0,
-        "C8": 1141.7000e0,
-        "C10": 33441.0000e0,
-        "scf_convcrit": 1e-12,
-        "scf_policy": pyscme.SCFPolicy.strict,
-        "NC": [1,1,1],
+        "dispersion": {
+            "td": 7.5548 * Bohr,
+            "rc": 8.0 / Bohr,
+            "w_rc": 2 / Bohr,
+            "C6_OO": 46.4430e0,
+            "C8_OO": 1141.7000e0,
+            "C10_OO": 33441.0000e0,
+        },
+        "repulsion": {
+            "Ar_OO": 8149.63 / Hartree,
+            "Br_OO": -0.5515,
+            "Cr_OO": -3.4695 * Bohr,
+            "r_Br": 1.0 / Bohr,
+            "rc": 7.5 / Bohr,
+            "w_rc": 2 / Bohr,
+        },
+        "electrostatic": {
+            "scf_convcrit": 1e-12,
+            "NC": [1, 1, 1],
+            "scf_policy": pyscme.SCFPolicy.strict,
+            "te": 1.1045 / Bohr,
+            "max_iter_scf": 500,
+            "rc": 9.0 / Bohr,
+            "w_rc": 2 / Bohr,
+        },
         "dms": True,
-        "qms": True
+        "qms": True,
     }
 
     for (key, value) in kwargs.items():
@@ -50,7 +57,7 @@ def scmef_init(pos, cell, pbc=True, **kwargs):
 
     # Set SCME calc
     bdys.calc =  SCMECalculator(atoms=bdys, **para_dict)
-    parameter_H2O.Assign_parameters_H20(bdys.calc.scme)
+    parameter_H2O.Assign_parameters_H2O(bdys.calc.scme)
 
     return bdys
 
