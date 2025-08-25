@@ -1,20 +1,17 @@
 """
 Constraints
 
-Static Constraints should always have 
+Constraints should always have 
   apply!(forces, pos, mas, inds, buff)
-  
-Dynamic Constraints should always have
-  apply!(forces, vels, pos, mas, inds buff)
 """
 
-struct StaticConstraint{I,A,B} <: MyStaticConstraint
+struct Constraint{I,A,B} <: MyConstraint
   inds::I
   apply!::A
   buff::B
 end
 
-fixAtoms(inds) = StaticConstraint(inds, fixAtoms!, nothing)
+fixAtoms(inds) = Constraint(inds, fixAtoms!, nothing)
 
 function fixAtoms!(forces, pos, mas, inds, buff)
   for i in inds
@@ -28,7 +25,7 @@ struct SHAKE_BUF{F<:Float64, AV3D<:AbstractVector}
   rnew::AV3D
 end
 
-SHAKE(bonds, req) = StaticConstraint(
+SHAKE(bonds, req) = Constraint(
   bonds, 
   SHAKE!,
   SHAKE_BUF(

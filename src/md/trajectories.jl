@@ -1,12 +1,12 @@
 
 # Time dependent MD properties
 struct Image{D, F<:AbstractFloat} <: MyImage
-  pos::Vector{SVector{D, F}}
-  vel::Vector{SVector{D, F}}
+  pos::Vector{MVector{D, F}}
+  vel::Vector{MVector{D, F}}
   time::F
   temp::F
   energy::F
-  forces::Vector{SVector{D, F}}
+  forces::Vector{MVector{D, F}}
 end
 
 struct Traj{D, F<:AbstractFloat, S<:AbstractString, Im<:MyImage} <: MyTraj
@@ -34,7 +34,7 @@ function getImage(solu::SciMLBase.ODESolution, i::Int, dt::Float64)
   T = solu.prob.p.temp[i]
   E = solu.prob.p.energy[i]
   n = length(r[1])
-  F = SVector{n}.(solu.prob.p.forces[i])
+  F = solu.prob.p.forces[i]
 
   Image(r, v, t, T, E, F)
 end

@@ -30,5 +30,4 @@ abstract type MyCalc end
 abstract type MyThermostat end
 
 # Constraints
-abstract type MyStaticConstraint end
-abstract type MyDynamicConstraint end
+abstract type MyConstraint end

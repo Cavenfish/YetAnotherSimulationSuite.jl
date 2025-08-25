@@ -44,7 +44,7 @@ struct Dynamics{T,D,B,P, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractStrin
   mols::Vector{Vector{I}}
   temp::Vector{F}
   energy::Vector{F}
-  forces::Vector{Vector{SVector{D, F}}}
+  forces::Vector{Vector{MVector{D, F}}}
   potVars::PV
   PBC::Vector{B}
   NC::Vector{I}
@@ -107,12 +107,12 @@ function Base.run(
   mas        = [i.m for i in bdys]
   potVars    = calc.b(bdys)
   pars, mols = getPairs(bdys)
-  pos        = [SVector{3}(i.r) for i in bdys]
-  vel        = [SVector{3}(i.v) for i in bdys]
+  pos        = [MVector{3}(i.r) for i in bdys]
+  vel        = [MVector{3}(i.v) for i in bdys]
 
   simu = Dynamics(
     mas, symbols, pars, mols, Float64[], Float64[], 
-    Vector{SVector{3, Float64}}[], potVars, PBC, NC, ensemble
+    Vector{MVector{3, Float64}}[], potVars, PBC, NC, ensemble
   )
 
   doRun(calc, vel, pos, tspan, simu, algo, dt, split; kwargs...)
@@ -125,12 +125,12 @@ function Base.run(
 
   potVars    = calc.b(cell)
   pars, mols = getPairs(cell)
-  pos        = [SVector{3}(i) for i in getPos(cell)]
-  vel        = [SVector{3}(i) for i in cell.velocity]
+  pos        = [MVector{3}(i) for i in getPos(cell)]
+  vel        = [MVector{3}(i) for i in cell.velocity]
 
   simu = Dynamics(
     cell.masses, cell.symbols, pars, mols, Float64[], Float64[], 
-    Vector{SVector{3, Float64}}[], potVars, cell.PBC, cell.NC, ensemble
+    Vector{MVector{3, Float64}}[], potVars, cell.PBC, cell.NC, ensemble
   )
 
   doRun(calc, vel, pos, tspan, simu, algo, dt, split; kwargs...)
