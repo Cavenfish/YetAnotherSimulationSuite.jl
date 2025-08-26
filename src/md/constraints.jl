@@ -40,7 +40,7 @@ function SHAKE!(
   bonds::AbstractVector, buff::B
 ) where {B}
 
-  maxIter = 25
+  maxIter = 250
 
   for (i,j) in bonds
 

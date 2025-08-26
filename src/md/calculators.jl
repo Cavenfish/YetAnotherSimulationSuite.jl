@@ -37,6 +37,9 @@ function fg!(F, G, x, p, calc::MyCalc)
       for c in calc.constraints
         c.apply!(forces, u, p.m, c.inds, c.buff)
       end
+
+      tmp = [j for i in u for j in i]
+      x  .= tmp
     end
 
     tmp = [j for i in forces for j in i]
