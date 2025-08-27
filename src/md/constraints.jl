@@ -75,3 +75,24 @@ function SHAKE!(
     end
   end
 end
+
+
+struct SETTLE_BUF{F<:Float64, AV3D<:AbstractVector}
+  req::F
+  rold::AV3D
+  rnew::AV3D
+end
+
+SETTLE(bonds, req) = Constraint(
+  bonds, 
+  SETTLE!,
+  SETTLE_BUF(
+    req,
+    MVector{3}(zeros(3)),
+    MVector{3}(zeros(3))
+  ) 
+)
+
+function SETTLE!(F, u, m, inds, buff)
+
+end
