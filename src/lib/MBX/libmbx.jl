@@ -127,6 +127,13 @@ function mbx_get_induced_dipoles(μ)
 
 end
 
+function mbx_get_charges(q)
+  ccall(
+    (:get_charges_, libmbx), Cvoid,
+    (Ptr{Cdouble},), q
+  )
+end
+
 function mbx_finalize_system()
 
   ccall(
@@ -197,5 +204,18 @@ function mbx_getConstituentEnergies(obj::Union{Vector{MyAtoms}, MyCell})
   xyz  = [j for i in vars.xyz for j in i]
   nats = convert(Int32, length(vars.at_nams))
 
-  mbx_get_energy_decomp(xyz, nats)
+  ret = mbx_get_energy_decomp(xyz, nats)
+  mbx_finalize_system()
+
+  ret
+end
+
+function mbx_getCharges(obj::Union{Vector{MyAtoms}, MyCell})
+  vars = MBX(obj)
+  q    = zeros(vars.num_mon * 4)
+  
+  mbx_get_charges(q)
+  mbx_finalize_system()
+
+  q
 end
