@@ -1,6 +1,21 @@
 #TODO:
 #   -Make function to clean duplicates
 
+"""
+    Cell{D, B, I, F, S}
+
+Structure representing a simulation cell.
+
+# Fields
+- `lattice`: Lattice matrix.
+- `scaled_pos`: Scaled positions.
+- `velocity`: Velocities.
+- `masses`: Masses.
+- `symbols`: Atomic symbols.
+- `mask`: Mask vector.
+- `PBC`: Periodic boundary conditions.
+- `NC`: Neighbor counts.
+"""
 struct Cell{D, B, I<:Int, F<:AbstractFloat, S<:AbstractString} <: MyCell
   lattice::MMatrix{D,D,F}
   scaled_pos::Vector{MVector{D,F}}
@@ -12,6 +27,24 @@ struct Cell{D, B, I<:Int, F<:AbstractFloat, S<:AbstractString} <: MyCell
   NC::Vector{I}
 end
 
+"""
+    Cell(lat, spos, vel, mas, sym, mask, PBC, NC)
+
+Construct a Cell object from lattice, positions, velocities, etc.
+
+# Arguments
+- `lat`: Lattice matrix.
+- `spos`: Scaled positions.
+- `vel`: Velocities.
+- `mas`: Masses.
+- `sym`: Symbols.
+- `mask`: Mask vector.
+- `PBC`: Periodic boundary conditions.
+- `NC`: Neighbor counts.
+
+# Returns
+- Cell object.
+"""
 function Cell(
   lat::Matrix, spos::AbstractArray, vel::AbstractArray, 
   mas::Vector{F}, sym::Vector{S}, mask::Vector{Bool},
@@ -28,6 +61,18 @@ function Cell(
   )
 end
 
+"""
+    reorder!(cell::MyCell, order::Vector{Int})
+
+Reorder the atoms in a cell according to a given order.
+
+# Arguments
+- `cell`: MyCell object.
+- `order`: New order of indices.
+
+# Side Effects
+- Modifies the cell in-place.
+"""
 function reorder!(cell::MyCell, order::Vector{Int})
   cell.scaled_pos .= cell.scaled_pos[order]
   cell.velocity   .= cell.velocity[order]
@@ -36,6 +81,21 @@ function reorder!(cell::MyCell, order::Vector{Int})
   cell.mask       .= cell.mask[order]
 end
 
+"""
+    makeCell(bdys, lattice; mask, PBC, NC)
+
+Construct a Cell from a vector of MyAtoms and a lattice.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+- `lattice`: Lattice matrix.
+- `mask`: Mask vector (optional).
+- `PBC`: Periodic boundary conditions (optional).
+- `NC`: Neighbor counts (optional).
+
+# Returns
+- Cell object.
+"""
 function makeCell(bdys::Vector{MyAtoms}, lattice::AbstractMatrix; 
   mask=repeat([false], length(bdys)), PBC=repeat([true], 3), NC=[1,1,1])
 
@@ -49,6 +109,18 @@ function makeCell(bdys::Vector{MyAtoms}, lattice::AbstractMatrix;
   )
 end
 
+"""
+    trim!(cell::MyCell, iter)
+
+Remove atoms at given indices from a cell.
+
+# Arguments
+- `cell`: MyCell object.
+- `iter`: Indices to remove.
+
+# Side Effects
+- Modifies the cell in-place.
+"""
 function trim!(cell::MyCell, iter)
   deleteat!(cell.scaled_pos, iter)
   deleteat!(cell.velocity, iter)
@@ -57,6 +129,17 @@ function trim!(cell::MyCell, iter)
   deleteat!(cell.mask, iter)
 end
 
+"""
+    makeBdys(cell::MyCell)::Vector{MyAtoms}
+
+Convert a cell to a vector of MyAtoms.
+
+# Arguments
+- `cell`: MyCell object.
+
+# Returns
+- Vector of MyAtoms.
+"""
 function makeBdys(cell::MyCell)::Vector{MyAtoms}
   D    = length(cell.velocity[1])
   pos  = MVector{D}.(getPos(cell))
@@ -65,12 +148,36 @@ function makeBdys(cell::MyCell)::Vector{MyAtoms}
   [Particle(pos[i], vel[i], cell.masses[i], cell.symbols[i]) for i = 1:length(pos)]
 end
 
+"""
+    getScaledPos(x0, lattice)
+
+Get scaled positions from Cartesian coordinates and lattice.
+
+# Arguments
+- `x0`: Cartesian coordinates.
+- `lattice`: Lattice matrix.
+
+# Returns
+- Vector of scaled positions.
+"""
 function getScaledPos(x0, lattice)
   T = inv(lattice)
   
   [T * x0[i:i+2] for i = 1:3:length(x0)-1]
 end
 
+"""
+    getScaledPos!(cell, x0)
+
+Update scaled positions in a cell from Cartesian coordinates.
+
+# Arguments
+- `cell`: MyCell object.
+- `x0`: Cartesian coordinates.
+
+# Side Effects
+- Modifies the cell in-place.
+"""
 function getScaledPos!(cell, x0)
   T = inv(cell.lattice)
 
@@ -82,16 +189,49 @@ function getScaledPos!(cell, x0)
 
 end
 
+"""
+    getPos(cell)
+
+Get Cartesian positions from scaled positions in a cell.
+
+# Arguments
+- `cell`: MyCell object.
+
+# Returns
+- Vector of Cartesian positions.
+"""
 function getPos(cell)
   [cell.lattice * i for i in cell.scaled_pos]
 end
 
+"""
+    getVolume(cell)
+
+Compute the volume of a cell.
+
+# Arguments
+- `cell`: MyCell object.
+
+# Returns
+- Volume (Float64).
+"""
 function getVolume(cell)
   a,b,c  = eachrow(cell.lattice)
 
   cross(b,c) |> (x -> dot(a,x))
 end 
 
+"""
+    wrap!(cell)
+
+Wrap all atoms in a cell into the primary unit cell.
+
+# Arguments
+- `cell`: MyCell object.
+
+# Side Effects
+- Modifies the cell in-place.
+"""
 function wrap!(cell)
   r = getPos(cell)
   
@@ -109,6 +249,17 @@ function wrap!(cell)
 
 end
 
+"""
+    center!(cell)
+
+Center the atoms in a cell.
+
+# Arguments
+- `cell`: MyCell object.
+
+# Side Effects
+- Modifies the cell in-place.
+"""
 function center!(cell)
   r  = getPos(cell)
   r0 = sum(r) ./ length(r)
@@ -129,6 +280,18 @@ function center!(cell)
 
 end
 
+"""
+    repeat(cell::MyCell, count::Integer)
+
+Repeat a cell multiple times.
+
+# Arguments
+- `cell`: MyCell object.
+- `count`: Number of repetitions.
+
+# Returns
+- New repeated Cell object.
+"""
 function Base.repeat(cell::MyCell, count::Integer)
   Cell(
     deepcopy(cell.lattice),
@@ -142,6 +305,19 @@ function Base.repeat(cell::MyCell, count::Integer)
   )
 end
 
+"""
+    replicate!(super, cell, N)
+
+Replicate a cell into a supercell.
+
+# Arguments
+- `super`: Supercell object to fill.
+- `cell`: Cell to replicate.
+- `N`: Replication factors along each axis.
+
+# Side Effects
+- Modifies the supercell in-place.
+"""
 function replicate!(super, cell, N)
 
   a,b,c  = eachrow(cell.lattice)
@@ -190,6 +366,17 @@ function replicate!(super, cell, N)
 
 end
 
+"""
+    getMIC(cell::MyCell)
+
+Get the minimum image convention cell.
+
+# Arguments
+- `cell`: MyCell object.
+
+# Returns
+- New MyCell object with minimum image convention applied.
+"""
 function getMIC(cell::MyCell)
   bdys = makeBdys(cell)
   new  = getMIC(bdys, cell.lattice)
@@ -197,6 +384,18 @@ function getMIC(cell::MyCell)
   makeCell(new, cell.lattice*3, mask=cell.mask, PBC=cell.PBC, NC=cell.NC)
 end
 
+"""
+    makeSuperCell(cell, T)
+
+Create a supercell from a cell and transformation matrix.
+
+# Arguments
+- `cell`: MyCell object.
+- `T`: Transformation matrix.
+
+# Returns
+- New supercell object.
+"""
 function makeSuperCell(cell, T)
 
   N       = diag(T)
@@ -224,6 +423,19 @@ function makeSuperCell(cell, T)
   super
 end
 
+"""
+    makeSuperCell!(super, cell, T)
+
+In-place creation of a supercell from a cell and transformation matrix.
+
+# Arguments
+- `super`: Supercell object to fill.
+- `cell`: Cell to replicate.
+- `T`: Transformation matrix.
+
+# Side Effects
+- Modifies the supercell in-place.
+"""
 function makeSuperCell!(super, cell, T)
 
   super.lattice .= T * cell.lattice
@@ -240,6 +452,18 @@ function makeSuperCell!(super, cell, T)
 
 end
 
+"""
+    getPrimitiveCell(cell, symprec)
+
+Get the primitive cell using spglib.
+
+# Arguments
+- `cell`: MyCell object.
+- `symprec`: Symmetry precision.
+
+# Returns
+- Primitive Cell object.
+"""
 function getPrimitiveCell(cell, symprec)
   amu  = TOML.parsefile(joinpath(@__DIR__, "../data/Atoms.toml"))["Mass"]
   num  = TOML.parsefile(joinpath(@__DIR__, "../data/Atoms.toml"))["Number"]

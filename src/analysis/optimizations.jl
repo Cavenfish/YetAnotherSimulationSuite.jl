@@ -1,6 +1,20 @@
 # TODO:
 #   - Generalize the dimensionality of optimizations
 
+"""
+    optVars
+
+Structure holding optimization variables for geometry optimization.
+
+# Fields
+- `potVars`: Potential variables.
+- `mols`: Molecule indices.
+- `pars`: Pair indices.
+- `m`: Masses.
+- `PBC`: Periodic boundary conditions.
+- `NC`: Neighbor counts.
+- `lattice`: Lattice matrix.
+"""
 struct optVars{D,B,P, I<:Int, PV<:PotVars, F<:AbstractFloat}
   potVars::PV
   mols::Vector{Vector{I}}
@@ -11,19 +25,52 @@ struct optVars{D,B,P, I<:Int, PV<:PotVars, F<:AbstractFloat}
   lattice::MMatrix{D,D,F}
 end
 
+"""
+    prepX0(bdys::Vector{MyAtoms})
 
+Prepare the initial coordinate vector from a set of atoms.
+
+# Arguments
+- `bdys`: Vector of `MyAtoms` objects.
+
+# Returns
+- Flat vector of coordinates.
+"""
 function prepX0(bdys::Vector{MyAtoms})
   r  = [i.r for i in bdys]
   
   [j for i in r for j in i]
 end
 
+"""
+    prepX0(cell::MyCell)
+
+Prepare the initial coordinate vector from a cell.
+
+# Arguments
+- `cell`: `MyCell` object.
+
+# Returns
+- Flat vector of coordinates.
+"""
 function prepX0(cell::MyCell)
   r  = getPos(cell)
   
   [j for i in r for j in i]
 end
 
+"""
+    prep4pot(builder, bdys::Vector{MyAtoms})
+
+Prepare variables for potential energy calculation from atoms.
+
+# Arguments
+- `builder`: Potential builder function.
+- `bdys`: Vector of `MyAtoms` objects.
+
+# Returns
+- Tuple: (coordinate vector, `optVars` object).
+"""
 function prep4pot(builder, bdys::Vector{MyAtoms})
   m          = [i.m for i in bdys]
   x0         = prepX0(bdys)
@@ -37,6 +84,18 @@ function prep4pot(builder, bdys::Vector{MyAtoms})
   x0, vars
 end
 
+"""
+    prep4pot(builder, cell::MyCell)
+
+Prepare variables for potential energy calculation from a cell.
+
+# Arguments
+- `builder`: Potential builder function.
+- `cell`: `MyCell` object.
+
+# Returns
+- Tuple: (coordinate vector, `optVars` object).
+"""
 function prep4pot(builder, cell::MyCell)
   bdys       = makeBdys(cell)
   x0         = prepX0(cell)
@@ -48,6 +107,18 @@ function prep4pot(builder, cell::MyCell)
   x0, vars
 end
 
+"""
+    getNewBdys(bdys, res)
+
+Construct new atom objects from optimization results.
+
+# Arguments
+- `bdys`: Original vector of `MyAtoms`.
+- `res`: Optimization result.
+
+# Returns
+- Vector of new `MyAtoms` objects.
+"""
 function getNewBdys(bdys, res)
   N   = length(bdys)
   opt = res.minimizer
@@ -66,6 +137,20 @@ function getNewBdys(bdys, res)
   new
 end
 
+"""
+    opt(calc::MyCalc, algo, bdys::Vector{MyAtoms}; kwargs...)
+
+Optimize the geometry of a set of atoms.
+
+# Arguments
+- `calc`: Calculator object.
+- `algo`: Optimization algorithm.
+- `bdys`: Vector of `MyAtoms` objects.
+- `kwargs`: Additional options.
+
+# Returns
+- Optimized vector of `MyAtoms`.
+"""
 function opt(calc::MyCalc, algo, bdys::Vector{MyAtoms}; kwargs...)
   x0, vars = prep4pot(calc.b, bdys)
   optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
@@ -76,6 +161,20 @@ function opt(calc::MyCalc, algo, bdys::Vector{MyAtoms}; kwargs...)
   optBdys
 end
 
+"""
+    opt(calc::MyCalc, algo, cell::MyCell; kwargs...)
+
+Optimize the geometry of a cell.
+
+# Arguments
+- `calc`: Calculator object.
+- `algo`: Optimization algorithm.
+- `cell`: `MyCell` object.
+- `kwargs`: Additional options.
+
+# Returns
+- Optimized `MyCell` object.
+"""
 function opt(calc::MyCalc, algo, cell::MyCell; kwargs...)
   x0, vars = prep4pot(calc.b, cell)
   optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
@@ -94,6 +193,21 @@ function opt(calc::MyCalc, algo, cell::MyCell; kwargs...)
   )
 end
 
+"""
+    HiddenOptVars
+
+Structure for hidden variable optimization.
+
+# Fields
+- `potVars`: Potential variables.
+- `cellBuf`: Cell buffer.
+- `superBuf`: Supercell buffer.
+- `scaleEnergy`: Energy scaling factor.
+- `PBC`: Periodic boundary conditions.
+- `mols`: Molecule indices.
+- `pars`: Pair indices.
+- `T`: Transformation matrix.
+"""
 struct HiddenOptVars
   potVars::PotVars
   cellBuf::MyCell
@@ -105,6 +219,21 @@ struct HiddenOptVars
   T::Matrix
 end
 
+"""
+    hiddenOpt(calc::MyCalc, algo, cell, T; kwargs...)
+
+Optimize a cell using a hidden variable approach and a supercell transformation.
+
+# Arguments
+- `calc`: Calculator object.
+- `algo`: Optimization algorithm.
+- `cell`: `MyCell` object.
+- `T`: Transformation matrix.
+- `kwargs`: Additional options.
+
+# Returns
+- Optimized `MyCell` object.
+"""
 function hiddenOpt(calc::MyCalc, algo, cell, T; kwargs...)
 
   super   = makeSuperCell(cell, T)
@@ -140,6 +269,22 @@ function hiddenOpt(calc::MyCalc, algo, cell, T; kwargs...)
   )  
 end
 
+"""
+    hiddenEoM(F, G, Γ, calc::MyCalc, vars, x)
+
+Energy and gradient evaluation for hidden variable optimization.
+
+# Arguments
+- `F`: Energy output (or nothing).
+- `G`: Gradient output (or nothing).
+- `Γ`: Gradient buffer.
+- `calc`: Calculator object.
+- `vars`: HiddenOptVars object.
+- `x`: Coordinate vector.
+
+# Returns
+- Energy value if `F` is not `nothing`.
+"""
 function hiddenEoM(F, G, Γ, calc::MyCalc, vars, x)
   getScaledPos!(vars.cellBuf, x)
 
@@ -158,6 +303,21 @@ function hiddenEoM(F, G, Γ, calc::MyCalc, vars, x)
 
 end
 
+"""
+    optCell(calc::MyCalc, algo, cell::MyCell; precon=nothing, kwargs...)
+
+Optimize the lattice parameters of a cell.
+
+# Arguments
+- `calc`: Calculator object.
+- `algo`: Optimization algorithm.
+- `cell`: `MyCell` object.
+- `precon`: (Optional) Preconditioner.
+- `kwargs`: Additional options.
+
+# Returns
+- Optimized `MyCell` object.
+"""
 function optCell(calc::MyCalc, algo, cell::MyCell; precon=nothing, kwargs...)
 
   ret          = deepcopy(cell)

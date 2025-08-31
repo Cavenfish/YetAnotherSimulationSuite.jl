@@ -1,3 +1,15 @@
+"""
+    getPotEnergy(calc::MyCalc, obj::Union{MyCell, Vector{MyAtoms}})
+
+Compute the potential energy of a cell or molecule.
+
+# Arguments
+- `calc`: Calculator object (`MyCalc`).
+- `obj`: `MyCell` or vector of `MyAtoms`.
+
+# Returns
+- Potential energy (Float64).
+"""
 function getPotEnergy(calc::MyCalc, obj::Union{MyCell, Vector{MyAtoms}})
   x, vars = prep4pot(calc.b, obj)
   energy  = fg!(true, nothing, x, vars, calc)
@@ -5,6 +17,19 @@ function getPotEnergy(calc::MyCalc, obj::Union{MyCell, Vector{MyAtoms}})
   energy
 end
 
+"""
+    getVibEnergy(mol::Vector{MyAtoms}, eignvec; calc=nothing)
+
+Compute the vibrational energy of a molecule along a mode.
+
+# Arguments
+- `mol`: Vector of `MyAtoms`.
+- `eignvec`: Mode vector.
+- `calc`: (Optional) Calculator for potential energy.
+
+# Returns
+- Vibrational energy (Float64).
+"""
 function getVibEnergy(mol::Vector{MyAtoms}, eignvec; calc=nothing)
 
   E = 0.0
@@ -21,6 +46,17 @@ function getVibEnergy(mol::Vector{MyAtoms}, eignvec; calc=nothing)
   E
 end
 
+"""
+    getTransEnergy(mol::Vector{MyAtoms})
+
+Compute the translational kinetic energy of a molecule.
+
+# Arguments
+- `mol`: Vector of `MyAtoms`.
+
+# Returns
+- Translational energy (Float64).
+"""
 function getTransEnergy(mol::Vector{MyAtoms})
   μ = reducedMass(mol)
   v = vCoM(mol)
@@ -29,6 +65,17 @@ function getTransEnergy(mol::Vector{MyAtoms})
   E
 end
 
+"""
+    getRotEnergy(mol::Vector{MyAtoms})
+
+Compute the rotational kinetic energy of a molecule.
+
+# Arguments
+- `mol`: Vector of `MyAtoms`.
+
+# Returns
+- Rotational energy (Float64).
+"""
 function getRotEnergy(mol::Vector{MyAtoms})
   vcom = vCoM(mol)
   com  =  CoM(mol)
@@ -45,6 +92,19 @@ function getRotEnergy(mol::Vector{MyAtoms})
   E
 end
 
+"""
+    vibExcite!(mol::Vector{MyAtoms}, eignvec, E)
+
+Excite a vibrational mode of a molecule to a given energy.
+
+# Arguments
+- `mol`: Vector of `MyAtoms`.
+- `eignvec`: Mode vector.
+- `E`: Target energy.
+
+# Side Effects
+- Modifies velocities of atoms in-place.
+"""
 function vibExcite!(mol::Vector{MyAtoms}, eignvec, E)
   M = [i.m for i in mol for j in 1:3]
   v = @. sqrt( 2E / M ) * eignvec
@@ -62,6 +122,18 @@ function vibExcite!(mol::Vector{MyAtoms}, eignvec, E)
 
 end
 
+"""
+    transExcite!(mol::Vector{MyAtoms}, ke)
+
+Excite the translational motion of a molecule to a given kinetic energy.
+
+# Arguments
+- `mol`: Vector of `MyAtoms`.
+- `ke`: Target kinetic energy.
+
+# Side Effects
+- Modifies velocities of atoms in-place.
+"""
 function transExcite!(mol::Vector{MyAtoms}, ke)
   r = randVector()
   μ = reducedMass(mol)
