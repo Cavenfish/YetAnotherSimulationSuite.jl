@@ -1,6 +1,26 @@
+"""
+    savGol(y, ws, order; deriv=0)
 
+Apply a Savitzky-Golay filter to the input signal `y`.
+
+# Arguments
+- `y`: Array of data points to be smoothed or differentiated.
+- `ws`: Window size (must be odd and ≥ 1).
+- `order`: Polynomial order for the filter (must satisfy `ws ≥ order + 2`).
+- `deriv`: (Optional) Order of the derivative to compute (default is 0, i.e., smoothing).
+
+# Returns
+- Filtered (or differentiated) signal as an array of the same length as `y`.
+
+# Throws
+- `ArgumentError` if input arguments are invalid.
+
+# Example
+```julia
+smoothed = savGol(data, 5, 2)
+```
+"""
 function savGol(y, ws, order; deriv=0)
-  
   #Check inputs
   isodd(ws)      || throw(ArgumentError("window size must be odd"))
   ws ≥ 1         || throw(ArgumentError("window size must be ≥ 1"))

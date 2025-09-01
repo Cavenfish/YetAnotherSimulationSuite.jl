@@ -8,6 +8,17 @@
 #   momentum to atoms.
 
 # Atoms in simulation
+"""
+    Particle{D, F, S}
+
+Mutable struct representing an atom in the simulation.
+
+# Fields
+- `r`: Position vector.
+- `v`: Velocity vector.
+- `m`: Mass.
+- `s`: Symbol.
+"""
 mutable struct Particle{D, F <: AbstractFloat, S <: AbstractString} <: MyAtoms
   r::MVector{D, F}
   v::MVector{D, F}
@@ -15,6 +26,20 @@ mutable struct Particle{D, F <: AbstractFloat, S <: AbstractString} <: MyAtoms
   s::S
 end
 
+"""
+    Particle(r, v, m, s)
+
+Construct a Particle from position, velocity, mass, and symbol.
+
+# Arguments
+- `r`: Position vector.
+- `v`: Velocity vector.
+- `m`: Mass.
+- `s`: Symbol.
+
+# Returns
+- Particle object.
+"""
 function Particle(r::V, v::V, m::Float64, s::String) where V <: Union{Vector, SVector}
   n = length(r)
 
@@ -24,6 +49,17 @@ function Particle(r::V, v::V, m::Float64, s::String) where V <: Union{Vector, SV
   Particle(rm, vm, m, s)
 end
 
+"""
+    center(bdys::Vector{MyAtoms})
+
+Compute the geometric center of a set of atoms.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+
+# Returns
+- Center position as a vector.
+"""
 function center(bdys::Vector{MyAtoms})
   o = zeros(3)
 
@@ -34,6 +70,19 @@ function center(bdys::Vector{MyAtoms})
   o ./ length(bdys)
 end
 
+"""
+    swapAtoms!(bdys::Vector{MyAtoms}, i, j)
+
+Swap the positions of two atoms in a vector.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+- `i`: Index of first atom.
+- `j`: Index of second atom.
+
+# Side Effects
+- Modifies the positions in-place.
+"""
 function swapAtoms!(bdys::Vector{MyAtoms}, i, j)
   a = bdys[i].r |> deepcopy
   b = bdys[j].r |> deepcopy
@@ -42,6 +91,17 @@ function swapAtoms!(bdys::Vector{MyAtoms}, i, j)
   bdys[j].r .= a
 end
 
+"""
+    centerBdys!(bdys::Vector{MyAtoms})
+
+Center a set of atoms at the origin.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+
+# Side Effects
+- Modifies positions in-place.
+"""
 function centerBdys!(bdys::Vector{MyAtoms})
   com = CoM(bdys)
   for i in bdys
@@ -49,6 +109,19 @@ function centerBdys!(bdys::Vector{MyAtoms})
   end
 end
 
+"""
+    swapIso!(bdys::Vector{MyAtoms}, swap, mas)
+
+Swap isotopes (masses) for a set of atoms.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+- `swap`: Indices to swap.
+- `mas`: New masses.
+
+# Side Effects
+- Modifies masses in-place.
+"""
 function swapIso!(bdys::Vector{MyAtoms}, swap, mas)
   for i in 1:length(swap)
     j         = swap[i]
@@ -56,6 +129,18 @@ function swapIso!(bdys::Vector{MyAtoms}, swap, mas)
   end
 end
 
+"""
+    getSurfaceMolecules(bdys::Vector{MyAtoms}; α=nothing)
+
+Get the surface molecules from a set of atoms using alpha shapes.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+- `α`: Alpha parameter (optional).
+
+# Returns
+- Vector of surface MyAtoms.
+"""
 function getSurfaceMolecules(bdys::Vector{MyAtoms}; α=nothing)
   mols = getMols(bdys, 1.5)
 
@@ -71,6 +156,18 @@ function getSurfaceMolecules(bdys::Vector{MyAtoms}; α=nothing)
   surf
 end
 
+"""
+    pickRandomMol(bdys::Vector{MyAtoms}, loc)
+
+Pick a random molecule from the surface or bulk.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+- `loc`: "surf" or "bulk".
+
+# Returns
+- Vector of MyAtoms for the selected molecule.
+"""
 function pickRandomMol(bdys::Vector{MyAtoms}, loc)
 
   surf = getSurfaceMolecules(bdys)
@@ -90,6 +187,18 @@ function pickRandomMol(bdys::Vector{MyAtoms}, loc)
   
 end
 
+"""
+    getScaledPos(bdys::Vector{MyAtoms}, lattice)
+
+Get scaled positions for a set of atoms given a lattice.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+- `lattice`: Lattice matrix.
+
+# Returns
+- Vector of scaled positions.
+"""
 function getScaledPos(bdys::Vector{MyAtoms}, lattice)
 
   T    = inv(lattice)
@@ -97,6 +206,18 @@ function getScaledPos(bdys::Vector{MyAtoms}, lattice)
   [T * i.r for i in bdys]
 end
 
+"""
+    getMIC(bdys::Vector{MyAtoms}, lattice)
+
+Get the minimum image convention positions for a set of atoms.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+- `lattice`: Lattice matrix.
+
+# Returns
+- Vector of MyAtoms with minimum image convention applied.
+"""
 function getMIC(bdys::Vector{MyAtoms}, lattice)
   a,b,c  = eachrow(lattice)
   new    = MyAtoms[]
@@ -118,6 +239,18 @@ function getMIC(bdys::Vector{MyAtoms}, lattice)
   new
 end
 
+"""
+    wrap!(bdys::Vector{MyAtoms}, lattice)
+
+Wrap all atoms into the primary unit cell.
+
+# Arguments
+- `bdys`: Vector of MyAtoms.
+- `lattice`: Lattice matrix.
+
+# Side Effects
+- Modifies positions in-place.
+"""
 function wrap!(bdys::Vector{MyAtoms}, lattice)
 
   f = [floor.(transpose(lattice) \ i.r) for i in bdys]

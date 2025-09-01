@@ -14,6 +14,19 @@ atomName(frame::Frame, i::Int) = Atom(frame, i) |> name
 getMasses(frame::Frame) = [atomMass(frame, i) for i = 0:length(frame)-1]
 getNames( frame::Frame) = [atomName(frame, i) for i = 0:length(frame)-1]
 
+"""
+    ifProperty(frame, props, p)
+
+Return the value of property `p` from `frame` if it exists in `props`, else return 0.0.
+
+# Arguments
+- `frame`: Chemfiles Frame object.
+- `props`: List of property names.
+- `p`: Property name to look for.
+
+# Returns
+- Value of the property as Float64, or 0.0 if not found.
+"""
 function ifProperty(frame, props, p)
   if p in props
     x = property(frame, p)
@@ -23,6 +36,18 @@ function ifProperty(frame, props, p)
   end
 end
 
+"""
+    atomForces(frame, i)
+
+Get the force vector for atom `i` in the given `frame`.
+
+# Arguments
+- `frame`: Chemfiles Frame object.
+- `i`: Atom index.
+
+# Returns
+- Static vector of forces.
+"""
 function atomForces(frame, i)
   x = property(Atom(frame, i), "forces")
   n = length(x)
@@ -30,6 +55,17 @@ function atomForces(frame, i)
   SVector{n}(x)
 end
 
+"""
+    readSystem(file::String)
+
+Read a system from a file and return either a trajectory or a single frame.
+
+# Arguments
+- `file`: Path to the file.
+
+# Returns
+- Traj object if multiple frames, otherwise a single frame as MyCell or MyAtoms.
+"""
 function readSystem(file::String)
   buf    = Trajectory(file)
   N::Int = length(buf)
@@ -42,6 +78,17 @@ function readSystem(file::String)
 
 end
 
+"""
+    readFrame(frame::Frame)
+
+Convert a Chemfiles Frame to a vector of MyAtoms or a MyCell if lattice is present.
+
+# Arguments
+- `frame`: Chemfiles Frame object.
+
+# Returns
+- Vector of MyAtoms or MyCell object.
+"""
 function readFrame(frame::Frame)
   N::Int = length(frame)
   bdys   = MyAtoms[]
@@ -76,6 +123,17 @@ function readFrame(frame::Frame)
   makeCell(bdys, lat)
 end
 
+"""
+    readImage(frame::Frame)
+
+Read an image (snapshot) from a Chemfiles Frame, extracting positions, velocities, forces, and properties.
+
+# Arguments
+- `frame`: Chemfiles Frame object.
+
+# Returns
+- Image object containing positions, velocities, time, temperature, energy, and forces.
+"""
 function readImage(frame::Frame)
   pos    = positions(frame)
   props  = list_properties(frame)
@@ -103,6 +161,18 @@ function readImage(frame::Frame)
   Image(pos, vel, time, temp, energy, forces)
 end
 
+"""
+    readTraj(buf::Trajectory, N::Int)
+
+Read a trajectory from a Chemfiles Trajectory buffer.
+
+# Arguments
+- `buf`: Chemfiles Trajectory object.
+- `N`: Number of frames to read.
+
+# Returns
+- Traj object containing all images, masses, symbols, and lattice.
+"""
 function readTraj(buf::Trajectory, N::Int)
   frame   = read(buf)
   lattice = UnitCell(frame) |> matrix
@@ -118,6 +188,18 @@ function readTraj(buf::Trajectory, N::Int)
   Traj(images, masses, symbols, lattice)
 end
 
+"""
+    Base.write(file::String, bdys::Vector{MyAtoms})
+
+Write a vector of MyAtoms to a file using Chemfiles.
+
+# Arguments
+- `file`: Output file path.
+- `bdys`: Vector of MyAtoms to write.
+
+# Side Effects
+- Writes atomic coordinates and velocities to file.
+"""
 function Base.write(file::String, bdys::Vector{MyAtoms})
   buf   = Trajectory(file, 'w')
   frame = Frame()
@@ -144,6 +226,18 @@ function Base.write(file::String, bdys::Vector{MyAtoms})
   close(buf)
 end
 
+"""
+    Base.write(file::String, cell::MyCell)
+
+Write a MyCell object to a file using Chemfiles.
+
+# Arguments
+- `file`: Output file path.
+- `cell`: MyCell object to write.
+
+# Side Effects
+- Writes atomic coordinates, velocities, and cell information to file.
+"""
 function Base.write(file::String, cell::MyCell)
   buf   = Trajectory(file, 'w')
   frame = Frame()
@@ -174,6 +268,19 @@ function Base.write(file::String, cell::MyCell)
   close(buf)
 end
 
+"""
+    Base.write(file::String, traj::MyTraj; step=1)
+
+Write a trajectory to a file using Chemfiles.
+
+# Arguments
+- `file`: Output file path.
+- `traj`: MyTraj object to write.
+- `step`: Step interval for writing frames (default: 1).
+
+# Side Effects
+- Writes trajectory frames, including positions, velocities, energies, and forces, to file.
+"""
 function Base.write(file::String, traj::MyTraj; step=1)
   buf   = Trajectory(file, 'w')
   ucell = Matrix(traj.lattice) |> UnitCell

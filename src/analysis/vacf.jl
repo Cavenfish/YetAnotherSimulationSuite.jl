@@ -1,4 +1,17 @@
+"""
+    vacfInps
 
+Input structure for velocity autocorrelation function (VACF) calculations.
+
+# Fields
+- `vel`: Velocity data.
+- `mas`: Masses.
+- `Hz`: Sampling frequency.
+- `norm`: Normalize flag.
+- `win`: Window function.
+- `pad`: Padding factor.
+- `mir`: Mirror flag.
+"""
 struct vacfInps{V,B,W, I<:Integer, F<:AbstractFloat}
   vel::V
   mas::Vector{F}
@@ -9,6 +22,17 @@ struct vacfInps{V,B,W, I<:Integer, F<:AbstractFloat}
   mir::B
 end
 
+"""
+    vacfOut
+
+Output structure for VACF and VDOS calculations.
+
+# Fields
+- `c`: Raw VACF.
+- `C`: Windowed VACF.
+- `v`: Frequency axis.
+- `I`: Intensity.
+"""
 struct vacfOut{F<:AbstractFloat}
   c::Vector{F}
   C::Vector{F}
@@ -20,6 +44,15 @@ Hann( i,N) = sin((pi*i)/N)^2
 Welch(i,N) = 1 - ((i-N/2)/(N/2))^2
 HannM(i,N) = cos((pi*i)/(2*(N-1)))^2
 
+"""
+    window!(out, W)
+
+Apply a window function to the VACF output.
+
+# Arguments
+- `out`: `vacfOut` object.
+- `W`: Window function.
+"""
 function window!(out, W)
   N = length(out.C)
   w = [W(i,N) for i in 0:N-1]
@@ -27,12 +60,30 @@ function window!(out, W)
   out.C .*= w
 end
 
+"""
+    mirror!(out)
+
+Mirror the VACF output for improved frequency resolution.
+
+# Arguments
+- `out`: `vacfOut` object.
+"""
 function mirror!(out)
   N::Int = length(out.C) / 2 |> ceil
 
   out.C .= [reverse(out.C[1:N]); out.C[2:N]]
 end
 
+"""
+    vacf!(inp, out; atms=nothing)
+
+Compute the velocity autocorrelation function (VACF).
+
+# Arguments
+- `inp`: `vacfInps` object.
+- `out`: `vacfOut` object.
+- `atms`: (Optional) Indices of atoms to include.
+"""
 function vacf!(inp, out; atms=nothing)
   T = length(inp.vel)       # Total timesteps 
   N = length(inp.vel[1])    # Total number of atoms
@@ -61,6 +112,18 @@ function vacf!(inp, out; atms=nothing)
 
 end
 
+"""
+    VDOS(inp; atms=nothing)
+
+Compute the vibrational density of states (VDOS) from VACF input.
+
+# Arguments
+- `inp`: `vacfInps` object.
+- `atms`: (Optional) Indices of atoms to include.
+
+# Returns
+- `vacfOut` object with VDOS data.
+"""
 function VDOS(inp; atms=nothing)
   # Initialize output
   k   = 29979245800.0 # Divide by this to convert from Hz to cm^-1
@@ -90,6 +153,18 @@ function VDOS(inp; atms=nothing)
   out
 end
 
+"""
+    getDiffusionCoefficient(out; D=3)
+
+Calculate the diffusion coefficient from VACF output.
+
+# Arguments
+- `out`: `vacfOut` object.
+- `D`: Dimensionality (default: 3).
+
+# Returns
+- Diffusion coefficient (Float64).
+"""
 function getDiffusionCoefficient(out; D=3)
   N = length(out.C)
 
