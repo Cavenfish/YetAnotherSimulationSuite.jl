@@ -100,3 +100,10 @@ def scmef_get_constituent_energies(pos, cell, pbc=True, **kwargs):
     E_intra = bdys.calc.results["energy_monomer"]
 
     return E_elec, E_disp, E_core, E_intra
+
+def scmef_get_total_electric_field(pos, cell, pbc=True, **kwargs):
+    
+    bdys = scmef_init(pos, cell, pbc=pbc)
+    bdys.get_potential_energy()
+
+    return bdys.calc.scme.electric_field_total
