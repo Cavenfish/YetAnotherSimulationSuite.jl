@@ -11,17 +11,17 @@ function scmef_getDipole(cell::MyCell)
   py"scmef_get_dipole"(pos, cell.lattice, NC=cell.NC)
 end
 
-function scmef_getInducedDipoles(bdys::Vector{MyAtoms})
+function scmef_getTotalDipoles(bdys::Vector{MyAtoms})
   pos = [i.r for i in bdys]
   lat = [100 0 0;0 100 0; 0 0 100]
 
-  py"scmef_get_induced_dipoles"(pos, lat, pbc=false)
+  py"scmef_get_total_dipoles"(pos, lat, pbc=false)
 end
 
-function scmef_getInducedDipoles(cell::MyCell)
+function scmef_getTotalDipoles(cell::MyCell)
   pos = getPos(cell)
 
-  py"scmef_get_induced_dipoles"(pos, cell.lattice, NC=cell.NC)
+  py"scmef_get_total_dipoles"(pos, cell.lattice, NC=cell.NC)
 end
 
 function scmef_getConstituentEnergies(bdys::Vector{MyAtoms})
