@@ -106,4 +106,23 @@ def scmef_get_total_electric_field(pos, cell, pbc=True, **kwargs):
     bdys = scmef_init(pos, cell, pbc=pbc)
     bdys.get_potential_energy()
 
-    return bdys.calc.scme.electric_field_total * bdys.calc.unit_energy
+    return bdys.calc.scme.electric_field_total
+
+def scmef_get_electrostatic_components(pos, cell, pbc=True, **kwargs):
+
+    bdys = scmef_init(pos, cell, pbc=pbc)
+    bdys.get_potential_energy()
+
+    ef    = bdys.calc.scme.electric_field_total
+    ef_d1 = bdys.calc.scme.electric_field_total_d1
+    ef_d2 = bdys.calc.scme.electric_field_total_d2
+    ef_d3 = bdys.calc.scme.electric_field_total_d3
+
+    di   = bdys.calc.scme.dipole_moments
+    di_s = bdys.calc.scme.static_dipole_moments
+    qu   = bdys.calc.scme.quadrupole_moments
+    qu_s = bdys.calc.scme.static_quadrupole_moments
+    oc   = bdys.calc.scme.octupole_moments
+    he   = bdys.calc.scme.hexadecapole_moments
+
+    return (ef, ef_d1, ef_d2, ef_d3, di, di_s, qu, qu_s, oc, he)
