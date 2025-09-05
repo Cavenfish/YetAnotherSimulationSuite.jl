@@ -106,4 +106,4 @@ def scmef_get_total_electric_field(pos, cell, pbc=True, **kwargs):
     bdys = scmef_init(pos, cell, pbc=pbc)
     bdys.get_potential_energy()
 
-    return bdys.calc.scme.electric_field_total
+    return bdys.calc.scme.electric_field_total * bdys.calc.unit_energy
