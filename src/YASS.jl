@@ -49,7 +49,7 @@ module YASS
     getVibEnergy,
 
     #molsAndPairs.jl
-    getMols, getPairs,
+    getMols,
 
     #bodies.jl
     Particle, swapIso!, pickRandomMol, centerBdys!,

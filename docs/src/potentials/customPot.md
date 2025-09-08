@@ -68,8 +68,10 @@ function MyEnergy(u, vars)
   end
 
   # Iterate over all pairs in your system
-  for par in vars.pars
-    E -= 1.0
+  for i = 1:length(vars.mols)
+    for j = i+1:length(vars.mols)
+      E -= 1.0
+    end
   end
 
   # Return the energy
@@ -113,7 +115,7 @@ function MyEnergyAndForces!(F, u, vars)
   MyForces!(F, u, vars)
 
   # Keep in mind though that if you need to iterate
-  # over all mols and pars for both the forces and energy
+  # over all mols and pairs for both the forces and energy
   # doing this only once in here would be faster and more
   # memory efficient. Here we call the other two function 
   # just for the sake of showing you can do such a thing.

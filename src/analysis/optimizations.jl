@@ -9,16 +9,14 @@ Structure holding optimization variables for geometry optimization.
 # Fields
 - `potVars`: Potential variables.
 - `mols`: Molecule indices.
-- `pars`: Pair indices.
 - `m`: Masses.
 - `PBC`: Periodic boundary conditions.
 - `NC`: Neighbor counts.
 - `lattice`: Lattice matrix.
 """
-struct optVars{D,B,P, I<:Int, PV<:PotVars, F<:AbstractFloat}
+struct optVars{D,B, I<:Int, PV<:PotVars, F<:AbstractFloat}
   potVars::PV
   mols::Vector{Vector{I}}
-  pars::Vector{P}
   m::Vector{F}
   PBC::Vector{B}
   NC::Vector{I}
@@ -72,14 +70,14 @@ Prepare variables for potential energy calculation from atoms.
 - Tuple: (coordinate vector, `optVars` object).
 """
 function prep4pot(builder, bdys::Vector{MyAtoms})
-  m          = [i.m for i in bdys]
-  x0         = prepX0(bdys)
-  potVars    = builder(bdys)
-  pars, mols = getPairs(bdys)
-  NC         = [0,0,0]
-  PBC        = repeat([false], 3)
-  lattice    = MMatrix{3,3}(zeros(3,3))
-  vars       = optVars(potVars, mols, pars, m, PBC, NC, lattice)
+  m       = [i.m for i in bdys]
+  x0      = prepX0(bdys)
+  potVars = builder(bdys)
+  mols    = getMols(bdys, 1.2)
+  NC      = [0,0,0]
+  PBC     = repeat([false], 3)
+  lattice = MMatrix{3,3}(zeros(3,3))
+  vars    = optVars(potVars, mols, m, PBC, NC, lattice)
   
   x0, vars
 end
@@ -97,12 +95,12 @@ Prepare variables for potential energy calculation from a cell.
 - Tuple: (coordinate vector, `optVars` object).
 """
 function prep4pot(builder, cell::MyCell)
-  bdys       = makeBdys(cell)
-  x0         = prepX0(cell)
-  potVars    = builder(cell)
-  pars, mols = getPairs(cell)
-  vars       = optVars(potVars, mols, pars, cell.masses, 
-                       cell.PBC, cell.NC, cell.lattice)
+  bdys    = makeBdys(cell)
+  x0      = prepX0(cell)
+  potVars = builder(cell)
+  mols    = getMols(cell, 1.2)
+  vars    = optVars(potVars, mols, cell.masses, 
+                    cell.PBC, cell.NC, cell.lattice)
   
   x0, vars
 end

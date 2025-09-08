@@ -57,24 +57,27 @@ function MvHff!(F, u, p)
     E += _Morse!(F, u, mol[1], mol[2], P.D, P.a, P.req)
   end
 
-  for par in p.pars
-    c1, o1 = par[1]
-    c2, o2 = par[2]
+  for i = 1:length(p.mols)
+    c1, o1 = p.mols[i]
 
-    #C--C
-    E += _Buckingham!(F, u, c1, c2, P.Acc, P.Bcc, P.Ccc)
+    for j = i+1:length(p.mols)
+      c2, o2 = p.mols[j]
 
-    #C--O
-    E += _Buckingham!(F, u, c1, o2, P.Aco, P.Bco, P.Cco)
+      #C--C
+      E += _Buckingham!(F, u, c1, c2, P.Acc, P.Bcc, P.Ccc)
 
-    #O--C
-    E += _Buckingham!(F, u, o1, c2, P.Aco, P.Bco, P.Cco)
+      #C--O
+      E += _Buckingham!(F, u, c1, o2, P.Aco, P.Bco, P.Cco)
 
-    #O--O
-    E += _Buckingham!(F, u, o1, o2, P.Aoo, P.Boo, P.Coo)
+      #O--C
+      E += _Buckingham!(F, u, o1, c2, P.Aco, P.Bco, P.Cco)
 
-    #Special Electrostatics
-    E += _electroMvH!(F, u, par, P.Qc, P.Qo, P.αc, P.αo, P.req)
+      #O--O
+      E += _Buckingham!(F, u, o1, o2, P.Aoo, P.Boo, P.Coo)
+
+      #Special Electrostatics
+      E += _electroMvH!(F, u, p.mols[[i,j]], P.Qc, P.Qo, P.αc, P.αo, P.req)
+    end
   end
 
   E

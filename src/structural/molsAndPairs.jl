@@ -23,34 +23,6 @@ function getMols(bdys::Vector{MyAtoms}, rmax::Float64)
 end
 
 """
-    getPairs(bdys::Vector{MyAtoms})
-
-Generate all unique pairs of molecules from a set of atoms.
-
-# Arguments
-- `bdys`: Vector of `MyAtoms` objects.
-
-# Returns
-- Tuple: (Vector of `Pair` objects, vector of molecule indices).
-"""
-function getPairs(bdys::Vector{MyAtoms})
-
-  # Get mols and N
-  mols = getMols(bdys, 1.5)
-  N    = size(mols)[1]
-
-  # Make all pairs
-  pars = Pair[]
-  for i in 1:N
-    for j in i+1:N
-      push!(pars, Pair(mols[i],mols[j]))
-    end
-  end
-
-  pars, mols
-end
-
-"""
     getMols(cell::MyCell, rmax::Float64)
 
 Cluster atoms in a cell into molecules using DBSCAN with cutoff `rmax`.
@@ -68,36 +40,6 @@ function getMols(cell::MyCell, rmax::Float64)
   ret = dbscan(D, rmax, metric=nothing)
 
   [i.core_indices for i in ret.clusters]
-end
-
-"""
-    getPairs(cell::MyCell)
-
-Generate all unique pairs of molecules from a cell.
-
-# Arguments
-- `cell`: `MyCell` object.
-
-# Returns
-- Tuple: (Vector of `Pair` objects, vector of molecule indices).
-"""
-function getPairs(cell::MyCell)
-
-  n = length(cell.masses)
-
-  # Get mols and N
-  mols = getMols(cell, 1.5)
-  N    = size(mols)[1]
-
-  # Make all pairs
-  pars = Pair[]
-  for i in 1:N
-    for j in i+1:N
-      push!(pars, Pair(mols[i],mols[j]))
-    end
-  end
-
-  pars, mols
 end
 
 """

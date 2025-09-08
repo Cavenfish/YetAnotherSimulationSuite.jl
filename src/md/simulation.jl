@@ -87,7 +87,6 @@ Structure holding all MD simulation variables.
 # Fields
 - `m`: Masses.
 - `s`: Symbols.
-- `pars`: Pair indices.
 - `mols`: Molecule indices.
 - `temp`: Temperatures.
 - `energy`: Energies.
@@ -97,10 +96,9 @@ Structure holding all MD simulation variables.
 - `NC`: Neighbor counts.
 - `ensemble`: Ensemble object.
 """
-struct Dynamics{T,D,B,P, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractString}
+struct Dynamics{T,D,B, PV<:PotVars, I<:Int, F<:AbstractFloat, S<:AbstractString}
   m::Vector{F}
   s::Vector{S}
-  pars::Vector{P}
   mols::Vector{Vector{I}}
   temp::Vector{F}
   energy::Vector{F}
@@ -216,17 +214,17 @@ function Base.run(
   dt::Float64, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
 ) where T <: Union{NVE,NpT,NVT}
 
-  NC         = [0,0,0]
-  PBC        = repeat([false], 3)
-  symbols    = [i.s for i in bdys]
-  mas        = [i.m for i in bdys]
-  potVars    = calc.b(bdys)
-  pars, mols = getPairs(bdys)
-  pos        = [SVector{3}(i.r) for i in bdys]
-  vel        = [SVector{3}(i.v) for i in bdys]
+  NC      = [0,0,0]
+  PBC     = repeat([false], 3)
+  symbols = [i.s for i in bdys]
+  mas     = [i.m for i in bdys]
+  potVars = calc.b(bdys)
+  mols    = getMols(bdys, 1.2)
+  pos     = [SVector{3}(i.r) for i in bdys]
+  vel     = [SVector{3}(i.v) for i in bdys]
 
   simu = Dynamics(
-    mas, symbols, pars, mols, Float64[], Float64[], 
+    mas, symbols, mols, Float64[], Float64[], 
     Vector{SVector{3, Float64}}[], potVars, PBC, NC, ensemble
   )
 
@@ -256,13 +254,13 @@ function Base.run(
   dt::Float64, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
 ) where T <: Union{NVE,NpT,NVT}
 
-  potVars    = calc.b(cell)
-  pars, mols = getPairs(cell)
-  pos        = [SVector{3}(i) for i in getPos(cell)]
-  vel        = [SVector{3}(i) for i in cell.velocity]
+  potVars = calc.b(cell)
+  mols    = getMols(cell, 1.2)
+  pos     = [SVector{3}(i) for i in getPos(cell)]
+  vel     = [SVector{3}(i) for i in cell.velocity]
 
   simu = Dynamics(
-    cell.masses, cell.symbols, pars, mols, Float64[], Float64[], 
+    cell.masses, cell.symbols, mols, Float64[], Float64[], 
     Vector{SVector{3, Float64}}[], potVars, cell.PBC, cell.NC, ensemble
   )
 
