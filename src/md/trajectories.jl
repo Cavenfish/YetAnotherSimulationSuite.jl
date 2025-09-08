@@ -17,6 +17,33 @@ struct Traj{D, F<:AbstractFloat, S<:AbstractString, Im<:MyImage} <: MyTraj
 end
 
 """
+    length(traj::MyTraj)
+
+Get the number of images in a trajectory.
+
+# Arguments
+- `traj`: Traj object.
+
+# Returns
+- Number of images.
+"""
+Base.length(traj::MyTraj) = length(traj.images)
+
+"""
+    show(io::IO, traj::MyTraj)
+
+Custom display for MyTraj objects.
+
+# Arguments
+- `io`: IO stream.
+- `traj`: MyTraj object.
+"""
+function Base.show(io::IO, traj::MyTraj)
+  N = length(traj)
+  println(io, "$(N) Images")
+end
+
+"""
     Traj(imgs, mas, sym, lat)
 
 Construct a Traj object from images, masses, symbols, and lattice.
