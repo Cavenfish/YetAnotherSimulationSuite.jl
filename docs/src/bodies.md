@@ -1,10 +1,10 @@
 # Bodies
 
-There are two types of simulation objects within YASS, the Atom and Cell objects. A Cell object is self-contained and is passed as-is to simulation functions, whereas the Atom object is only a single Atom. For simulations with more than one Atom, you must use a vector of Atom objects.
+There are two types of simulation objects within YASS, the Particle and Cell objects. A Cell object is self-contained and is passed as-is to simulation functions, whereas the Particle object is only a single Particle. For simulations with more than one Particle, you must use a vector of Particle objects.
 
-### Atom
+### Particle
 
-In YASS you have an Atom object, which contains the position, velocity, mass and symbol of the atom. As mentioned above, you will typically be working with a vector of Atoms. You can create this vector of Atoms manually or read them in from an xyz file.
+In YASS you have an Particle object, which contains the position, velocity, mass and symbol of the atom. As mentioned above, you will typically be working with a vector of atoms. You can create this vector of atoms manually or read them in from an xyz file.
 
 ```julia
 using YASS
@@ -23,7 +23,7 @@ bdys::Vector{YASS.MyAtoms} = [
 write("./h2o.xyz", bdys)
 ```
 
-Within YASS the Atom struct is mutable, this is to allow on-the-fly swapping of atomic masses. 
+Within YASS the Particle struct is mutable, this is to allow on-the-fly swapping of atomic masses. 
 
 ```julia
 using YASS
@@ -31,11 +31,11 @@ using YASS
 # Read it in from an xyz file
 bdys = readSystem("./myFile.xyz")
 
-# Change the mass of the first Atom
+# Change the mass of the first atom
 bdys[1].m = 2.00
 ```
 
-YASS also contains some auxiliary functions that can apply changes to Atom objects.
+YASS also contains some auxiliary functions that can apply changes to Particle objects.
 
 ```julia
 using YASS
