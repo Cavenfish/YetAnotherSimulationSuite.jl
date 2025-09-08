@@ -62,6 +62,86 @@ function Cell(
 end
 
 """
+    length(cell::MyCell)
+
+Get number of atoms in cell
+
+# Arguments
+- `cell`: MyCell object
+
+# Returns
+- Number of atoms in cell
+"""
+Base.length(cell::MyCell) = length(cell.masses)
+
+"""
+    show(io::IO, cell::MyCell)
+
+Display cell struct information
+
+# Arguments
+- `io`: IO 
+- `cell`: MyCell object
+"""
+function Base.show(io::IO, cell::MyCell)
+  s = unique(cell.symbols)
+  N = length(cell.masses)
+  println(io, "$(N) Atoms")
+  
+  for i in s
+    n = filter(e -> e == i, cell.symbols) |> length
+    println(io, "$(n) $(i)")
+  end
+
+  println(io, "lattice:\n$(cell.lattice)")
+end
+
+"""
+    getindex(cell::MyCell, inds)
+
+Get cell atoms at `inds` indicies
+
+# Arguments
+- `cell`: MyCell object
+- `inds`: Indices to get
+
+# Returns
+- Cell object
+"""
+function Base.getindex(cell::MyCell, inds)
+  Cell(
+    copy(cell.lattice),
+    cell.scaled_pos[inds],
+    cell.velocity[inds],
+    cell.masses[inds],
+    cell.symbols[inds],
+    cell.mask[inds],
+    copy(cell.PBC),
+    copy(cell.NC)
+  )
+end
+
+"""
+    deleteat!(cell::MyCell, iter)
+
+Remove atoms at given indices from a cell.
+
+# Arguments
+- `cell`: MyCell object.
+- `iter`: Indices to remove.
+
+# Side Effects
+- Modifies the cell in-place.
+"""
+function Base.deleteat!(cell::MyCell, iter)
+  deleteat!(cell.scaled_pos, iter)
+  deleteat!(cell.velocity, iter)
+  deleteat!(cell.masses, iter)
+  deleteat!(cell.symbols, iter)
+  deleteat!(cell.mask, iter)
+end
+
+"""
     reorder!(cell::MyCell, order::Vector{Int})
 
 Reorder the atoms in a cell according to a given order.
@@ -107,26 +187,6 @@ function makeCell(bdys::Vector{MyAtoms}, lattice::AbstractMatrix;
     [i.s for i in bdys],
     mask, PBC, NC
   )
-end
-
-"""
-    deleteat!(cell::MyCell, iter)
-
-Remove atoms at given indices from a cell.
-
-# Arguments
-- `cell`: MyCell object.
-- `iter`: Indices to remove.
-
-# Side Effects
-- Modifies the cell in-place.
-"""
-function Base.deleteat!(cell::MyCell, iter)
-  deleteat!(cell.scaled_pos, iter)
-  deleteat!(cell.velocity, iter)
-  deleteat!(cell.masses, iter)
-  deleteat!(cell.symbols, iter)
-  deleteat!(cell.mask, iter)
 end
 
 """
