@@ -6,3 +6,4 @@ ignore:
   - src/md/potentials/funcs/TTMnrg.jl
   - src/lib/MBX
   - src/lib/SCMEf
+  - src/lib/Phonopy
