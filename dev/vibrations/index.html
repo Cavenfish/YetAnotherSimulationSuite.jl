@@ -3,4 +3,36 @@
 
 bdys = readSystem(&quot;water.xyz&quot;)
 
-freqs, vects = getHarmonicFreqs(TIP4Pf(), bdys)</code></pre><p><code>freqs</code> will be a vector of complex numbers, and <code>vects</code> a matrix of floats. Each column in <code>vects</code> is the eigenvector associated with a frequency in <code>freqs</code>. This means <code>vects[:,1]1</code> is the eigenvector with frequency <code>freqs[1]</code>.</p><h3 id="VACF"><a class="docs-heading-anchor" href="#VACF">VACF</a><a id="VACF-1"></a><a class="docs-heading-anchor-permalink" href="#VACF" title="Permalink"></a></h3></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../optimizations/">« Optimization</a><a class="docs-footer-nextpage" href="../md/dynamics/">Molecular Dynamics Simulations »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 8 September 2025 18:25">Monday 8 September 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+freqs, vects = getHarmonicFreqs(TIP4Pf(), bdys)</code></pre><p><code>freqs</code> will be a vector of complex numbers, and <code>vects</code> a matrix of floats. Each column in <code>vects</code> is the eigenvector associated with a frequency in <code>freqs</code>. This means <code>vects[:,1]</code> is the eigenvector with frequency <code>freqs[1]</code>.</p><h3 id="VACF"><a class="docs-heading-anchor" href="#VACF">VACF</a><a id="VACF-1"></a><a class="docs-heading-anchor-permalink" href="#VACF" title="Permalink"></a></h3><p>The velocity autocorrelation function (VACF) can be used to analyze vibrational modes from molecular dynamics trajectories. <code>YASS.jl</code> provides routines to compute the vibrational density of states (VDOS) through the VACF.</p><p>To calculate the VACF from a trajectory:</p><pre><code class="language-julia hljs">using YASS
+
+# Read in you water structure
+water = readSystem(&quot;water.xyz&quot;)
+
+# Run MD simulation and get trajectory
+traj = run(TIP4Pf(), water, (0.0, 10.0ps), 1fs, NVE())
+
+# Get velocities and masses
+vel, mas = getVelMas(traj)
+
+# Create VACF inputs
+inp = vacfInps(
+    vel,          # Velocity data
+    mas,          # Masses
+    1e15,         # Sampling frequency (1/fs = 1e15 Hz)
+    true,         # Normalize
+    Hann,         # Window function
+    4,            # Padding factor
+    true          # Mirror the data
+)
+
+# Calculate VDOS
+out = VDOS(inp)</code></pre><p>The output <code>out</code> contains:</p><ul><li><code>out.c</code>: Raw VACF</li><li><code>out.C</code>: Windowed VACF </li><li><code>out.v</code>: Frequency</li><li><code>out.I</code>: VDOS intensity</li></ul><p>You can customize the analysis by:</p><ul><li>Using different window functions (<code>Hann</code>, <code>Welch</code>, or <code>HannM</code>)</li><li>Adjusting the padding factor for FFT</li><li>Enabling/disabling mirroring of the data</li><li>Selecting specific atoms to include using the <code>atms</code> keyword argument</li></ul><p>For example, to analyze only oxygen atoms:</p><pre><code class="language-julia hljs"># Get indices of oxygen atoms
+O_indices = findall(x -&gt; x == &quot;O&quot;, traj.symbols)
+
+# Calculate VDOS for oxygen atoms only
+out = VDOS(inp, atms=O_indices)</code></pre><p>The frequency axis <code>out.v</code> is in wavenumbers (cm<span>$^{-1}$</span>) by default.</p><p>You can plot the VDOS spectrum using your preferred plotting package:</p><pre><code class="language-julia hljs">using Plots
+
+plot(out.v, out.I, 
+     xlabel=&quot;Wavenumber (cm-1)&quot;, 
+     ylabel=&quot;Intensity&quot;,
+     label=&quot;VDOS&quot;)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../optimizations/">« Optimization</a><a class="docs-footer-nextpage" href="../md/dynamics/">Molecular Dynamics Simulations »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 8 September 2025 22:03">Monday 8 September 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
