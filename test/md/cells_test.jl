@@ -38,7 +38,7 @@ end
   @test isapprox(tmp, cell.scaled_pos[1], atol=1e-10)
 
   # delete hydrogens
-  YASS.trim!(cell, 2:3)
+  deleteat!(cell, 2:3)
 
   @test length(cell.scaled_pos) == 1
   @test length(cell.velocity)   == 1
