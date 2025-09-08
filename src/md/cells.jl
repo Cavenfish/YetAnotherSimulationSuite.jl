@@ -110,7 +110,7 @@ function makeCell(bdys::Vector{MyAtoms}, lattice::AbstractMatrix;
 end
 
 """
-    trim!(cell::MyCell, iter)
+    deleteat!(cell::MyCell, iter)
 
 Remove atoms at given indices from a cell.
 
@@ -121,7 +121,7 @@ Remove atoms at given indices from a cell.
 # Side Effects
 - Modifies the cell in-place.
 """
-function trim!(cell::MyCell, iter)
+function Base.deleteat!(cell::MyCell, iter)
   deleteat!(cell.scaled_pos, iter)
   deleteat!(cell.velocity, iter)
   deleteat!(cell.masses, iter)
