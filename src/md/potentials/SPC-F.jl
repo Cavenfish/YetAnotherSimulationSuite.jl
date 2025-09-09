@@ -55,7 +55,6 @@ SPCF(bdys::Union{Vector{MyAtoms}, MyCell}) = _SPCF_PotVars(
 function SPCF!(F, u, p)
   E   = 0.0
   P   = p.potVars
-  NC  = p.NC .* p.PBC
   lat = isa(p, optVars) ? p.lattice : p.ensemble.lattice
 
   for mol in p.mols
