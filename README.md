@@ -13,12 +13,12 @@
 [ddocs-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [ddocs-url]: https://cavenfish.github.io/YASS.jl/dev/
 
-# Yet Another Simulation Suite (YASS.jl)
-
 [![][ddocs-img]][ddocs-url]
 [![][ci-img]][ci-url]
 [![][codecov-img]][codecov-url]
 [![][aqua-img]][aqua-url]
+
+# Yet Another Simulation Suite (YASS.jl)
 
 `YASS.jl` is a modern, flexible atomic simulation suite written in Julia. It aims to provide:
 
