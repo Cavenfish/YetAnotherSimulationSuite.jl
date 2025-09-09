@@ -16,7 +16,6 @@ lat = [10.0 0 0; 0 10.0 0; 0 0 10.0]
   @test isapprox(posC, pos, atol=1e-10)
   @test getVolume(cell) == 1000.0
   @test getMols(cell, 1.2) == [[1,2,3]]
-  @test getPairs(cell)[1] |> isempty
 
 end
 
@@ -39,7 +38,7 @@ end
   @test isapprox(tmp, cell.scaled_pos[1], atol=1e-10)
 
   # delete hydrogens
-  YASS.trim!(cell, 2:3)
+  deleteat!(cell, 2:3)
 
   @test length(cell.scaled_pos) == 1
   @test length(cell.velocity)   == 1

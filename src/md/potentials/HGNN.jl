@@ -73,8 +73,10 @@ function HGNN!(F, u, p)
     E += molPot!(F, r, i, P.molVars)
   end
 
-  for i in p.pars
-    E += pairPot!(F, r, i, P.pairVars, P.rhats, P.dPdr, P.P, P.A)
+  for i = 1:length(p.mols)
+    for j = i+1:length(p.mols)
+      E += pairPot!(F, r, p.mols[[i,j]], P.pairVars, P.rhats, P.dPdr, P.P, P.A)
+    end
   end
   
   E  *= 0.000124 # cm-1 to eV

@@ -1,4 +1,15 @@
+"""
+    getHarmonicFreqs(calc::MyCalc, obj::Union{MyCell, Vector{MyAtoms}})
 
+Compute harmonic vibrational frequencies and modes for a cell or molecule.
+
+# Arguments
+- `calc`: Calculator object (`MyCalc`).
+- `obj`: `MyCell` or vector of `MyAtoms`.
+
+# Returns
+- Tuple: (vector of frequencies, matrix of modes).
+"""
 function getHarmonicFreqs(calc::MyCalc, obj::Union{MyCell, Vector{MyAtoms}})
   _hbar = 1.0545718001391127e-34
   _e    = 1.6021766208e-19
@@ -41,6 +52,17 @@ function getHarmonicFreqs(calc::MyCalc, obj::Union{MyCell, Vector{MyAtoms}})
   (freqs, modes)
 end
 
+"""
+    animateMode(bdys::Vector{MyAtoms}, mode, fileName; c=1.0)
+
+Animate a vibrational mode and write the trajectory to a file.
+
+# Arguments
+- `bdys`: Vector of `MyAtoms` objects.
+- `mode`: Mode vector to animate.
+- `fileName`: Output file name.
+- `c`: (Optional) Amplitude scaling factor (default: 1.0).
+"""
 function animateMode(bdys::Vector{MyAtoms}, mode, fileName; c=1.0)
   f = open(fileName, "w")
   N = length(bdys)
@@ -68,6 +90,20 @@ function animateMode(bdys::Vector{MyAtoms}, mode, fileName; c=1.0)
   close(f)
 end
 
+"""
+    getModePES(EoM, bdys, mode; range=collect(-1:0.001:2))
+
+Compute the potential energy surface (PES) along a vibrational mode.
+
+# Arguments
+- `EoM`: Energy function.
+- `bdys`: Vector of `MyAtoms` objects.
+- `mode`: Mode vector.
+- `range`: (Optional) Range of displacements (default: -1:0.001:2).
+
+# Returns
+- Tuple: (displacement values, energy values).
+"""
 function getModePES(EoM, bdys, mode; range=collect(-1:0.001:2))
 
   x0, vars = prep4pot(EoM, bdys)
@@ -85,6 +121,20 @@ function getModePES(EoM, bdys, mode; range=collect(-1:0.001:2))
   return x, y
 end
 
+"""
+    getModeInteractionPES(EoM!, bdys, mode; range=collect(-1:0.001:2))
+
+Compute the interaction potential energy surface along a vibrational mode.
+
+# Arguments
+- `EoM!`: Energy function.
+- `bdys`: Vector of `MyAtoms` objects.
+- `mode`: Mode vector.
+- `range`: (Optional) Range of displacements (default: -1:0.001:2).
+
+# Returns
+- Tuple: (displacement values, interaction energy values).
+"""
 function getModeInteractionPES(EoM!, bdys, mode; range=collect(-1:0.001:2))
 
   x0, vars = prep4pot(bdys)

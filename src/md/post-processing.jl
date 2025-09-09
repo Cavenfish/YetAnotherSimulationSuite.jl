@@ -1,4 +1,16 @@
+"""
+    processDynamics(solu::SciMLBase.ODESolution; dt=fs, step=1)
 
+Convert an ODE solution to a Traj object.
+
+# Arguments
+- `solu`: ODE solution object.
+- `dt`: Time step (default: fs).
+- `step`: Step interval (default: 1).
+
+# Returns
+- Traj object.
+"""
 function processDynamics(solu::SciMLBase.ODESolution; dt=fs, step=1)
   N  = length(solu.t)
   
@@ -10,6 +22,20 @@ function processDynamics(solu::SciMLBase.ODESolution; dt=fs, step=1)
   )
 end
 
+"""
+    push!(tj::MyTraj, solu::SciMLBase.ODESolution; dt=fs, step=1)
+
+Append images from an ODE solution to a trajectory.
+
+# Arguments
+- `tj`: Traj object.
+- `solu`: ODE solution object.
+- `dt`: Time step (default: fs).
+- `step`: Step interval (default: 1).
+
+# Side Effects
+- Modifies `tj` in-place.
+"""
 function Base.push!(tj::MyTraj, solu::SciMLBase.ODESolution; dt=fs, step=1)
   N = length(solu.t)
   
@@ -19,6 +45,18 @@ function Base.push!(tj::MyTraj, solu::SciMLBase.ODESolution; dt=fs, step=1)
 
 end
 
+"""
+    processTmpFiles(files; kwargs...)
+
+Process a list of temporary files containing ODE solutions into a single trajectory.
+
+# Arguments
+- `files`: List of file paths.
+- `kwargs`: Additional keyword arguments.
+
+# Returns
+- Traj object.
+"""
 function processTmpFiles(files; kwargs...)
   
   # Process first tmp file into traj obj

@@ -1,3 +1,15 @@
+"""
+    getMols(bdys::Vector{MyAtoms}, rmax::Float64)
+
+Cluster atoms in `bdys` into molecules using DBSCAN with cutoff `rmax`.
+
+# Arguments
+- `bdys`: Vector of `MyAtoms` objects.
+- `rmax`: Distance cutoff for clustering.
+
+# Returns
+- Vector of vectors, each containing indices of atoms in a molecule.
+"""
 function getMols(bdys::Vector{MyAtoms}, rmax::Float64)
   pts = zeros(length(bdys[1].r), length(bdys))
 
@@ -10,23 +22,18 @@ function getMols(bdys::Vector{MyAtoms}, rmax::Float64)
   [i.core_indices for i in ret.clusters]
 end
 
-function getPairs(bdys::Vector{MyAtoms})
+"""
+    getMols(cell::MyCell, rmax::Float64)
 
-  # Get mols and N
-  mols = getMols(bdys, 1.5)
-  N    = size(mols)[1]
+Cluster atoms in a cell into molecules using DBSCAN with cutoff `rmax`.
 
-  # Make all pairs
-  pars = Pair[]
-  for i in 1:N
-    for j in i+1:N
-      push!(pars, Pair(mols[i],mols[j]))
-    end
-  end
+# Arguments
+- `cell`: `MyCell` object.
+- `rmax`: Distance cutoff for clustering.
 
-  pars, mols
-end
-
+# Returns
+- Vector of vectors, each containing indices of atoms in a molecule.
+"""
 function getMols(cell::MyCell, rmax::Float64)
   D   = getDistanceMatrix(cell)
 
@@ -35,25 +42,17 @@ function getMols(cell::MyCell, rmax::Float64)
   [i.core_indices for i in ret.clusters]
 end
 
-function getPairs(cell::MyCell)
+"""
+    getDistanceMatrix(cell::MyCell)
 
-  n = length(cell.masses)
+Compute the pairwise distance matrix for atoms in a cell, accounting for periodicity.
 
-  # Get mols and N
-  mols = getMols(cell, 1.5)
-  N    = size(mols)[1]
+# Arguments
+- `cell`: `MyCell` object.
 
-  # Make all pairs
-  pars = Pair[]
-  for i in 1:N
-    for j in i+1:N
-      push!(pars, Pair(mols[i],mols[j]))
-    end
-  end
-
-  pars, mols
-end
-
+# Returns
+- Symmetric matrix of distances between atoms.
+"""
 function getDistanceMatrix(cell::MyCell)
 
   if isdiag(cell.lattice)
@@ -65,6 +64,17 @@ function getDistanceMatrix(cell::MyCell)
   D
 end
 
+"""
+    distanceMatrixOrthorhombicCell(cell::MyCell)
+
+Compute the distance matrix for an orthorhombic cell.
+
+# Arguments
+- `cell`: `MyCell` object.
+
+# Returns
+- Symmetric matrix of distances between atoms.
+"""
 function distanceMatrixOrthorhombicCell(cell::MyCell)
   n  = length(cell.scaled_pos)
   D  = zeros(n,n)
@@ -87,6 +97,17 @@ function distanceMatrixOrthorhombicCell(cell::MyCell)
   D
 end
 
+"""
+    distanceMatrixAnyCell(cell::MyCell)
+
+Compute the distance matrix for a general (possibly non-orthorhombic) cell.
+
+# Arguments
+- `cell`: `MyCell` object.
+
+# Returns
+- Symmetric matrix of distances between atoms.
+"""
 function distanceMatrixAnyCell(cell::MyCell)
   n     = length(cell.scaled_pos)
   D     = zeros(n,n)
@@ -103,6 +124,18 @@ function distanceMatrixAnyCell(cell::MyCell)
   D
 end
 
+"""
+    periodicDistance(x::AbstractArray, y::AbstractArray, vects)
+
+Compute the minimum periodic distance between two points given lattice vectors.
+
+# Arguments
+- `x`, `y`: Position vectors.
+- `vects`: Iterable of lattice vectors.
+
+# Returns
+- Minimum periodic distance (Float64).
+"""
 function periodicDistance(x::AbstractArray, y::AbstractArray, vects)
   r = norm(x - y)
 

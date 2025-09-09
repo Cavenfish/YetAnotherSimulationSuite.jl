@@ -18,26 +18,33 @@ def scmef_init(pos, cell, pbc=True, **kwargs):
 
     # SCME params
     para_dict = {
-        "te": 1.1045 / Bohr,
-        "td": 7.5548 * Bohr,
-        "Ar": 8149.63 / Hartree,
-        "Br": -0.5515,
-        "Cr": -3.4695 * Bohr,
-        "r_Br": 1.0 / Bohr,
-        "rc_Disp": 8.0 / Bohr,
-        "rc_Core": 7.5 / Bohr,
-        "rc_Elec": 9.0 / Bohr,
-        "w_rc_Elec": 2.0 / Bohr,
-        "w_rc_Core": 2.0 / Bohr,
-        "w_rc_Disp": 2.0 / Bohr,
-        "C6": 46.4430e0,
-        "C8": 1141.7000e0,
-        "C10": 33441.0000e0,
-        "scf_convcrit": 1e-12,
-        "scf_policy": pyscme.SCFPolicy.strict,
-        "NC": [1,1,1],
+        "dispersion": {
+            "td": 7.5548 * Bohr,
+            "rc": 8.0 / Bohr,
+            "w_rc": 2 / Bohr,
+            "C6_OO": 46.4430e0,
+            "C8_OO": 1141.7000e0,
+            "C10_OO": 33441.0000e0,
+        },
+        "repulsion": {
+            "Ar_OO": 8149.63 / Hartree,
+            "Br_OO": -0.5515,
+            "Cr_OO": -3.4695 * Bohr,
+            "r_Br": 1.0 / Bohr,
+            "rc": 7.5 / Bohr,
+            "w_rc": 2 / Bohr,
+        },
+        "electrostatic": {
+            "scf_convcrit": 1e-12,
+            "NC": [1, 1, 1],
+            "scf_policy": pyscme.SCFPolicy.strict,
+            "te": 1.1045 / Bohr,
+            "max_iter_scf": 500,
+            "rc": 9.0 / Bohr,
+            "w_rc": 2 / Bohr,
+        },
         "dms": True,
-        "qms": True
+        "qms": True,
     }
 
     for (key, value) in kwargs.items():
@@ -50,7 +57,7 @@ def scmef_init(pos, cell, pbc=True, **kwargs):
 
     # Set SCME calc
     bdys.calc =  SCMECalculator(atoms=bdys, **para_dict)
-    parameter_H2O.Assign_parameters_H20(bdys.calc.scme)
+    parameter_H2O.Assign_parameters_H2O(bdys.calc.scme)
 
     return bdys
 
@@ -75,21 +82,47 @@ def scmef_get_dipole(pos, cell, pbc=True, **kwargs):
 
     return bdys.get_dipole_moment()
     
-def scmef_get_induced_dipoles(pos, cell, pbc=True, **kwargs):
+def scmef_get_total_dipoles(pos, cell, pbc=True, **kwargs):
 
     bdys = scmef_init(pos, cell, pbc=pbc)
     bdys.get_potential_energy()
 
-    return bdys.calc.results["induced_dipoles"]
+    return bdys.calc.scme.dipole_moments
 
 def scmef_get_constituent_energies(pos, cell, pbc=True, **kwargs):
     
     bdys = scmef_init(pos, cell, pbc=pbc)
     bdys.get_potential_energy()
 
-    E_elec  = bdys.calc.results["electrostatic_energy"]
-    E_disp  = bdys.calc.results["dispersion_energy"]
-    E_core  = bdys.calc.results["core_energy"]
-    E_intra = bdys.calc.results["monomer_energy"]
+    E_elec  = bdys.calc.results["energy_electrostatic"]
+    E_disp  = bdys.calc.results["energy_dispersion"]
+    E_core  = bdys.calc.results["energy_core"]
+    E_intra = bdys.calc.results["energy_monomer"]
 
     return E_elec, E_disp, E_core, E_intra
+
+def scmef_get_total_electric_field(pos, cell, pbc=True, **kwargs):
+    
+    bdys = scmef_init(pos, cell, pbc=pbc)
+    bdys.get_potential_energy()
+
+    return bdys.calc.scme.electric_field_total
+
+def scmef_get_electrostatic_components(pos, cell, pbc=True, **kwargs):
+
+    bdys = scmef_init(pos, cell, pbc=pbc)
+    bdys.get_potential_energy()
+
+    ef    = bdys.calc.scme.electric_field_total
+    ef_d1 = bdys.calc.scme.electric_field_total_d1
+    ef_d2 = bdys.calc.scme.electric_field_total_d2
+    ef_d3 = bdys.calc.scme.electric_field_total_d3
+
+    di   = bdys.calc.scme.dipole_moments
+    di_s = bdys.calc.scme.static_dipole_moments
+    qu   = bdys.calc.scme.quadrupole_moments
+    qu_s = bdys.calc.scme.static_quadrupole_moments
+    oc   = bdys.calc.scme.octupole_moments
+    he   = bdys.calc.scme.hexadecapole_moments
+
+    return (ef, ef_d1, ef_d2, ef_d3, di, di_s, qu, qu_s, oc, he)

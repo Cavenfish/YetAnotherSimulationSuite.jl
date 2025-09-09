@@ -74,6 +74,26 @@ function mbx_get_energy(xyz, nats)
   E[] * E_MBX2JMD
 end
 
+function mbx_get_energy_decomp(xyz, nats)
+  E1b = Ref{Cdouble}(0)
+  E2b = Ref{Cdouble}(0)
+  E3b = Ref{Cdouble}(0)
+  E4b = Ref{Cdouble}(0)
+  Edp = Ref{Cdouble}(0)
+  Eel = Ref{Cdouble}(0)
+
+  ccall(
+    (:get_energy_decomp_, libmbx), Cvoid,
+    (
+      Ptr{Cdouble}, Ref{Cint}, Ref{Cdouble}, Ref{Cdouble}, Ref{Cdouble},
+      Ref{Cdouble}, Ref{Cdouble}, Ref{Cdouble}
+    ),
+    xyz, nats, E1b, E2b, E3b, E4b, Edp, Eel,
+  )
+
+  (E1b[], E2b[], E3b[], E4b[], Edp[], Eel[]) .* E_MBX2JMD
+end
+
 function mbx_get_energy_grad!(G, xyz, nats)
 
   E   = Ref{Cdouble}(0)
@@ -105,6 +125,13 @@ function mbx_get_induced_dipoles(μ)
     (Ptr{Cdouble},), μ
   )
 
+end
+
+function mbx_get_charges(q)
+  ccall(
+    (:get_charges_, libmbx), Cvoid,
+    (Ptr{Cdouble},), q
+  )
 end
 
 function mbx_finalize_system()
@@ -170,4 +197,25 @@ function mbx_getInducedDipoles(bdys::Vector{MyAtoms})
   mbx_finalize_system()
 
   [μ[i:i+2] for i = 1:3:length(μ)]
+end
+
+function mbx_getConstituentEnergies(obj::Union{Vector{MyAtoms}, MyCell})
+  vars = MBX(obj)
+  xyz  = [j for i in vars.xyz for j in i]
+  nats = convert(Int32, length(vars.at_nams))
+
+  ret = mbx_get_energy_decomp(xyz, nats)
+  mbx_finalize_system()
+
+  ret
+end
+
+function mbx_getCharges(obj::Union{Vector{MyAtoms}, MyCell})
+  vars = MBX(obj)
+  q    = zeros(vars.num_mon * 4)
+  
+  mbx_get_charges(q)
+  mbx_finalize_system()
+
+  q
 end

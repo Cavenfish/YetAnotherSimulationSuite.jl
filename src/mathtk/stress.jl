@@ -1,5 +1,16 @@
+"""
+    getNumericalStress(calc::MyCalc, cell::MyCell; eps=1e-6)
 
-# This is copied from the ASE implementation 
+Compute the numerical stress tensor for a cell using finite differences.
+
+# Arguments
+- `calc`: Calculator object (`MyCalc`).
+- `cell`: Cell object (`MyCell`).
+- `eps`: Strain increment for finite difference (default: 1e-6).
+
+# Returns
+- 3x3 stress tensor matrix.
+"""
 function getNumericalStress(calc::MyCalc, cell::MyCell; eps=1e-6)
   stress = zeros(3,3)
   vol    = getVolume(cell)
@@ -36,7 +47,19 @@ function getNumericalStress(calc::MyCalc, cell::MyCell; eps=1e-6)
   stress
 end
 
-# A version of the above that only operates on diagonal terms of matrix
+"""
+    getNumericalStressOrthogonal(calc::MyCalc, cell::MyCell; eps=1e-6)
+
+Compute the numerical stress tensor for a cell using finite differences, only for diagonal terms (orthogonal cell).
+
+# Arguments
+- `calc`: Calculator object (`MyCalc`).
+- `cell`: Cell object (`MyCell`).
+- `eps`: Strain increment for finite difference (default: 1e-6).
+
+# Returns
+- 3x3 stress tensor matrix (only diagonal terms are nonzero).
+"""
 function getNumericalStressOrthogonal(calc::MyCalc, cell::MyCell; eps=1e-6)
   stress = zeros(3,3)
   vol    = getVolume(cell)

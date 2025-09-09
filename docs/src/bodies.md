@@ -1,106 +1,156 @@
-# Bodies
+# Simulation Bodies
 
-There are two types of simulation objects within YASS, the Atom and Cell objects. A Cell object is self-contained and is passed as-is to simulation functions, whereas the Atom object is only a single Atom. For simulations with more than one Atom, you must use a vector of Atom objects.
+`YASS.jl` provides two main types of simulation objects: `Particle` and `Cell`. Each serves different purposes in molecular simulations:
 
-### Atom
+- `Particle`: Represents individual atoms or particles
+- `Cell`: Represents periodic systems like crystals
 
-In YASS you have an Atom object, which contains the position, velocity, mass and symbol of the atom. As mentioned above, you will typically be working with a vector of Atoms. You can create this vector of Atoms manually or read them in from an xyz file.
+## Particle Objects
+
+The `Particle` type is the fundamental building block for molecular simulations. Each particle has:
+
+- Position vector (`r`)
+- Velocity vector (`v`) 
+- Mass (`m`)
+- Chemical symbol (`s`)
+
+### Creating Particles
+
+You can create particles in several ways:
 
 ```julia
 using YASS
 
-# Read it in from an xyz file
-bdys = readSystem("./myFile.xyz")
+# Read from XYZ file
+atoms = readSystem("molecule.xyz")
 
-# Or make it yourself
-bdys::Vector{YASS.MyAtoms} = [
-  Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, "O"),
-  Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, "H"),
-  Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, "H")
+# Create manually
+water::Vector{YASS.MyAtoms} = [
+    Particle([0.000,  0.000, 0.000], zeros(3), 15.999, "O"),
+    Particle([0.757,  0.586, 0.000], zeros(3),  1.008, "H"),
+    Particle([0.757, -0.586, 0.000], zeros(3),  1.008, "H")
 ]
 
-# Write it to an xyz file
-write("./h2o.xyz", bdys)
+# Save to file
+write("water.xyz", water)
 ```
 
-Within YASS the Atom struct is mutable, this is to allow on-the-fly swapping of atomic masses. 
+### Modifying Particles
+
+The `Particle` type is mutable, allowing modifications after creation:
+
+```julia
+# Modify position
+atoms[1].r .= [1.0, 0.0, 0.0]
+
+# Change velocity
+atoms[1].v .= [0.1, 0.0, 0.0]
+
+# Update mass (e.g., for isotope studies)
+atoms[1].m = 18.015  # Change to heavy water
+
+# Change chemical symbol
+atoms[1].s = "D"     # Deuterium
+```
+
+### Particle Manipulation Functions
+
+YASS provides several utility functions for working with particles:
+
+```julia
+# Translate all particles
+translate!(atoms, [1.0, 0.0, 0.0])
+
+# Center particles at origin
+centerBdys!(atoms)
+
+# Swap positions of two particles
+swapAtoms!(atoms, 1, 2)
+
+# Change isotopes for specific atoms
+swapIso!(atoms, [1,2], [2.014, 2.014])  # Convert H to D
+
+# Get center of mass
+com = CoM(atoms)
+
+# Get center of mass velocity
+vcom = vCoM(atoms)
+
+# Remove center of mass motion
+zeroVCoM!(atoms)
+```
+
+## Cell Objects
+
+The `Cell` type represents periodic systems and contains:
+
+- Lattice matrix
+- Scaled positions (fractional coordinates)
+- Velocities
+- Masses
+- Chemical symbols  
+- Periodic boundary conditions
+- Neighbor counts
+
+### Creating Cells
 
 ```julia
 using YASS
 
-# Read it in from an xyz file
-bdys = readSystem("./myFile.xyz")
+# Read from file with lattice information
+cell = readSystem("crystal.xyz")
 
-# Change the mass of the first Atom
-bdys[1].m = 2.00
-```
-
-YASS also contains some auxiliary functions that can apply changes to Atom objects.
-
-```julia
-using YASS
-
-# Read it in from an xyz file
-bdys = readSystem("./myFile.xyz")
-
-# Uniformally translate all atoms
-v = [1.0, 0.0, 0.0]
-translateBdys!(bdys, v)
-
-# Center the atoms about the center-of-mass
-centerBdys!(bdys)
-
-# Swap the positions of atoms 1 and 2
-swapAtoms!(bdys, 1, 2)
-
-# Swap the mass of atoms 1, and 2 with 4.00 and 5.00
-swapIso!(bdys, [1,2], [4.0, 5.0])
-```
-
-### Cell
-
-The Cell object within YASS holds the lattice, scaled positions, velocities, masses, symbols, and some PBC criteria. Making the Cell object completely from sctratch is possible but not typical. 
-
-```julia
-using YASS
-
-# Read it in from an xyz file
-cell = readSystem("./myFile.xyz")
-
-# Or make it yourself
-bdys::Vector{YASS.MyAtoms} = [
-  Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, 'O'),
-  Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, 'H'),
-  Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, 'H')
+# Create from atoms and lattice
+atoms = [
+    Particle([0.0, 0.0, 0.0], zeros(3), 22.990, "Na"),
+    Particle([0.5, 0.5, 0.5], zeros(3), 35.450, "Cl")
 ]
-lat  = [5 0 0; 0 5 0; 0 0 5]
-cell = makeCell(bdys, lat)
+lattice = [
+    5.0 0.0 0.0
+    0.0 5.0 0.0
+    0.0 0.0 5.0
+]
+cell = makeCell(atoms, lattice)
 
-# Write it to an xyz file
-write("./myCell.xyz", cell)
+# Specify periodic boundary conditions
+cell = makeCell(atoms, lattice, 
+    PBC=[true, true, true],  # Periodic in all directions
+    NC=[1,1,1]               # Neighbor cells to consider
+)
+
+# Save cell to file
+write("nacl.xyz", cell)
 ```
 
-YASS also contians some basic auxiliary functions for cells. 
+### Cell Operations
+
+`YASS.jl` provides various functions for cell manipulation:
 
 ```julia
-using YASS
-
-# Read it in from an xyz file
-cell = readSystem("./myFile.xyz")
-
-# Wrap atoms outside cell back into cell
+# Wrap atoms back into primary cell
 wrap!(cell)
 
-# Center atoms at cell center
+# Center atoms in cell
 center!(cell)
 
-# Make a supercell
-T     = [2 0 0; 0 2 0; 0 0 2]
-super = makeSuperCell(cell, T)
+# Create supercell
+transform = [2 0 0; 0 2 0; 0 0 2]  # 2x2x2 supercell
+super = makeSuperCell(cell, transform)
 
-# Get primitive cell
-prim  = getPrimitiveCell(cell, 1e-5)# 1e-5 is symprec
+# Get primitive cell (with symmetry precision)
+primitive = getPrimitiveCell(cell, 1e-5)
 
-# Get vector of Atoms from cell
-bdys  = getBdys(cell)
+# Convert between cell and atoms
+atoms = makeBdys(cell)        # Cell -> Atoms
+cell = makeCell(atoms, lat)   # Atoms -> Cell
+
+# Get Cartesian positions
+positions = getPos(cell)
+
+# Get cell volume
+volume = getVolume(cell)
+
+# Reorder atoms
+order = sortperm([atom.m for atom in atoms])
+reorder!(cell, order)
 ```

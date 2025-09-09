@@ -1,4 +1,15 @@
+"""
+    getIPR(modes; N=2)
 
+Compute the inverse participation ratio (IPR) for vibrational modes.
+
+# Arguments
+- `modes`: Matrix of mode vectors.
+- `N`: Number of atoms per molecule (default: 2).
+
+# Returns
+- Matrix of IPR values.
+"""
 function getIPR(modes; N=2)
   m   = N * 3
   l   = size(modes)[2]
@@ -19,6 +30,18 @@ function getIPR(modes; N=2)
   ipr
 end
 
+"""
+    getPR(ipr; x=1.6e-5)
+
+Compute the participation ratio (PR) from IPR data.
+
+# Arguments
+- `ipr`: IPR matrix.
+- `x`: Threshold value (default: 1.6e-5).
+
+# Returns
+- Vector of participation ratios.
+"""
 function getPR(ipr; x=1.6e-5)
   l  = size(ipr)[2]
   pr = zeros(l)
