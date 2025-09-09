@@ -2,6 +2,19 @@
 Intramolecular Potential Functions
 """
 
+struct _Buffers{AV3D<:AbstractVector}
+  ri::AV3D
+  rj::AV3D
+  fi::AV3D
+  fj::AV3D
+end
+
+const _func_buffs = _Buffers(
+  MVector{3}(zeros(3)),
+  MVector{3}(zeros(3)),
+  MVector{3}(zeros(3)),
+  MVector{3}(zeros(3))
+)
 
 function _Morse(
   r::Float64, rvec::V, D::Float64, a::Float64, req::Float64
