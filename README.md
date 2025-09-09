@@ -20,22 +20,91 @@
 [![][codecov-img]][codecov-url]
 [![][aqua-img]][aqua-url]
 
+`YASS.jl` is a modern, flexible atomic simulation suite written in Julia. It aims to provide:
 
-**`YASS.jl` is still in the pre-release phase.** The roadmap below tracks the development process of `YASS.jl`.
+- 🎯 Simple, and intuitive API
+- ⚡ High performance native Julia implementation
+- 🔧 Easy extensibility for custom methods
+- 📦 Built-in potentials and analysis tools
 
-`YASS.jl` aims to offer users a simple, intuitive and easy-to-use molecular dynamics enviornment. It draws inspiration from Python's [ASE](https://wiki.fysik.dtu.dk/ase/index.html), but is intended to be faster and offer users more flexibility. The flexibility comes from the relative ease with which users can add their own methods to dynamics or other components of `YASS.jl`.
+## Quick Start
 
-# Roadmap to Becoming a True Package
+```julia
+using YASS
 
-  - [x] Clear out niche code
-  - [ ] Make documentation
-  - [ ] Add example scripts
-  - [x] Get codecov above 70%
-  - [ ] Rewrite code to use Unitful.jl?
-  - [x] Use Chemfiles for file IO
+# Read molecule
+water = readSystem("water.xyz")
 
-# Features to Add
+# Run 10ps NVE simulation
+traj = run(TIP4Pf(), water, (0.0, 10.0ps), 1.0fs, NVE())
 
-  - [ ] Add NPT simulations
-  - [ ] Add anharmonic vibrational analysis
-  - [ ] Add PIMD methods
+# Analyze results
+energies = [img.energy for img in traj.images]
+temperatures = [img.temp for img in traj.images]
+```
+
+## Features
+
+- 🧪 Multiple molecular dynamics ensembles (NVE, NVT)
+- 🔬 Built-in analysis tools (RDF, VACF)
+- ⚛️ Geometry and cell optimizations
+- 📊 Common water models (TIP4P/2005f, SPC-F) 
+- 💻 Easy-to-extend architecture
+- 🚄 High performance through Julia's native speed
+- 📝 Comprehensive documentation
+
+## Installation
+
+```julia
+using Pkg
+Pkg.add("https://github.com/Cavenfish/YASS.jl.git")
+```
+
+## Contributing
+
+We welcome contributions! Whether it's:
+
+- 🐛 Bug fixes
+- ✨ New features
+- 📚 Documentation improvements
+- 🧪 Additional test cases
+
+If you find `YASS.jl` useful or just want to show support, please consider starring the repository!
+
+## Development Status
+
+**YASS.jl is currently in pre-release phase.** 
+
+Here's what we're working on:
+
+### Roadmap
+- [x] Core functionality cleanup
+- [x] Comprehensive documentation
+- [ ] Example scripts and tutorials
+- [x] Test coverage >70%
+- [ ] Unitful.jl integration
+- [x] Chemfiles.jl integration
+
+### Upcoming Features
+- [ ] NPT ensemble simulations
+- [ ] Anharmonic vibrational analysis
+- [ ] Path integral molecular dynamics (PIMD)
+- [ ] Additional analysis tools
+
+## License
+
+`YASS.jl` is MIT licensed. See [LICENSE](LICENSE) for details.
+
+## Citation
+
+If you use `YASS.jl` in your research, please cite:
+
+```bibtex
+@misc{yass2023,
+  author = {Brian C. Ferrari},
+  title = {YASS.jl: Yet Another Simulation Suite},
+  year = {2023},
+  publisher = {GitHub},
+  url = {https://github.com/Cavenfish/YASS.jl}
+}
+```
