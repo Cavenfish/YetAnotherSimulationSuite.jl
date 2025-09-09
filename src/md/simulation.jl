@@ -10,8 +10,8 @@ tips and tricks should be done here. Making r and v SVectors prior to the
 dynamics run is one example. 
 """
 
-struct NVE{D, F<:AbstractFloat}
-  lattice::SMatrix{D, D, F}
+struct NVE{AM<:AbstractMatrix}
+  lattice::AM
 end
 
 """
@@ -35,8 +35,8 @@ Construct an NVE ensemble from a MyCell object.
 """
 NVE(cell::MyCell) = NVE(cell.lattice)
 
-struct NpT{D,B, T<:MyThermostat, F<:AbstractFloat}
-  lattice::MMatrix{D, D, F}
+struct NpT{B, AM<:AbstractMatrix, T<:MyThermostat}
+  lattice::AM
   barostat::B
   thermostat::T
 end
@@ -50,8 +50,8 @@ Structure for NVT (canonical) ensemble.
 - `lattice`: Lattice matrix.
 - `thermostat`: Thermostat object.
 """
-struct NVT{D, T<:MyThermostat, F<:AbstractFloat}
-  lattice::SMatrix{D, D, F}
+struct NVT{AM<:AbstractMatrix, T<:MyThermostat}
+  lattice::AM
   thermostat::T
 end
 
