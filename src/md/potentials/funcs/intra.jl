@@ -48,6 +48,23 @@ function _Morse!(
   E
 end
 
+function _Morse!(
+  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF, lat::AbstractMatrix,
+  i::Int64, j::Int64, D::Float64, a::Float64, req::Float64, rc::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+  
+  r = pbcVec!(rbuf, u[i], u[j], rc, lat)
+  c = exp(-a*(r-req))
+  E = D * (1 - c)^2
+
+  @. Fbuf = -2D * a * c * (1 - c) * rbuf / r
+
+  F[i] .-= Fbuf
+  F[j] .+= Fbuf
+
+  E
+end
+
 function _harmonicBond(
   r::Float64, rvec::V, K::Float64, req::Float64
 ) where V <: AbstractVector

@@ -11,7 +11,9 @@ https://pubs.acs.org/doi/full/10.1021/acs.jpca.5b02611
 """
 MvHff(; constraints=nothing) = Calculator(MvHff; EF=MvHff!, constraints=constraints)
 
-struct _MvHff_PotVars{F<:Float64} <: PotVars
+struct _MvHff_PotVars{
+  F<:Float64, AV2D<:AbstractVector, AV3D<:AbstractVector
+} <: PotVars
   D::F
   a::F
   req::F
@@ -28,6 +30,12 @@ struct _MvHff_PotVars{F<:Float64} <: PotVars
   Qo::F
   αc::F
   αo::F
+  rs::F
+  rc::F
+  S::AV2D
+  Fbuf::AV3D
+  rbuf::AV3D
+  rbuf2::AV3D
 end
 
 MvHff(bdys::Vector{MyAtoms}) = _MvHff_PotVars(
@@ -46,37 +54,60 @@ MvHff(bdys::Vector{MyAtoms}) = _MvHff_PotVars(
   -1.7835026375774934,
   -2.333732174702465,
   3.843702939952312,
-  2.131611069944055
+  2.131611069944055,
+  11.0,
+  12.0,
+  MVector{2}(zeros(2)),
+  MVector{3}(zeros(3)),
+  MVector{3}(zeros(3)),
+  MVector{3}(zeros(3))
 )
 
 function MvHff!(F, u, p)
-  E = 0.0
-  P = p.potVars
-
-  for mol in p.mols
-    E += _Morse!(F, u, mol[1], mol[2], P.D, P.a, P.req)
-  end
+  E   = 0.0
+  P   = p.potVars
+  lat = isa(p, optVars) ? p.lattice : p.ensemble.lattice
 
   for i = 1:length(p.mols)
     c1, o1 = p.mols[i]
 
+    E += _Morse!(F, u, P.Fbuf, P.rbuf, lat, c1, o1, P.D, P.a, P.req, P.rc)
+
     for j = i+1:length(p.mols)
       c2, o2 = p.mols[j]
 
+      doo = pbcVec!(P.rbuf2, u[o1], u[o2], P.rc, lat)
+      switchLR!(P.S, doo, P.rs, P.rc)
+
+      if iszero(P.S)
+        continue
+      end
+
+      e = 0.0
+
       #C--C
-      E += _Buckingham!(F, u, c1, c2, P.Acc, P.Bcc, P.Ccc)
+      e += _Buckingham!(F, u, P.Fbuf, P.rbuf, lat, c1, c2, P.Acc, P.Bcc, P.Ccc, P.rc)
 
       #C--O
-      E += _Buckingham!(F, u, c1, o2, P.Aco, P.Bco, P.Cco)
+      e += _Buckingham!(F, u, P.Fbuf, P.rbuf, lat, c1, o2, P.Aco, P.Bco, P.Cco, P.rc)
 
       #O--C
-      E += _Buckingham!(F, u, o1, c2, P.Aco, P.Bco, P.Cco)
+      e += _Buckingham!(F, u, P.Fbuf, P.rbuf, lat, o1, c2, P.Aco, P.Bco, P.Cco, P.rc)
 
       #O--O
-      E += _Buckingham!(F, u, o1, o2, P.Aoo, P.Boo, P.Coo)
+      e += _Buckingham!(F, u, P.Fbuf, P.rbuf, lat, o1, o2, P.Aoo, P.Boo, P.Coo, P.rc)
 
       #Special Electrostatics
-      E += _electroMvH!(F, u, p.mols[[i,j]], P.Qc, P.Qo, P.αc, P.αo, P.req)
+      e += _electroMvH!(F, u, p.mols[[i,j]], P.Qc, P.Qo, P.αc, P.αo, P.req)
+
+      E += P.S[1] * e
+
+      if P.S[2] != 0.0
+        P.rbuf2 ./= doo
+        P.Fbuf   .= -P.S[2] * e .* P.rbuf2
+        F[o1]   .-= P.Fbuf
+        F[o2]   .+= P.Fbuf
+      end
     end
   end
 

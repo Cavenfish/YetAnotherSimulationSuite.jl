@@ -95,6 +95,23 @@ function _Buckingham!(
   E
 end
 
+function _Buckingham!(
+  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF,
+  i::Int64, j::Int64, A::Float64, B::Float64, C::Float64, rc::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+
+  r = pbcVec!(rbuf, u[i], u[j], rc, lat)
+  a = A * exp(-B * r)
+  b = C / r^6
+  E = a - b
+  f = @. (B * a / r * rvec) - (6b / r^2 * rvec)
+
+  F[i] .-= f
+  F[j] .+= f
+
+  E
+end
+
 function _Coulomb(
   ri::Vi, rj::Vj, Qi::Float64, Qj::Float64
 ) where {Vi <: AbstractVector, Vj <: AbstractVector}
