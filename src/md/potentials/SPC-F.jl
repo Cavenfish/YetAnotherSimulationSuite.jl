@@ -23,7 +23,6 @@ struct _SPCF_PotVars{
   Qh::F
   rs::F
   rc::F
-  wa::SV3D
   Fbuf::AV3D
   rbuf::AV3D
   rbuf2::AV3D
@@ -44,7 +43,6 @@ SPCF(bdys::Union{Vector{MyAtoms}, MyCell}) = _SPCF_PotVars(
   0.5 * 2.959855,
   9.0,
   10.0,
-  SVector{3}([-1.0, 0.5, 0.5]),
   MVector{3}(zeros(3)),
   MVector{3}(zeros(3)),
   MVector{3}(zeros(3)),

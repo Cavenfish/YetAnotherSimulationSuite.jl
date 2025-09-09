@@ -4,28 +4,28 @@ Intermolecular Potential Functions
 
 
 function _vdw(
-  ri::Vi, rj::Vj, ϵij::Float64, σij::Float64
+  ri::Vi, rj::Vj, ϵ::Float64, σ::Float64
 ) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
   rvec = rj - ri
   r    = norm(rvec)
-  a    = σij / r
-  E    = 4ϵij * ((a)^12 - (a)^6)
-  F    = @. 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rvec
+  a    = σ / r
+  E    = 4ϵ * ((a)^12 - (a)^6)
+  F    = @. 4ϵ * (12*(a)^11 - 6*(a)^5) * (σ / r^3) * rvec
 
   E,F
 end
 
 function _vdw!(
   F::Vector{Vf}, u::Vector{Vu},
-  i::Int64, j::Int64, ϵij::Float64, σij::Float64; S=1.0
+  i::Int64, j::Int64, ϵ::Float64, σ::Float64; S=1.0
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   rvec  = u[j] - u[i]
   r     = norm(rvec)
-  a     = σij / r
-  E     = 4ϵij * ((a)^12 - (a)^6)
-  f     = 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rvec
+  a     = σ / r
+  E     = 4ϵ * ((a)^12 - (a)^6)
+  f     = 4ϵ * (12*(a)^11 - 6*(a)^5) * (σ / r^3) * rvec
   @. F[i] -= f * S
   @. F[j] += f * S
 
@@ -34,14 +34,14 @@ end
 
 function _vdw!(
   F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF,
-  i::Int64, j::Int64, ϵij::Float64, σij::Float64; S=1.0
+  i::Int64, j::Int64, ϵ::Float64, σ::Float64; S=1.0
 ) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
 
   @. rbuf = u[j] - u[i]
   r     = norm(rbuf)
-  a     = σij / r
-  E     = 4ϵij * ((a)^12 - (a)^6)
-  @. Fbuf  = 4ϵij * (12*(a)^11 - 6*(a)^5) * (σij / r^3) * rbuf
+  a     = σ / r
+  E     = 4ϵ * ((a)^12 - (a)^6)
+  @. Fbuf  = 4ϵ * (12*(a)^11 - 6*(a)^5) * (σ / r^3) * rbuf
   @. F[i] -= Fbuf * S
   @. F[j] += Fbuf * S
 
