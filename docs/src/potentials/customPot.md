@@ -1,152 +1,197 @@
 # Custom Potentials
 
-Using a custom potential within `YASS.jl` is fairly straightforward. You need to make the following components.
+`YASS.jl` allows you to implement custom potentials for molecular simulations. This guide demonstrates how to create a custom potential using a Lennard-Jones potential for gold (Au) as an example. To create a custom potential, you need three components:
 
-  - `PotVars` struct
-  - Initializer function (minimum 1, maximum 2)
-  - Evaluation functions (minimum 1, maximum 3)
-
-### Potential Variables Struct
-
-This struct should hold all parameters (outside of particle positions, velocities, etc.) needed to evaluate your potential. The name of this struct is not important but the type must be the `PotVars` type from `YASS`. 
+1. `PotVars` struct - Holds potential parameters
+2. Initializer function - Sets up the potential
+3. Evaluation functions - Calculate energies and forces
 
 ```julia
-using YASS 
+using YASS
 
-struct MyExamplePotVars{F<:Float64} <: YASS.PotVars
-  gamma::F
+struct AuLJPotVars{F<:Float64} <: YASS.PotVars
+    ε::F    # Well depth (eV)
+    σ::F    # Equilibrium distance (Å)
+    rc::F   # Cutoff radius (Å)
+    rc2::F  # Squared cutoff (Å²)
 end
-```
 
-### Initializer Function
+# Initialize potential with Au parameters
+function AuLJPotential(x::Union{Vector{YASS.MyAtoms}, YASS.MyCell})
+    ε = 5.29e-3  # eV
+    σ = 2.951    # Å (minimum at 2^(1/6)σ ≈ 3.31Å)
+    rc = 8.0     # Å
+    rc2 = rc^2   # Precalculate squared cutoff
+    
+    AuLJPotVars(ε, σ, rc, rc2)
+end
 
-This function needs to initialize the variables used within your custom potential. The function should take a single parameter, either a vector of `Particle` or a `YASS cell` object, and return your custom `PotVars` struct initialized with your potential's parameters.
-
-```julia
-MyExamplePotential(x::Union{Vector{YASS.MyAtoms}, YASS.MyCell}) = MyExamplePotVars(16.0)
-```
-
-### Evaluation functions
-
-`YASS.jl` calculators can have 3 different evaluation functions: 
-
-  1) Energy only evaluation
-  2) Inplace forces only evaluation
-  3) Energy and inplace forces evaluation
-
-You don't need to make all 3 functions, but you must have both energy and force evaluations to make a full calculator. This means you can make just function number 3 or both functions 1 and 2. If you make all functions the calculator is given more flexibility which may increase performance. For instance, if you want to get the potential energy of your system and only function number 3 is available then the calculator will need to evaluate both forces and energy to return just the energy. Whereas, an energy only evaluation may be faster and more memory efficient.
-
-The evaluation functions have required arguments and not adhereing to them will cause the calculator to not work. In the examples below they are shown, their names however are allowed to changed.
-
-```julia
-"""
-Energy only evaluation
-
-Required arguments:
-  u: positions of particles in system
-  vars: struct of variables passed to the calculator
-
-Required return:
-  energy: the energy of the system
-
-Order must be preserved but u and vars can be named anything.
-"""
-function MyEnergy(u, vars)
-  # Initialize energy
-  E = 0.0
-
-  # Access your PotVars from vars
-  potVars = vars.potVars
-
-  # Vars also has the masses and species of the system
-  m = vars.m # masses
-  s = vars.s # species (ie. "H" for hydrogen)
-
-  # Iterate over all molecules in your system
-  for mol in vars.mols
-    E += potVars.gamma
-  end
-
-  # Iterate over all pairs in your system
-  for i = 1:length(vars.mols)
-    for j = i+1:length(vars.mols)
-      E -= 1.0
+# Energy-only evaluation
+function AuLJEnergy(u, vars)
+    E = 0.0
+    potVars = vars.potVars
+    
+    # Extract parameters
+    ε = potVars.ε
+    σ = potVars.σ
+    rc2 = potVars.rc2
+    
+    # Calculate pair interactions
+    for i = 1:length(u)
+        for j = i+1:length(u)
+            
+            # Get distance vector and magnitude squared
+            r = u[j] - u[i]
+            r2 = dot(r, r)
+            
+            # Skip if beyond cutoff
+            r2 > rc2 && continue
+            
+            # Calculate LJ terms
+            σ_r2 = (σ^2)/r2
+            σ_r6 = σ_r2^3
+            σ_r12 = σ_r6^2
+            
+            # Add pair energy
+            E += 4ε*(σ_r12 - σ_r6)
+        end
     end
-  end
-
-  # Return the energy
-  E
+    
+    E
 end
 
-"""
-Inplace forces only evaluation
-
-Required arguments:
-  F: forces on particles in system
-  u: positions of particles in system
-  vars: struct of variables passed to the calculator
-
-No return value
-
-Order must be preserved but u and vars can be named anything.
-"""
-function MyForces!(F, u, vars)
-  # This exmaple just illustrates the declration of
-  # this function.
-  F .= 0.0
+# Force-only evaluation (in-place)
+function AuLJForces!(F, u, vars)
+    potVars = vars.potVars
+    
+    # Extract parameters
+    ε = potVars.ε
+    σ = potVars.σ
+    rc2 = potVars.rc2
+    
+    # Calculate forces between pairs
+    for i = 1:length(u)
+        for j = i+1:length(u)
+            
+            # Get distance vector and magnitude squared
+            r = u[j] - u[i]
+            r2 = dot(r, r)
+            
+            # Skip if beyond cutoff
+            r2 > rc2 && continue
+            
+            # Calculate LJ terms
+            σ_r2 = (σ^2)/r2
+            σ_r6 = σ_r2^3
+            σ_r12 = σ_r6^2
+            
+            # Calculate force (negative gradient)
+            f = 24ε/r2 * (2σ_r12 - σ_r6) .* r
+            
+            # Add forces
+            F[i] .-= f
+            F[j] .+= f
+        end
+    end
 end
 
-"""
-Energy and inplace forces only evaluation
+# Combined energy and forces evaluation
+function AuLJEnergyForces!(F, u, vars)
+    E = 0.0
+    potVars = vars.potVars
+    
+    # Extract parameters
+    ε = potVars.ε
+    σ = potVars.σ
+    rc2 = potVars.rc2
+    
+    # Calculate interactions
+    for i = 1:length(u)
+        for j = i+1:length(u)
+            
+            # Get distance vector and magnitude squared
+            r = u[j] - u[i]
+            r2 = dot(r, r)
+            
+            # Skip if beyond cutoff
+            r2 > rc2 && continue
+            
+            # Calculate LJ terms
+            σ_r2 = (σ^2)/r2
+            σ_r6 = σ_r2^3
+            σ_r12 = σ_r6^2
+            
+            # Add pair energy
+            E += 4ε*(σ_r12 - σ_r6)
+            
+            # Calculate and add forces
+            f = 24ε/r2 * (2σ_r12 - σ_r6) .* r
+            F[i] .-= f
+            F[j] .+= f
+        end
+    end
+    
+    E
+end
 
-Required arguments:
-  F: forces on particles in system
-  u: positions of particles in system
-  vars: struct of variables passed to the calculator
-
-Required return:
-  energy: the energy of the system
-
-Order must be preserved but u and vars can be named anything.
-"""
-function MyEnergyAndForces!(F, u, vars)
-  # You are allowed to do this
-  E = MyEnergy(u, vars)
-  MyForces!(F, u, vars)
-
-  # Keep in mind though that if you need to iterate
-  # over all mols and pairs for both the forces and energy
-  # doing this only once in here would be faster and more
-  # memory efficient. Here we call the other two function 
-  # just for the sake of showing you can do such a thing.
-
-  # Return energy
-  E
+# Initializer function
+function AuLJ(; constraints=nothing)
+    Calculator(
+        AuLJPotential;
+        E = AuLJEnergy,
+        F = AuLJForces!,
+        EF = AuLJEnergyForces!,
+        constraints=constraints
+    )
 end
 ```
 
-### Putting it all Together
 
-Now that we have made all the necessary components we can put it all together as a calculator.
+# Usage example
 
 ```julia
-# Define it as a variable
-calc = Calculator(
-  MyExamplePotential; 
-  E = MyEnergy,
-  F = MyForces!,
-  EF = MyEnergyAndForces!
-)
+# Create gold cluster
+atoms::Vector{YASS.MyAtoms} = [
+    Particle([0.0, 0.0, 0.0], zeros(3), 196.97, "Au"),
+    Particle([3.0, 0.0, 0.0], zeros(3), 196.97, "Au"),
+    Particle([0.0, 3.0, 0.0], zeros(3), 196.97, "Au")
+]
 
-# Or define a grabber function for it
-MyPotential() = Calculator(
-  MyExamplePotential; 
-  E = MyEnergy,
-  F = MyForces!,
-  EF = MyEnergyAndForces!
-)
+# Create calculator
+calc = AuLJ()
 
-# You can then use either style
-E = getPotEnergy(calc, bdys)
-E = getPotEnergy(MyPotential(), bdys)
+# Get energy
+E = getPotEnergy(calc, atoms)
+println("Potential energy: $E eV")
+
+# Get forces
+F = getForces(calc, atoms)
+println("Forces on first atom: $(F[1]) eV/Å")
+
+# Run MD simulation
+traj = run(calc, atoms, (0.0, 10.0ps), 1.0fs, NVE())
+println("Trajectory length: $(length(traj)) frames")
 ```
+
+## Key Points About Custom Potentials
+
+1. Parameter Storage
+   - Use `PotVars` to store constants and parameters
+   - Precalculate frequently used values (like rc²)
+   - Include units in comments for clarity
+
+2. Force Calculations
+   - Use in-place operations with `F[i] .-= f` style updates
+
+3. Optimization Tips
+   - Implement distance cutoffs for efficiency
+   - Precalculate squared terms where possible
+   - Use inplace operations and buffers to reduce memory allocations
+
+4. Good Practices
+   - Include references for potential parameters
+   - Document units clearly
+   - Implement all three evaluation functions for flexibility
+   - Test energy conservation in MD simulations
+
+For more examples, check the source code of built-in potentials in `YASS.jl`.
