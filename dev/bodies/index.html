@@ -1,71 +1,93 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Bodies · YASS.jl</title><meta name="title" content="Bodies · YASS.jl"/><meta property="og:title" content="Bodies · YASS.jl"/><meta property="twitter:title" content="Bodies · YASS.jl"/><meta name="description" content="Documentation for YASS.jl."/><meta property="og:description" content="Documentation for YASS.jl."/><meta property="twitter:description" content="Documentation for YASS.jl."/><meta property="og:url" content="https://Cavenfish.github.io/YASS.jl/bodies/"/><meta property="twitter:url" content="https://Cavenfish.github.io/YASS.jl/bodies/"/><link rel="canonical" href="https://Cavenfish.github.io/YASS.jl/bodies/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">YASS.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Bodies</a></li><li><a class="tocitem" href="../optimizations/">Optimization</a></li><li><a class="tocitem" href="../vibrations/">Vibrations</a></li><li><span class="tocitem">Molecular Dynamics</span><ul><li><a class="tocitem" href="../md/dynamics/">Molecular Dynamics Simulations</a></li><li><a class="tocitem" href="../md/thermostats/">Thermostats</a></li></ul></li><li><span class="tocitem">Potentials</span><ul><li><a class="tocitem" href="../potentials/potList/">Available Potentials</a></li><li><a class="tocitem" href="../potentials/customPot/">Custom Potentials</a></li></ul></li><li><a class="tocitem" href="../dependencies/">Credits</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Bodies</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Bodies</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/Cavenfish/YASS.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/Cavenfish/YASS.jl/blob/main/docs/src/bodies.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Bodies"><a class="docs-heading-anchor" href="#Bodies">Bodies</a><a id="Bodies-1"></a><a class="docs-heading-anchor-permalink" href="#Bodies" title="Permalink"></a></h1><p>There are two types of simulation objects within YASS, the Particle and Cell objects. A Cell object is self-contained and is passed as-is to simulation functions, whereas the Particle object is only a single Particle. For simulations with more than one Particle, you must use a vector of Particle objects.</p><h3 id="Particle"><a class="docs-heading-anchor" href="#Particle">Particle</a><a id="Particle-1"></a><a class="docs-heading-anchor-permalink" href="#Particle" title="Permalink"></a></h3><p>In YASS you have an Particle object, which contains the position, velocity, mass and symbol of the atom. As mentioned above, you will typically be working with a vector of atoms. You can create this vector of atoms manually or read them in from an xyz file.</p><pre><code class="language-julia hljs">using YASS
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Bodies · YASS.jl</title><meta name="title" content="Bodies · YASS.jl"/><meta property="og:title" content="Bodies · YASS.jl"/><meta property="twitter:title" content="Bodies · YASS.jl"/><meta name="description" content="Documentation for YASS.jl."/><meta property="og:description" content="Documentation for YASS.jl."/><meta property="twitter:description" content="Documentation for YASS.jl."/><meta property="og:url" content="https://Cavenfish.github.io/YASS.jl/bodies/"/><meta property="twitter:url" content="https://Cavenfish.github.io/YASS.jl/bodies/"/><link rel="canonical" href="https://Cavenfish.github.io/YASS.jl/bodies/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">YASS.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Bodies</a><ul class="internal"><li><a class="tocitem" href="#Particle-Objects"><span>Particle Objects</span></a></li><li><a class="tocitem" href="#Cell-Objects"><span>Cell Objects</span></a></li></ul></li><li><a class="tocitem" href="../optimizations/">Optimization</a></li><li><a class="tocitem" href="../vibrations/">Vibrations</a></li><li><span class="tocitem">Molecular Dynamics</span><ul><li><a class="tocitem" href="../md/dynamics/">Molecular Dynamics Simulations</a></li><li><a class="tocitem" href="../md/thermostats/">Thermostats</a></li></ul></li><li><span class="tocitem">Potentials</span><ul><li><a class="tocitem" href="../potentials/potList/">Available Potentials</a></li><li><a class="tocitem" href="../potentials/customPot/">Custom Potentials</a></li></ul></li><li><a class="tocitem" href="../dependencies/">Credits</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Bodies</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Bodies</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/Cavenfish/YASS.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/Cavenfish/YASS.jl/blob/main/docs/src/bodies.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Simulation-Bodies"><a class="docs-heading-anchor" href="#Simulation-Bodies">Simulation Bodies</a><a id="Simulation-Bodies-1"></a><a class="docs-heading-anchor-permalink" href="#Simulation-Bodies" title="Permalink"></a></h1><p><code>YASS.jl</code> provides two main types of simulation objects: <code>Particle</code> and <code>Cell</code>. Each serves different purposes in molecular simulations:</p><ul><li><code>Particle</code>: Represents individual atoms or particles</li><li><code>Cell</code>: Represents periodic systems like crystals</li></ul><h2 id="Particle-Objects"><a class="docs-heading-anchor" href="#Particle-Objects">Particle Objects</a><a id="Particle-Objects-1"></a><a class="docs-heading-anchor-permalink" href="#Particle-Objects" title="Permalink"></a></h2><p>The <code>Particle</code> type is the fundamental building block for molecular simulations. Each particle has:</p><ul><li>Position vector (<code>r</code>)</li><li>Velocity vector (<code>v</code>) </li><li>Mass (<code>m</code>)</li><li>Chemical symbol (<code>s</code>)</li></ul><h3 id="Creating-Particles"><a class="docs-heading-anchor" href="#Creating-Particles">Creating Particles</a><a id="Creating-Particles-1"></a><a class="docs-heading-anchor-permalink" href="#Creating-Particles" title="Permalink"></a></h3><p>You can create particles in several ways:</p><pre><code class="language-julia hljs">using YASS
 
-# Read it in from an xyz file
-bdys = readSystem(&quot;./myFile.xyz&quot;)
+# Read from XYZ file
+atoms = readSystem(&quot;molecule.xyz&quot;)
 
-# Or make it yourself
-bdys::Vector{YASS.MyAtoms} = [
-  Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, &quot;O&quot;),
-  Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, &quot;H&quot;),
-  Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, &quot;H&quot;)
+# Create manually
+water::Vector{YASS.MyAtoms} = [
+    Particle([0.000,  0.000, 0.000], zeros(3), 15.999, &quot;O&quot;),
+    Particle([0.757,  0.586, 0.000], zeros(3),  1.008, &quot;H&quot;),
+    Particle([0.757, -0.586, 0.000], zeros(3),  1.008, &quot;H&quot;)
 ]
 
-# Write it to an xyz file
-write(&quot;./h2o.xyz&quot;, bdys)</code></pre><p>Within YASS the Particle struct is mutable, this is to allow on-the-fly swapping of atomic masses. </p><pre><code class="language-julia hljs">using YASS
+# Save to file
+write(&quot;water.xyz&quot;, water)</code></pre><h3 id="Modifying-Particles"><a class="docs-heading-anchor" href="#Modifying-Particles">Modifying Particles</a><a id="Modifying-Particles-1"></a><a class="docs-heading-anchor-permalink" href="#Modifying-Particles" title="Permalink"></a></h3><p>The <code>Particle</code> type is mutable, allowing modifications after creation:</p><pre><code class="language-julia hljs"># Modify position
+atoms[1].r .= [1.0, 0.0, 0.0]
 
-# Read it in from an xyz file
-bdys = readSystem(&quot;./myFile.xyz&quot;)
+# Change velocity
+atoms[1].v .= [0.1, 0.0, 0.0]
 
-# Change the mass of the first atom
-bdys[1].m = 2.00</code></pre><p>YASS also contains some auxiliary functions that can apply changes to Particle objects.</p><pre><code class="language-julia hljs">using YASS
+# Update mass (e.g., for isotope studies)
+atoms[1].m = 18.015  # Change to heavy water
 
-# Read it in from an xyz file
-bdys = readSystem(&quot;./myFile.xyz&quot;)
+# Change chemical symbol
+atoms[1].s = &quot;D&quot;     # Deuterium</code></pre><h3 id="Particle-Manipulation-Functions"><a class="docs-heading-anchor" href="#Particle-Manipulation-Functions">Particle Manipulation Functions</a><a id="Particle-Manipulation-Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Particle-Manipulation-Functions" title="Permalink"></a></h3><p>YASS provides several utility functions for working with particles:</p><pre><code class="language-julia hljs"># Translate all particles
+translate!(atoms, [1.0, 0.0, 0.0])
 
-# Uniformally translate all atoms
-v = [1.0, 0.0, 0.0]
-translateBdys!(bdys, v)
+# Center particles at origin
+centerBdys!(atoms)
 
-# Center the atoms about the center-of-mass
-centerBdys!(bdys)
+# Swap positions of two particles
+swapAtoms!(atoms, 1, 2)
 
-# Swap the positions of atoms 1 and 2
-swapAtoms!(bdys, 1, 2)
+# Change isotopes for specific atoms
+swapIso!(atoms, [1,2], [2.014, 2.014])  # Convert H to D
 
-# Swap the mass of atoms 1, and 2 with 4.00 and 5.00
-swapIso!(bdys, [1,2], [4.0, 5.0])</code></pre><h3 id="Cell"><a class="docs-heading-anchor" href="#Cell">Cell</a><a id="Cell-1"></a><a class="docs-heading-anchor-permalink" href="#Cell" title="Permalink"></a></h3><p>The Cell object within YASS holds the lattice, scaled positions, velocities, masses, symbols, and some PBC criteria. Making the Cell object completely from sctratch is possible but not typical. </p><pre><code class="language-julia hljs">using YASS
+# Get center of mass
+com = CoM(atoms)
 
-# Read it in from an xyz file
-cell = readSystem(&quot;./myFile.xyz&quot;)
+# Get center of mass velocity
+vcom = vCoM(atoms)
 
-# Or make it yourself
-bdys::Vector{YASS.MyAtoms} = [
-  Particle([ 0.00,  0.22, 0.0], zeros(3), 15.999, &#39;O&#39;),
-  Particle([ 0.75, -0.36, 0.0], zeros(3),  1.000, &#39;H&#39;),
-  Particle([-0.75, -0.36, 0.0], zeros(3),  1.000, &#39;H&#39;)
+# Remove center of mass motion
+zeroVCoM!(atoms)</code></pre><h2 id="Cell-Objects"><a class="docs-heading-anchor" href="#Cell-Objects">Cell Objects</a><a id="Cell-Objects-1"></a><a class="docs-heading-anchor-permalink" href="#Cell-Objects" title="Permalink"></a></h2><p>The <code>Cell</code> type represents periodic systems and contains:</p><ul><li>Lattice matrix</li><li>Scaled positions (fractional coordinates)</li><li>Velocities</li><li>Masses</li><li>Chemical symbols  </li><li>Periodic boundary conditions</li><li>Neighbor counts</li></ul><h3 id="Creating-Cells"><a class="docs-heading-anchor" href="#Creating-Cells">Creating Cells</a><a id="Creating-Cells-1"></a><a class="docs-heading-anchor-permalink" href="#Creating-Cells" title="Permalink"></a></h3><pre><code class="language-julia hljs">using YASS
+
+# Read from file with lattice information
+cell = readSystem(&quot;crystal.xyz&quot;)
+
+# Create from atoms and lattice
+atoms = [
+    Particle([0.0, 0.0, 0.0], zeros(3), 22.990, &quot;Na&quot;),
+    Particle([0.5, 0.5, 0.5], zeros(3), 35.450, &quot;Cl&quot;)
 ]
-lat  = [5 0 0; 0 5 0; 0 0 5]
-cell = makeCell(bdys, lat)
+lattice = [
+    5.0 0.0 0.0
+    0.0 5.0 0.0
+    0.0 0.0 5.0
+]
+cell = makeCell(atoms, lattice)
 
-# Write it to an xyz file
-write(&quot;./myCell.xyz&quot;, cell)</code></pre><p>YASS also contians some basic auxiliary functions for cells. </p><pre><code class="language-julia hljs">using YASS
+# Specify periodic boundary conditions
+cell = makeCell(atoms, lattice, 
+    PBC=[true, true, true],  # Periodic in all directions
+    NC=[1,1,1]               # Neighbor cells to consider
+)
 
-# Read it in from an xyz file
-cell = readSystem(&quot;./myFile.xyz&quot;)
-
-# Wrap atoms outside cell back into cell
+# Save cell to file
+write(&quot;nacl.xyz&quot;, cell)</code></pre><h3 id="Cell-Operations"><a class="docs-heading-anchor" href="#Cell-Operations">Cell Operations</a><a id="Cell-Operations-1"></a><a class="docs-heading-anchor-permalink" href="#Cell-Operations" title="Permalink"></a></h3><p><code>YASS.jl</code> provides various functions for cell manipulation:</p><pre><code class="language-julia hljs"># Wrap atoms back into primary cell
 wrap!(cell)
 
-# Center atoms at cell center
+# Center atoms in cell
 center!(cell)
 
-# Make a supercell
-T     = [2 0 0; 0 2 0; 0 0 2]
-super = makeSuperCell(cell, T)
+# Create supercell
+transform = [2 0 0; 0 2 0; 0 0 2]  # 2x2x2 supercell
+super = makeSuperCell(cell, transform)
 
-# Get primitive cell
-prim  = getPrimitiveCell(cell, 1e-5)# 1e-5 is symprec
+# Get primitive cell (with symmetry precision)
+primitive = getPrimitiveCell(cell, 1e-5)
 
-# Get vector of Atoms from cell
-bdys  = getBdys(cell)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../optimizations/">Optimization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Monday 8 September 2025 22:03">Monday 8 September 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+# Convert between cell and atoms
+atoms = makeBdys(cell)        # Cell -&gt; Atoms
+cell = makeCell(atoms, lat)   # Atoms -&gt; Cell
+
+# Get Cartesian positions
+positions = getPos(cell)
+
+# Get cell volume
+volume = getVolume(cell)
+
+# Reorder atoms
+order = sortperm([atom.m for atom in atoms])
+reorder!(cell, order)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../optimizations/">Optimization »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Tuesday 9 September 2025 10:12">Tuesday 9 September 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
