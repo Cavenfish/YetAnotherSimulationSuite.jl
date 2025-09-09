@@ -19,14 +19,7 @@ end
 
 Construct a default NVE ensemble with zero lattice.
 """
-NVE() = NVE(@SMatrix zeros(3,3))
-
-"""
-    NVE(lat::AbstractMatrix)
-
-Construct an NVE ensemble from a lattice matrix.
-"""
-NVE(lat::AbstractMatrix) = SMatrix{size(lat)...}(lat) |> NVE
+NVE() = NVE(zeros(3,3))
 
 """
     NVE(cell::MyCell)
@@ -68,16 +61,6 @@ NVT(thermostat::MyThermostat) = NVT(zeros(3,3), thermostat)
 Construct an NVT ensemble from a MyCell and thermostat.
 """
 NVT(cell::MyCell, thermostat::MyThermostat) = NVT(cell.lattice, thermostat)
-
-"""
-    NVT(lat::AbstractMatrix, thermostat::MyThermostat)
-
-Construct an NVT ensemble from a lattice and thermostat.
-"""
-function NVT(lat::AbstractMatrix, thermostat::MyThermostat)
-  l = SMatrix{size(lat)...}(lat)
-  NVT(l, thermostat)
-end
 
 """
     Dynamics{T,D,B,P,PV,I,F,S}
