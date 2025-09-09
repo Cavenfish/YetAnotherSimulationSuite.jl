@@ -18,9 +18,8 @@
 [![][codecov-img]][codecov-url]
 [![][aqua-img]][aqua-url]
 
-<p style="text-align: center">
-  <img src="https://github.com/Cavenfish/YASS.jl/blob/dev/docs/src/assets/logo.png" alt="Logo" width=500 >
-</p>
+
+<img src="https://github.com/Cavenfish/YASS.jl/blob/dev/docs/src/assets/logo.png" alt="Logo" width=350 >
 
 # Yet Another Simulation Suite (YASS.jl)
 
