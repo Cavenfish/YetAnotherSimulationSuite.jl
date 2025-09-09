@@ -57,16 +57,12 @@ function SPCF!(F, u, p)
   P   = p.potVars
   lat = isa(p, optVars) ? p.lattice : p.ensemble.lattice
 
-  for mol in p.mols
-    o, h1, h2 = mol
-
-    E += _harmonicBond!(F, u, P.Fbuf, P.rbuf, lat, o, h1, P.Kb, P.req, P.rc)
-    E += _harmonicBond!(F, u, P.Fbuf, P.rbuf, lat, o, h2, P.Kb, P.req, P.rc)
-    E += _harmonicBondAngle!(F, u, P.rbuf, P.rbuf2, lat, h1, o, h2, P.Kθ, P.θeq, P.rc)
-  end
-
   for i = 1:length(p.mols)
     o1, h1, h2 = p.mols[i]
+
+    E += _harmonicBond!(F, u, P.Fbuf, P.rbuf, lat, o1, h1, P.Kb, P.req, P.rc)
+    E += _harmonicBond!(F, u, P.Fbuf, P.rbuf, lat, o1, h2, P.Kb, P.req, P.rc)
+    E += _harmonicBondAngle!(F, u, P.rbuf, P.rbuf2, lat, h1, o1, h2, P.Kθ, P.θeq, P.rc)
 
     for j = i+1:length(p.mols)
       o2, h3, h4 = p.mols[j]
