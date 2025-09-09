@@ -48,6 +48,21 @@ function _vdw!(
   E
 end
 
+function _vdw!(
+  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF, lat::AbstractMatrix,
+  i::Int64, j::Int64, ϵ::Float64, σ::Float64; S=1.0
+) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+
+  r        = pbcVec!(rbuf, u[i], u[j], lat)
+  a        = σ / r
+  E        = 4ϵ * ((a)^12 - (a)^6)
+  @. Fbuf  = 4ϵ * (12*(a)^11 - 6*(a)^5) * (σ / r^3) * rbuf
+  @. F[i] -= Fbuf * S
+  @. F[j] += Fbuf * S
+
+  E
+end
+
 function _Buckingham(
   ri::Vi, rj::Vj, Aij::Float64, Bij::Float64, Cij::Float64
 ) where {Vi <: AbstractVector, Vj <: AbstractVector}
@@ -126,6 +141,20 @@ function _Coulomb!(
 
   @. rbuf   = u[j] - u[i]
   r         = norm(rbuf)
+  E         = Qi*Qj / r
+  @. Fbuf   = Qi*Qj / r^3 * rbuf
+  @. F[i] .-= Fbuf * S
+  @. F[j] .+= Fbuf * S
+
+  E
+end
+
+function _Coulomb!(
+  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF, lat::AbstractMatrix,
+  i::Int64, j::Int64, Qi::Float64, Qj::Float64; S=1.0
+) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+
+  r         = pbcVec!(rbuf, u[i], u[j], lat)
   E         = Qi*Qj / r
   @. Fbuf   = Qi*Qj / r^3 * rbuf
   @. F[i] .-= Fbuf * S

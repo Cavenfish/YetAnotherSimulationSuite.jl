@@ -90,6 +90,22 @@ function _harmonicBond!(
   E
 end
 
+function _harmonicBond!(
+  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF, lat::AbstractMatrix,
+  i::Int64, j::Int64, K::Float64, req::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+
+  r = pbcVec!(rbuf, u[i], u[j], lat)
+  E = 0.5 * K * (r - req)^2
+
+  @. Fbuf = -K * (r - req) * rbuf / r
+
+  F[i] .-= Fbuf
+  F[j] .+= Fbuf
+
+  E
+end
+
 function _harmonicBondAngle(
   r1::V, r2::V, K::Float64, θeq::Float64
 ) where V <: AbstractVector
@@ -114,6 +130,25 @@ function _harmonicBondAngle!(
   θ     = dot(ri, rj) / (norm(ri) * norm(rj)) |> (x -> clamp(x, -1, 1)) |> acos
   E     = 0.5 * K * (θ - θeq)^2
   pre   = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * norm(ri) * norm(rj))
+  Fi    = pre * (rj - (ri * (dot(ri, rj) / dot(ri,ri))))
+  Fj    = pre * (ri - (rj * (dot(ri, rj) / dot(rj,rj))))
+  F[i] .+= Fi
+  F[j] .+= Fj
+  @. F[o] -= (Fi + Fj)
+
+  E
+end
+
+function _harmonicBondAngle!(
+  F::Vf, u::Vu, ri::AV, rj::AV, lat::AbstractMatrix,
+  i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64
+) where {Vf <: AbstractVector, Vu <: AbstractVector, AV<:AbstractVector}
+
+  di    = pbcVec!(ri, u[o], u[i], lat)
+  dj    = pbcVec!(rj, u[o], u[j], lat)
+  θ     = dot(ri, rj) / (di * dj) |> (x -> clamp(x, -1, 1)) |> acos
+  E     = 0.5 * K * (θ - θeq)^2
+  pre   = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * di * dj)
   Fi    = pre * (rj - (ri * (dot(ri, rj) / dot(ri,ri))))
   Fj    = pre * (ri - (rj * (dot(ri, rj) / dot(rj,rj))))
   F[i] .+= Fi
