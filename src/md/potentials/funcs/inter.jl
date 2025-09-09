@@ -50,10 +50,10 @@ end
 
 function _vdw!(
   F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF, lat::AbstractMatrix,
-  i::Int64, j::Int64, ϵ::Float64, σ::Float64; S=1.0
+  i::Int64, j::Int64, ϵ::Float64, σ::Float64, rc::Float64; S=1.0
 ) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
 
-  r        = pbcVec!(rbuf, u[i], u[j], lat)
+  r        = pbcVec!(rbuf, u[i], u[j], rc, lat)
   a        = σ / r
   E        = 4ϵ * ((a)^12 - (a)^6)
   @. Fbuf  = 4ϵ * (12*(a)^11 - 6*(a)^5) * (σ / r^3) * rbuf
@@ -151,10 +151,10 @@ end
 
 function _Coulomb!(
   F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF, lat::AbstractMatrix,
-  i::Int64, j::Int64, Qi::Float64, Qj::Float64; S=1.0
+  i::Int64, j::Int64, Qi::Float64, Qj::Float64, rc::Float64; S=1.0
 ) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
 
-  r         = pbcVec!(rbuf, u[i], u[j], lat)
+  r         = pbcVec!(rbuf, u[i], u[j], rc, lat)
   E         = Qi*Qj / r
   @. Fbuf   = Qi*Qj / r^3 * rbuf
   @. F[i] .-= Fbuf * S

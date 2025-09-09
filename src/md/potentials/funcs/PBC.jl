@@ -7,13 +7,13 @@ end
 const _pbc_buf = _PBC_Cache(MVector{3}(zeros(3)), MVector{3}(zeros(3)))
 
 function pbcVec!(
-  rbuf::AbstractVector, ri::AV, rj::AV, lat::AbstractMatrix;
+  rbuf::AbstractVector, ri::AV, rj::AV, rc::Float64, lat::AbstractMatrix;
   buf=_pbc_buf
 ) where {AV<:AbstractVector}
   @. rbuf = rj - ri
   d       = norm(rbuf)
 
-  if iszero(lat)
+  if iszero(lat) || d < rc
     return d
   end
 
@@ -24,7 +24,10 @@ function pbcVec!(
         buf.r .= (rj .+ buf.v) .- ri
         di     = norm(buf.r)
 
-        if di < d
+        if di < rc
+          rbuf .= buf.r
+          return di
+        elseif di < d
           d     = di
           rbuf .= buf.r
         end

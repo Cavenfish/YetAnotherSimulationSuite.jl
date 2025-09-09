@@ -92,10 +92,10 @@ end
 
 function _harmonicBond!(
   F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF, lat::AbstractMatrix,
-  i::Int64, j::Int64, K::Float64, req::Float64
+  i::Int64, j::Int64, K::Float64, req::Float64, rc::Float64
 ) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
 
-  r = pbcVec!(rbuf, u[i], u[j], lat)
+  r = pbcVec!(rbuf, u[i], u[j], rc, lat)
   E = 0.5 * K * (r - req)^2
 
   @. Fbuf = -K * (r - req) * rbuf / r
@@ -141,11 +141,11 @@ end
 
 function _harmonicBondAngle!(
   F::Vf, u::Vu, ri::AV, rj::AV, lat::AbstractMatrix,
-  i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64
+  i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64, rc::Float64
 ) where {Vf <: AbstractVector, Vu <: AbstractVector, AV<:AbstractVector}
 
-  di    = pbcVec!(ri, u[o], u[i], lat)
-  dj    = pbcVec!(rj, u[o], u[j], lat)
+  di    = pbcVec!(ri, u[o], u[i], rc, lat)
+  dj    = pbcVec!(rj, u[o], u[j], rc, lat)
   θ     = dot(ri, rj) / (di * dj) |> (x -> clamp(x, -1, 1)) |> acos
   E     = 0.5 * K * (θ - θeq)^2
   pre   = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * di * dj)
