@@ -113,6 +113,19 @@ function _Coulomb(
 end
 
 function _Coulomb!(
+  F::AbstractVector, ri::Vi, rj::Vj, lat::AbstractMatrix,
+  Qi::Float64, Qj::Float64, rc::Float64;
+  buf=_func_buffs
+) where {Vi <: AbstractVector, Vj <: AbstractVector}
+
+  r    = pbcVec!(buf.ri, ri, rj, rc, lat)
+  E    = Qi*Qj / r
+  @. F = Qi*Qj / r^3 * buf.ri
+
+  E
+end
+
+function _Coulomb!(
   F::Vf, u::Vu, i::Int64, j::Int64, Qi::Float64, Qj::Float64; 
   S=1.0, buf=_func_buffs
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
