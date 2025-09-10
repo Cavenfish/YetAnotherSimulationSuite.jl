@@ -23,13 +23,9 @@ struct _SPCF_PotVars{
   Qh::F
   rs::F
   rc::F
+  S::AV2D
   Fbuf::AV3D
   rbuf::AV3D
-  rbuf2::AV3D
-  S::AV2D
-  o2t::AV3D
-  h3t::AV3D
-  h4t::AV3D
 end
 
 SPCF(bdys::Union{Vector{MyAtoms}, MyCell}) = _SPCF_PotVars(
@@ -43,13 +39,9 @@ SPCF(bdys::Union{Vector{MyAtoms}, MyCell}) = _SPCF_PotVars(
   0.5 * 2.959855,
   9.0,
   10.0,
+  MVector{2}(zeros(2))
   MVector{3}(zeros(3)),
-  MVector{3}(zeros(3)),
-  MVector{3}(zeros(3)),
-  MVector{2}(zeros(2)),
-  MVector{3}(zeros(3)),
-  MVector{3}(zeros(3)),
-  MVector{3}(zeros(3)),
+  MVector{3}(zeros(3))
 )
 
 function SPCF!(F, u, p)
@@ -60,14 +52,14 @@ function SPCF!(F, u, p)
   for i = 1:length(p.mols)
     o1, h1, h2 = p.mols[i]
 
-    E += _harmonicBond!(F, u, P.Fbuf, P.rbuf, lat, o1, h1, P.Kb, P.req, P.rc)
-    E += _harmonicBond!(F, u, P.Fbuf, P.rbuf, lat, o1, h2, P.Kb, P.req, P.rc)
-    E += _harmonicBondAngle!(F, u, P.rbuf, P.rbuf2, lat, h1, o1, h2, P.Kθ, P.θeq, P.rc)
+    E += _harmonicBond!(F, u, lat, o1, h1, P.Kb, P.req, P.rc)
+    E += _harmonicBond!(F, u, lat, o1, h2, P.Kb, P.req, P.rc)
+    E += _harmonicBondAngle!(F, u, lat, h1, o1, h2, P.Kθ, P.θeq, P.rc)
 
     for j = i+1:length(p.mols)
       o2, h3, h4 = p.mols[j]
 
-      doo = pbcVec!(P.rbuf2, u[o1], u[o2], P.rc, lat)
+      doo = pbcVec!(P.rbuf, u[o1], u[o2], P.rc, lat)
       switchLR!(P.S, doo, P.rs, P.rc)
 
       if iszero(P.S)
@@ -77,26 +69,26 @@ function SPCF!(F, u, p)
       e  = 0.0
 
       # O-O Interactions
-      e += _vdw!(F, u, P.Fbuf, P.rbuf, lat, o1, o2, P.ϵ, P.σ, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, P.Fbuf, P.rbuf, lat, o1, o2, P.Qo, P.Qo, P.rc; S=P.S[1])
+      e += _vdw!(F, u, lat, o1, o2, P.ϵ, P.σ, P.rc; S=P.S[1])
+      e += _Coulomb!(F, u, lat, o1, o2, P.Qo, P.Qo, P.rc; S=P.S[1])
 
       # H-H Coulomb
-      e += _Coulomb!(F, u, P.Fbuf, P.rbuf, lat, h1, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, P.Fbuf, P.rbuf, lat, h1, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, P.Fbuf, P.rbuf, lat, h2, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, P.Fbuf, P.rbuf, lat, h2, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += _Coulomb!(F, u, lat, h1, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += _Coulomb!(F, u, lat, h1, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += _Coulomb!(F, u, lat, h2, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += _Coulomb!(F, u, lat, h2, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
 
       # H-O Coulomb
-      e += _Coulomb!(F, u, P.Fbuf, P.rbuf, lat, o1, h3, P.Qo, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, P.Fbuf, P.rbuf, lat, o1, h4, P.Qo, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, P.Fbuf, P.rbuf, lat, o2, h1, P.Qo, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, P.Fbuf, P.rbuf, lat, o2, h2, P.Qo, P.Qh, P.rc; S=P.S[1])
+      e += _Coulomb!(F, u, lat, o1, h3, P.Qo, P.Qh, P.rc; S=P.S[1])
+      e += _Coulomb!(F, u, lat, o1, h4, P.Qo, P.Qh, P.rc; S=P.S[1])
+      e += _Coulomb!(F, u, lat, o2, h1, P.Qo, P.Qh, P.rc; S=P.S[1])
+      e += _Coulomb!(F, u, lat, o2, h2, P.Qo, P.Qh, P.rc; S=P.S[1])
 
       E += P.S[1] * e
 
       if P.S[2] != 0.0
-        P.rbuf2 ./= doo
-        P.Fbuf   .= -P.S[2] * e .* P.rbuf2
+        P.rbuf ./= doo
+        P.Fbuf   .= -P.S[2] * e .* P.rbuf
         F[o1]   .-= P.Fbuf
         F[o2]   .+= P.Fbuf
       end
