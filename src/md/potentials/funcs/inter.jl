@@ -3,7 +3,7 @@ Intermolecular Potential Functions
 """
 
 
-function _vdw(
+function vdw(
   ri::Vi, rj::Vj, ϵ::Float64, σ::Float64
 ) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
@@ -16,23 +16,23 @@ function _vdw(
   E,F
 end
 
-function _vdw!(
+function vdw!(
   F::Vf, u::Vu, i::Int64, j::Int64, ϵ::Float64, σ::Float64; 
   S=1.0, buf=_func_buffs
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   @. buf.ri = u[j] - u[i]
-  r     = norm(buf.ri)
-  a     = σ / r
-  E     = 4ϵ * ((a)^12 - (a)^6)
-  @. buf.fi  = 4ϵ * (12*(a)^11 - 6*(a)^5) * (σ / r^3) * buf.ri
-  @. F[i] -= buf.fi * S
-  @. F[j] += buf.fi * S
+  r         = norm(buf.ri)
+  a         = σ / r
+  E         = 4ϵ * ((a)^12 - (a)^6)
+  @. buf.fi = 4ϵ * (12*(a)^11 - 6*(a)^5) * (σ / r^3) * buf.ri
+  @. F[i]  -= buf.fi * S
+  @. F[j]  += buf.fi * S
 
   E
 end
 
-function _vdw!(
+function vdw!(
   F::Vf, u::Vu, lat::AbstractMatrix, i::Int64, j::Int64,
   ϵ::Float64, σ::Float64, rc::Float64; 
   S=1.0, buf=_func_buffs
@@ -48,7 +48,7 @@ function _vdw!(
   E
 end
 
-function _Buckingham(
+function buckingham(
   ri::Vi, rj::Vj, A::Float64, B::Float64, C::Float64
 ) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
@@ -62,17 +62,17 @@ function _Buckingham(
   E,F
 end
 
-function _Buckingham!(
+function buckingham!(
   F::Vf, u::Vu, i::Int64, j::Int64,
   A::Float64, B::Float64, C::Float64;
   S=1.0, buf=_func_buffs
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   @. buf.ri = u[j] - u[i]
-  r     = norm(buf.ri)
-  a    = A * exp(-B * r)
-  b    = C / r^6
-  E    = a - b
+  r         = norm(buf.ri)
+  a         = A * exp(-B * r)
+  b         = C / r^6
+  E         = a - b
   @. buf.fi = (B * a / r * buf.ri) - (6b / r^2 * buf.ri)
 
   @. F[i] -= buf.fi * S
@@ -81,7 +81,7 @@ function _Buckingham!(
   E
 end
 
-function _Buckingham!(
+function buckingham!(
   F::Vf, u::Vu, lat::AbstractMatrix, i::Int64, j::Int64,
   A::Float64, B::Float64, C::Float64, rc::Float64;
   S=1.0, buf=_func_buffs
@@ -100,7 +100,7 @@ function _Buckingham!(
   E
 end
 
-function _Coulomb(
+function coulomb(
   ri::Vi, rj::Vj, Qi::Float64, Qj::Float64
 ) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
@@ -112,7 +112,7 @@ function _Coulomb(
   E,F
 end
 
-function _Coulomb!(
+function coulomb!(
   F::AbstractVector, ri::Vi, rj::Vj, lat::AbstractMatrix,
   Qi::Float64, Qj::Float64, rc::Float64;
   buf=_func_buffs
@@ -125,14 +125,14 @@ function _Coulomb!(
   E
 end
 
-function _Coulomb!(
+function coulomb!(
   F::Vf, u::Vu, i::Int64, j::Int64, Qi::Float64, Qj::Float64; 
   S=1.0, buf=_func_buffs
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   @. buf.ri = u[j] - u[i]
-  r     = norm(buf.ri)
-  E     = Qi*Qj / r
+  r         = norm(buf.ri)
+  E         = Qi*Qj / r
   @. buf.fi = Qi*Qj / r^3 * buf.ri
   @. F[i] .-= buf.fi * S
   @. F[j] .+= buf.fi * S
@@ -140,7 +140,7 @@ function _Coulomb!(
   E
 end
 
-function _Coulomb!(
+function coulomb!(
   F::Vf, u::Vu,  lat::AbstractMatrix, i::Int64, j::Int64,
   Qi::Float64, Qj::Float64, rc::Float64; 
   S=1.0, buf=_func_buffs
@@ -155,7 +155,7 @@ function _Coulomb!(
   E
 end
 
-function _shortDisp(
+function shortDisp(
   ri::Vi, rj::Vj, Aij::Float64, Bij::Float64
 ) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
@@ -167,7 +167,7 @@ function _shortDisp(
   E,F
 end
 
-function _shortDisp!(
+function shortDisp!(
   F::Vf, u::Vu,
   i::Int64, j::Int64, Aij::Float64, Bij::Float64
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
@@ -182,7 +182,7 @@ function _shortDisp!(
   E
 end
 
-function _longDisp(
+function longDisp(
   ri::Vi, rj::Vj, Cij::Float64; damp=nothing, p=nothing
 ) where {Vi <: AbstractVector, Vj <: AbstractVector}
 
@@ -200,7 +200,7 @@ function _longDisp(
   E,F
 end
 
-function _longDisp!(
+function longDisp!(
   F::Vf, u::Vu, 
   i::Int64, j::Int64, Cij::Float64; damp=nothing, p=nothing
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}

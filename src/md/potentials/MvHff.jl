@@ -81,7 +81,7 @@ function MvHff!(F, u, p)
   for i = 1:length(p.mols)
     c1, o1 = p.mols[i]
 
-    E += _Morse!(F, u, lat, c1, o1, P.D, P.a, P.req, P.rc)
+    E += morse!(F, u, lat, c1, o1, P.D, P.a, P.req, P.rc)
 
     for j = i+1:length(p.mols)
       c2, o2 = p.mols[j]
@@ -96,19 +96,19 @@ function MvHff!(F, u, p)
       e = 0.0
 
       #C--C
-      e += _Buckingham!(F, u, lat, c1, c2, P.Acc, P.Bcc, P.Ccc, P.rc; S=P.S[1])
+      e += buckingham!(F, u, lat, c1, c2, P.Acc, P.Bcc, P.Ccc, P.rc; S=P.S[1])
 
       #C--O
-      e += _Buckingham!(F, u, lat, c1, o2, P.Aco, P.Bco, P.Cco, P.rc; S=P.S[1])
+      e += buckingham!(F, u, lat, c1, o2, P.Aco, P.Bco, P.Cco, P.rc; S=P.S[1])
 
       #O--C
-      e += _Buckingham!(F, u, lat, o1, c2, P.Aco, P.Bco, P.Cco, P.rc; S=P.S[1])
+      e += buckingham!(F, u, lat, o1, c2, P.Aco, P.Bco, P.Cco, P.rc; S=P.S[1])
 
       #O--O
-      e += _Buckingham!(F, u, lat, o1, o2, P.Aoo, P.Boo, P.Coo, P.rc; S=P.S[1])
+      e += buckingham!(F, u, lat, o1, o2, P.Aoo, P.Boo, P.Coo, P.rc; S=P.S[1])
 
       #Special Electrostatics
-      e += _electroMvH!(F, u, c1, o1, c2, o2, lat, P)
+      e += electroMvH!(F, u, c1, o1, c2, o2, lat, P)
 
       E += P.S[1] * e
 
@@ -124,7 +124,7 @@ function MvHff!(F, u, p)
   E
 end
 
-function _electroMvH!(F, u, c1, o1, c2, o2, lat, P)
+function electroMvH!(F, u, c1, o1, c2, o2, lat, P)
 
   #Bond lengths
   d1 = pbcVec!(P.r1, u[c1], u[o1], P.rc, lat)
@@ -150,50 +150,49 @@ function _electroMvH!(F, u, c1, o1, c2, o2, lat, P)
   #the position dependent charges is: -α * Q * rvec / r
 
   #C--C
-  ϵ      = _Coulomb!(P.Fbuf, u[c1], u[c2], lat, Qc1, Qc2, P.rc)
-  E      = ϵ
-  @. P.F_Q1   = P.αc * ϵ * P.r1 / d1
-  @. P.F_Q2   = P.αc * ϵ * P.r2 / d2
+  E         = coulomb!(P.Fbuf, u[c1], u[c2], lat, Qc1, Qc2, P.rc)
+  @. P.F_Q1 = P.αc * ϵ * P.r1 / d1
+  @. P.F_Q2 = P.αc * ϵ * P.r2 / d2
   @. F[c1] -= (P.Fbuf + P.F_Q1) * P.S[1]
   @. F[o1] += P.F_Q1 * P.S[1]
   @. F[c2] += P.Fbuf - P.F_Q2 * P.S[1]
   @. F[o2] += P.F_Q2 * P.S[1]
 
 # C-X
-  ϵ    = _Coulomb!(P.Fbuf, u[c1], P.x2, lat, Qc1, Qx2, P.rc)
-  E     += ϵ
-  @. P.F_Q1   = P.αc * ϵ * P.r1 / d1
-  @. P.F_Q2   = - (P.αc * Qc2 + P.αo * Qo2) * ϵ/Qx2 * P.r2 / d2
+  ϵ         = coulomb!(P.Fbuf, u[c1], P.x2, lat, Qc1, Qx2, P.rc)
+  E        += ϵ
+  @. P.F_Q1 = P.αc * ϵ * P.r1 / d1
+  @. P.F_Q2 = - (P.αc * Qc2 + P.αo * Qo2) * ϵ/Qx2 * P.r2 / d2
   @. F[c1] -= (P.Fbuf + P.F_Q1) * P.S[1]
   @. F[o1] += P.F_Q1 * P.S[1]
   @. F[c2] += (wc * P.Fbuf) - P.F_Q2 * P.S[1]
   @. F[o2] += (wo * P.Fbuf) + P.F_Q2 * P.S[1]
 
   # C-O
-  ϵ   = _Coulomb!(P.Fbuf, u[c1], u[o2], lat, Qc1, Qo2, P.rc)
-  E     += ϵ
-  @. P.F_Q1   = P.αc * ϵ * P.r1 / d1
-  @. P.F_Q2   = P.αo * ϵ * P.r2 / d2
+  ϵ         = coulomb!(P.Fbuf, u[c1], u[o2], lat, Qc1, Qo2, P.rc)
+  E        += ϵ
+  @. P.F_Q1 = P.αc * ϵ * P.r1 / d1
+  @. P.F_Q2 = P.αo * ϵ * P.r2 / d2
   @. F[c1] -= (P.Fbuf + P.F_Q1) * P.S[1]
   @. F[o1] += P.F_Q1 * P.S[1]
   @. F[c2] -= P.F_Q2 * P.S[1]
   @. F[o2] += (P.Fbuf + P.F_Q2) * P.S[1]
 
   # X-C
-  ϵ   = _Coulomb!(P.Fbuf, P.x1, u[c2], lat, Qx1, Qc2, P.rc)
-  E     += ϵ
-  @. P.F_Q1   = - (P.αc * Qc1 + P.αo * Qo1) * ϵ/Qx1 * P.r1 / d1
-  @. P.F_Q2   = P.αc * ϵ * P.r2 / d2
+  ϵ         = coulomb!(P.Fbuf, P.x1, u[c2], lat, Qx1, Qc2, P.rc)
+  E        += ϵ
+  @. P.F_Q1 = - (P.αc * Qc1 + P.αo * Qo1) * ϵ/Qx1 * P.r1 / d1
+  @. P.F_Q2 = P.αc * ϵ * P.r2 / d2
   @. F[c1] -= ((wc * P.Fbuf) + P.F_Q1) * P.S[1]
   @. F[o1] += P.F_Q1 - (wo * P.Fbuf) * P.S[1]
   @. F[c2] += (P.Fbuf - P.F_Q2) * P.S[1]
   @. F[o2] += P.F_Q2 * P.S[1]
 
   # X-X
-  ϵ   = _Coulomb!(P.Fbuf, P.x1, P.x2, lat, Qx1, Qx2, P.rc)
-  E     += ϵ
-  @. P.F_Q1   = - (P.αc * Qc1 + P.αo * Qo1) * ϵ/Qx1 * P.r1 / d1
-  @. P.F_Q2   = - (P.αc * Qc2 + P.αo * Qo2) * ϵ/Qx2 * P.r2 / d2
+  ϵ         = coulomb!(P.Fbuf, P.x1, P.x2, lat, Qx1, Qx2, P.rc)
+  E        += ϵ
+  @. P.F_Q1 = - (P.αc * Qc1 + P.αo * Qo1) * ϵ/Qx1 * P.r1 / d1
+  @. P.F_Q2 = - (P.αc * Qc2 + P.αo * Qo2) * ϵ/Qx2 * P.r2 / d2
   @. F[c1] += ((-wc * P.Fbuf) - P.F_Q1) * P.S[1]
   @. F[o1] += ((-wo * P.Fbuf) + P.F_Q1) * P.S[1]
   @. F[c2] += (( wc * P.Fbuf) - P.F_Q2) * P.S[1]
@@ -201,40 +200,40 @@ function _electroMvH!(F, u, c1, o1, c2, o2, lat, P)
 
 
   # X-O
-  ϵ   = _Coulomb!(P.Fbuf, P.x1, u[o2], lat, Qx1, Qo2, P.rc)
-  E     += ϵ
-  @. P.F_Q1   = - (P.αc * Qc1 + P.αo * Qo1) * ϵ/Qx1 * P.r1 / d1
-  @. P.F_Q2   = P.αo * ϵ * P.r2 / d2
+  ϵ         = coulomb!(P.Fbuf, P.x1, u[o2], lat, Qx1, Qo2, P.rc)
+  E        += ϵ
+  @. P.F_Q1 = - (P.αc * Qc1 + P.αo * Qo1) * ϵ/Qx1 * P.r1 / d1
+  @. P.F_Q2 = P.αo * ϵ * P.r2 / d2
   @. F[c1] -= ((wc * P.Fbuf) + P.F_Q1) * P.S[1]
   @. F[o1] += (P.F_Q1 - (wo * P.Fbuf)) * P.S[1]
   @. F[c2] -= P.F_Q2 * P.S[1]
   @. F[o2] += (P.Fbuf + P.F_Q2) * P.S[1]
 
   # O-C
-  ϵ   = _Coulomb!(P.Fbuf, u[o1], u[c2], lat, Qo1, Qc2, P.rc)
-  E     += ϵ
-  @. P.F_Q1   = P.αo * ϵ * P.r1 / d1
-  @. P.F_Q2   = P.αc * ϵ * P.r2 / d2
+  ϵ         = coulomb!(P.Fbuf, u[o1], u[c2], lat, Qo1, Qc2, P.rc)
+  E        += ϵ
+  @. P.F_Q1 = P.αo * ϵ * P.r1 / d1
+  @. P.F_Q2 = P.αc * ϵ * P.r2 / d2
   @. F[c1] -= P.F_Q1 * P.S[1]
   @. F[o1] += (P.F_Q1 - P.Fbuf) * P.S[1]
   @. F[c2] += (P.Fbuf - P.F_Q2) * P.S[1]
   @. F[o2] += P.F_Q2 * P.S[1]
 
   # O-X
-  ϵ   = _Coulomb!(P.Fbuf, u[o1], P.x2, lat, Qo1, Qx2, P.rc)
-  E     += ϵ
-  @. P.F_Q1   = P.αo * ϵ * P.r1 / d1
-  @. P.F_Q2   = - (P.αc * Qc2 + P.αo * Qo2) * ϵ/Qx2 * P.r2 / d2
+  ϵ         = coulomb!(P.Fbuf, u[o1], P.x2, lat, Qo1, Qx2, P.rc)
+  E        += ϵ
+  @. P.F_Q1 = P.αo * ϵ * P.r1 / d1
+  @. P.F_Q2 = - (P.αc * Qc2 + P.αo * Qo2) * ϵ/Qx2 * P.r2 / d2
   @. F[c1] -= P.F_Q1 * P.S[1]
   @. F[o1] += (P.F_Q1 - P.Fbuf) * P.S[1]
   @. F[c2] += ((wc * P.Fbuf) - P.F_Q2) * P.S[1]
   @. F[o2] += ((wo * P.Fbuf) + P.F_Q2) * P.S[1]
 
   # O-O
-  ϵ   = _Coulomb!(P.Fbuf, u[o1], u[o2], lat, Qo1, Qo2, P.rc)
-  E     += ϵ
-  @. P.F_Q1   = P.αo * ϵ * P.r1 / d1
-  @. P.F_Q2   = P.αo * ϵ * P.r2 / d2
+  ϵ         = coulomb!(P.Fbuf, u[o1], u[o2], lat, Qo1, Qo2, P.rc)
+  E        += ϵ
+  @. P.F_Q1 = P.αo * ϵ * P.r1 / d1
+  @. P.F_Q2 = P.αo * ϵ * P.r2 / d2
   @. F[c1] -= P.F_Q1 * P.S[1]
   @. F[o1] += (P.F_Q1 - P.Fbuf) * P.S[1]
   @. F[c2] -= P.F_Q2 * P.S[1]

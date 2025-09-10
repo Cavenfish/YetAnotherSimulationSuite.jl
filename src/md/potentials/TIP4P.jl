@@ -83,9 +83,9 @@ function TIP4Pf!(F, u, p)
   for i = 1:length(p.mols)
     o1, h1, h2 = p.mols[i]
 
-    E += _Morse!(F, u, lat, o1, h1, P.D, P.a, P.req, P.rc)
-    E += _Morse!(F, u, lat, o1, h2, P.D, P.a, P.req, P.rc)
-    E += _harmonicBondAngle!(F, u, lat, h1, o1, h2, P.K, P.θeq, P.rc)
+    E += morse!(F, u, lat, o1, h1, P.D, P.a, P.req, P.rc)
+    E += morse!(F, u, lat, o1, h2, P.D, P.a, P.req, P.rc)
+    E += harmonicBondAngle!(F, u, lat, h1, o1, h2, P.K, P.θeq, P.rc)
 
     for j = i+1:length(p.mols)
       o2, h3, h4 = p.mols[j]
@@ -103,12 +103,12 @@ function TIP4Pf!(F, u, p)
       e += _vdw!(F, u, lat, o1, o2, P.ϵoo, P.σoo, P.rc; S=P.S[1])
 
       # H-H Coulomb Interactions
-      e += _Coulomb!(F, u, lat, h1, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, h1, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, h2, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, h2, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, h1, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, h1, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, h2, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, h2, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
 
-      e += _getMforces!(F, u, p.mols[i], p.mols[j], lat, P)
+      e += getMforces!(F, u, p.mols[i], p.mols[j], lat, P)
 
       E += P.S[1] * e
 
@@ -168,7 +168,7 @@ function spreadMforces!(
 
 end
 
-function _getMforces!(
+function getMforces!(
   F::Vf, u::Vu, w1::V, w2::V, lat::AbstractMatrix, P::T
 ) where {Vf<:AbstractVector, Vu<:AbstractVector, V<:Vector{Int64}, T}
   o1, h1, h2 = w1
@@ -180,36 +180,36 @@ function _getMforces!(
   _ = pbcVec!(P.r2o, u[o2], P.m2, P.rc, lat)
 
   # H1 -- M2
-  E     = _Coulomb!(P.Fbuf, u[h1], P.m2, lat, P.Qh, P.Qm, P.rc)
-  P.Fbuf     .*= P.S[1]
-  F[h1] .-= P.Fbuf
+  E        = coulomb!(P.Fbuf, u[h1], P.m2, lat, P.Qh, P.Qm, P.rc)
+  P.Fbuf .*= P.S[1]
+  F[h1]  .-= P.Fbuf
   spreadMforces!(F, P.Fbuf, P.r2o, P, w2, γ2)
 
   # H2 -- M2
-  e     = _Coulomb!(P.Fbuf, u[h2], P.m2, lat, P.Qh, P.Qm, P.rc)
-  P.Fbuf     .*= P.S[1]
-  E      += e
-  F[h2] .-= P.Fbuf
+  e        = coulomb!(P.Fbuf, u[h2], P.m2, lat, P.Qh, P.Qm, P.rc)
+  P.Fbuf .*= P.S[1]
+  E       += e
+  F[h2]  .-= P.Fbuf
   spreadMforces!(F, P.Fbuf, P.r2o, P, w2, γ2)
 
   # H3 -- M1
-  e    = _Coulomb!(P.Fbuf, u[h3], P.m1, lat, P.Qh, P.Qm, P.rc)
-  P.Fbuf     .*= P.S[1]
-  E      += e
-  F[h3] .-= P.Fbuf
+  e        = coulomb!(P.Fbuf, u[h3], P.m1, lat, P.Qh, P.Qm, P.rc)
+  P.Fbuf .*= P.S[1]
+  E       += e
+  F[h3]  .-= P.Fbuf
   spreadMforces!(F, P.Fbuf, P.r1o, P, w1, γ1)
 
   # H4 -- M1
-  e    = _Coulomb!(P.Fbuf, u[h4], P.m1, lat, P.Qh, P.Qm, P.rc)
-  P.Fbuf     .*= P.S[1]
-  E      += e
-  F[h4] .-= P.Fbuf
+  e        = coulomb!(P.Fbuf, u[h4], P.m1, lat, P.Qh, P.Qm, P.rc)
+  P.Fbuf .*= P.S[1]
+  E       += e
+  F[h4]  .-= P.Fbuf
   spreadMforces!(F, P.Fbuf, P.r1o, P, w1, γ1)
 
   # M1 -- M2
-  e       = _Coulomb!(P.Fbuf, P.m1, P.m2, lat, P.Qm, P.Qm, P.rc)
+  e        = coulomb!(P.Fbuf, P.m1, P.m2, lat, P.Qm, P.Qm, P.rc)
   P.Fbuf .*= P.S[1]
-  E        += e
+  E       += e
   spreadMforces!(F, P.Fbuf, P.r2o, P, w2, γ2)
   P.Fbuf .*= -1
   spreadMforces!(F, P.Fbuf, P.r1o, P, w1, γ1)

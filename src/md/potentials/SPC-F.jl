@@ -52,9 +52,9 @@ function SPCF!(F, u, p)
   for i = 1:length(p.mols)
     o1, h1, h2 = p.mols[i]
 
-    E += _harmonicBond!(F, u, lat, o1, h1, P.Kb, P.req, P.rc)
-    E += _harmonicBond!(F, u, lat, o1, h2, P.Kb, P.req, P.rc)
-    E += _harmonicBondAngle!(F, u, lat, h1, o1, h2, P.Kθ, P.θeq, P.rc)
+    E += harmonicBond!(F, u, lat, o1, h1, P.Kb, P.req, P.rc)
+    E += harmonicBond!(F, u, lat, o1, h2, P.Kb, P.req, P.rc)
+    E += harmonicBondAngle!(F, u, lat, h1, o1, h2, P.Kθ, P.θeq, P.rc)
 
     for j = i+1:length(p.mols)
       o2, h3, h4 = p.mols[j]
@@ -69,20 +69,20 @@ function SPCF!(F, u, p)
       e  = 0.0
 
       # O-O Interactions
-      e += _vdw!(F, u, lat, o1, o2, P.ϵ, P.σ, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, o1, o2, P.Qo, P.Qo, P.rc; S=P.S[1])
+      e += vdw!(F, u, lat, o1, o2, P.ϵ, P.σ, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, o1, o2, P.Qo, P.Qo, P.rc; S=P.S[1])
 
       # H-H Coulomb
-      e += _Coulomb!(F, u, lat, h1, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, h1, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, h2, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, h2, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, h1, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, h1, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, h2, h3, P.Qh, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, h2, h4, P.Qh, P.Qh, P.rc; S=P.S[1])
 
       # H-O Coulomb
-      e += _Coulomb!(F, u, lat, o1, h3, P.Qo, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, o1, h4, P.Qo, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, o2, h1, P.Qo, P.Qh, P.rc; S=P.S[1])
-      e += _Coulomb!(F, u, lat, o2, h2, P.Qo, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, o1, h3, P.Qo, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, o1, h4, P.Qo, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, o2, h1, P.Qo, P.Qh, P.rc; S=P.S[1])
+      e += coulomb!(F, u, lat, o2, h2, P.Qo, P.Qh, P.rc; S=P.S[1])
 
       E += P.S[1] * e
 
