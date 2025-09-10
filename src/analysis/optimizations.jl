@@ -14,13 +14,13 @@ Structure holding optimization variables for geometry optimization.
 - `NC`: Neighbor counts.
 - `lattice`: Lattice matrix.
 """
-struct optVars{D,B, I<:Int, PV<:PotVars, F<:AbstractFloat}
+struct optVars{B, I<:Int, PV<:PotVars, F<:AbstractFloat, AM<:AbstractMatrix}
   potVars::PV
   mols::Vector{Vector{I}}
   m::Vector{F}
   PBC::Vector{B}
   NC::Vector{I}
-  lattice::MMatrix{D,D,F}
+  lattice::AM
 end
 
 """

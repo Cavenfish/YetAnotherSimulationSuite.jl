@@ -1,22 +1,39 @@
 
-function _pbc!(
-  F::AbstractVector, u::AbstractVector, a::Int64, b::Int64,
-  func::FT, L::AbstractMatrix, NC::Vector{Int64}, p::PT
-) where {FT, PT}
-  E = 0.0
-  for i = -NC[1]:NC[1]
-    for j = -NC[2]:NC[2]
-      for k = -NC[3]:NC[3]
-        (i,j,k) == (0,0,0) && continue
+struct _PBC_Cache{AV3D<:AbstractVector}
+  v::AV3D
+  r::AV3D
+end
 
-        r2     = u[b] + (L[1, :] * i) + (L[2, :] * j) + (L[3, :] * k)
+const _pbc_buf = _PBC_Cache(MVector{3}(zeros(3)), MVector{3}(zeros(3)))
 
-        e,f    = func(u[a], r2, p...)
-        E     += e
-        F[a] .-= f
-        F[b] .+= f
+function pbcVec!(
+  rbuf::AbstractVector, ri::RI, rj::RJ, rc::Float64, lat::AbstractMatrix;
+  buf=_pbc_buf
+) where {RI<:AbstractVector, RJ<:AbstractVector}
+  @. rbuf = rj - ri
+  d       = norm(rbuf)
+
+  if iszero(lat) || d < rc
+    return d
+  end
+
+  for i = -1:1
+    for j = -1:1
+      for k = -1:1
+        buf.v .= (lat[1, :] * i) + (lat[2, :] * j) + (lat[3, :] * k)
+        buf.r .= (rj .+ buf.v) .- ri
+        di     = norm(buf.r)
+
+        if di < rc
+          rbuf .= buf.r
+          return di
+        elseif di < d
+          d     = di
+          rbuf .= buf.r
+        end
       end
     end
   end
-  E
+
+  d
 end
