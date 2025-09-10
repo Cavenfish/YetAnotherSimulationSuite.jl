@@ -88,9 +88,9 @@ function SPCF!(F, u, p)
 
       if P.S[2] != 0.0
         P.rbuf ./= doo
-        P.Fbuf   .= -P.S[2] * e .* P.rbuf
-        F[o1]   .-= P.Fbuf
-        F[o2]   .+= P.Fbuf
+        P.Fbuf  .= -P.S[2] * e .* P.rbuf
+        F[o1]  .-= P.Fbuf
+        F[o2]  .+= P.Fbuf
       end
     end
   end
