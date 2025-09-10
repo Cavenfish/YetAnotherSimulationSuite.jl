@@ -28,52 +28,37 @@ function _Morse(
 end
 
 function _Morse!(
-  F::Vector{Vf}, u::Vector{Vu}, 
-  i::Int64, j::Int64, D::Float64, a::Float64, req::Float64
+  F::Vf, u::Vu, i::Int64, j::Int64,
+  D::Float64, a::Float64, req::Float64;
+  buf=_func_buffs
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
   
-  rvec  = u[j] - u[i]
-  r     = norm(rvec)
+  @. buf.ri  = u[j] - u[i]
+  r     = norm(buf.ri)
   c     = exp(-a*(r-req))
   E     = D * (1 - c)^2
-  f     = @. -2D * a * c * (1 - c) * rvec / r
+  @. buf.fi  = -2D * a * c * (1 - c) * buf.ri / r
 
-  F[i] .-= f
-  F[j] .+= f
+  F[i] .-= buf.fi
+  F[j] .+= buf.fi
 
   E
 end
 
 function _Morse!(
-  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF,
-  i::Int64, j::Int64, D::Float64, a::Float64, req::Float64
-) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+  F::Vf, u::Vu, lat::AbstractMatrix, i::Int64, j::Int64,
+  D::Float64, a::Float64, req::Float64, rc::Float64;
+  buf=_func_buffs
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
   
-  @. rbuf  = u[j] - u[i]
-  r     = norm(rbuf)
-  c     = exp(-a*(r-req))
-  E     = D * (1 - c)^2
-  @. Fbuf  = -2D * a * c * (1 - c) * rbuf / r
-
-  F[i] .-= Fbuf
-  F[j] .+= Fbuf
-
-  E
-end
-
-function _Morse!(
-  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF, lat::AbstractMatrix,
-  i::Int64, j::Int64, D::Float64, a::Float64, req::Float64, rc::Float64
-) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
-  
-  r = pbcVec!(rbuf, u[i], u[j], rc, lat)
+  r = pbcVec!(buf.ri, u[i], u[j], rc, lat)
   c = exp(-a*(r-req))
   E = D * (1 - c)^2
 
-  @. Fbuf = -2D * a * c * (1 - c) * rbuf / r
+  @. buf.fi = -2D * a * c * (1 - c) * buf.ri / r
 
-  F[i] .-= Fbuf
-  F[j] .+= Fbuf
+  F[i] .-= buf.fi
+  F[j] .+= buf.fi
 
   E
 end
@@ -89,49 +74,34 @@ function _harmonicBond(
 end
 
 function _harmonicBond!(
-  F::Vector{Vf}, u::Vector{Vu}, 
-  i::Int64, j::Int64, K::Float64, req::Float64
+  F::Vf, u::Vu, i::Int64, j::Int64, K::Float64, req::Float64;
+  buf=_func_buffs
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
-  rvec  = u[j] - u[i]
-  r     = norm(rvec)
+  @. buf.ri  = u[j] - u[i]
+  r     = norm(buf.ri)
   E     = 0.5 * K * (r - req)^2
-  f     = @. - K * (r - req) * rvec / r
+  @. buf.fi = -K * (r - req) * buf.ri / r
 
-  F[i] .-= f
-  F[j] .+= f
+  F[i] .-= buf.fi
+  F[j] .+= buf.fi
 
   E
 end
 
 function _harmonicBond!(
-  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF,
-  i::Int64, j::Int64, K::Float64, req::Float64
-) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
+  F::Vf, u::Vu, lat::AbstractMatrix, i::Int64, j::Int64,
+  K::Float64, req::Float64, rc::Float64;
+  buf=_func_buffs
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
-  @. rbuf  = u[j] - u[i]
-  r     = norm(rbuf)
-  E     = 0.5 * K * (r - req)^2
-  @. Fbuf = -K * (r - req) * rbuf / r
-
-  F[i] .-= Fbuf
-  F[j] .+= Fbuf
-
-  E
-end
-
-function _harmonicBond!(
-  F::Vector{Vf}, u::Vector{Vu}, Fbuf::BUF, rbuf::BUF, lat::AbstractMatrix,
-  i::Int64, j::Int64, K::Float64, req::Float64, rc::Float64
-) where {Vf <: AbstractVector, Vu <: AbstractVector, BUF<:AbstractVector}
-
-  r = pbcVec!(rbuf, u[i], u[j], rc, lat)
+  r = pbcVec!(buf.ri, u[i], u[j], rc, lat)
   E = 0.5 * K * (r - req)^2
 
-  @. Fbuf = -K * (r - req) * rbuf / r
+  @. buf.fi = -K * (r - req) * buf.ri / r
 
-  F[i] .-= Fbuf
-  F[j] .+= Fbuf
+  F[i] .-= buf.fi
+  F[j] .+= buf.fi
 
   E
 end
@@ -151,39 +121,41 @@ function _harmonicBondAngle(
 end
 
 function _harmonicBondAngle!(
-  F::Vector{Vf}, u::Vector{Vu}, 
-  i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64
+  F::Vf, u::Vu, i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64;
+  buf=_func_buffs
 ) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
-  ri    = u[i] - u[o]
-  rj    = u[j] - u[o]
-  θ     = dot(ri, rj) / (norm(ri) * norm(rj)) |> (x -> clamp(x, -1, 1)) |> acos
+  @. buf.ri = u[i] - u[o]
+  @. buf.rj = u[j] - u[o]
+  θ     = dot(buf.ri, buf.rj) / (norm(buf.ri) * norm(buf.rj)) |> (x -> clamp(x, -1, 1)) |> acos
   E     = 0.5 * K * (θ - θeq)^2
-  pre   = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * norm(ri) * norm(rj))
-  Fi    = pre * (rj - (ri * (dot(ri, rj) / dot(ri,ri))))
-  Fj    = pre * (ri - (rj * (dot(ri, rj) / dot(rj,rj))))
-  F[i] .+= Fi
-  F[j] .+= Fj
-  @. F[o] -= (Fi + Fj)
+  pre   = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * norm(buf.ri) * norm(buf.rj))
+  buf.fi .= pre * (buf.rj - (buf.ri * (dot(buf.ri, buf.rj) / dot(buf.ri,buf.ri))))
+  buf.fj .= pre * (buf.ri - (buf.rj * (dot(buf.ri, buf.rj) / dot(buf.rj,buf.rj))))
+  F[i] .+= buf.fi
+  F[j] .+= buf.fj
+  @. F[o] -= (buf.fi + buf.fj)
 
   E
 end
 
 function _harmonicBondAngle!(
-  F::Vf, u::Vu, ri::AV, rj::AV, lat::AbstractMatrix,
-  i::Int64, o::Int64, j::Int64, K::Float64, θeq::Float64, rc::Float64
+  F::Vf, u::Vu, lat::AbstractMatrix, i::Int64, o::Int64, j::Int64,
+  K::Float64, θeq::Float64, rc::Float64;
+  buf=_func_buffs
 ) where {Vf <: AbstractVector, Vu <: AbstractVector, AV<:AbstractVector}
 
-  di    = pbcVec!(ri, u[o], u[i], rc, lat)
-  dj    = pbcVec!(rj, u[o], u[j], rc, lat)
-  θ     = dot(ri, rj) / (di * dj) |> (x -> clamp(x, -1, 1)) |> acos
-  E     = 0.5 * K * (θ - θeq)^2
-  pre   = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * di * dj)
-  Fi    = pre * (rj - (ri * (dot(ri, rj) / dot(ri,ri))))
-  Fj    = pre * (ri - (rj * (dot(ri, rj) / dot(rj,rj))))
-  F[i] .+= Fi
-  F[j] .+= Fj
-  @. F[o] -= (Fi + Fj)
+  di  = pbcVec!(buf.ri, u[o], u[i], rc, lat)
+  dj  = pbcVec!(buf.rj, u[o], u[j], rc, lat)
+  θ   = dot(buf.ri, buf.rj) / (di * dj) |> (x -> clamp(x, -1, 1)) |> acos
+  E   = 0.5 * K * (θ - θeq)^2
+  pre = K * (θ - θeq) / (sqrt(1 - cos(θ)^2) * di * dj)
+
+  buf.fi .= pre * (buf.rj - (buf.ri * (dot(buf.ri, buf.rj) / dot(buf.ri,buf.ri))))
+  buf.fj .= pre * (buf.ri - (buf.rj * (dot(buf.ri, buf.rj) / dot(buf.rj,buf.rj))))
+  F[i]  .+= buf.fi
+  F[j]  .+= buf.fj
+  F[o]  .-= (buf.fi .+ buf.fj)
 
   E
 end
