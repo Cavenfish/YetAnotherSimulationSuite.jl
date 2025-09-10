@@ -85,7 +85,7 @@ Here's what we're working on:
 - [x] Comprehensive documentation
 - [ ] Example scripts and tutorials
 - [x] Test coverage >70%
-- [ ] Unitful.jl integration
+- [x] Unitful.jl integration
 - [x] Chemfiles.jl integration
 
 ### Upcoming Features
