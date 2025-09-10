@@ -151,8 +151,8 @@ function electroMvH!(F, u, c1, o1, c2, o2, lat, P)
 
   #C--C
   E         = coulomb!(P.Fbuf, u[c1], u[c2], lat, Qc1, Qc2, P.rc)
-  @. P.F_Q1 = P.αc * ϵ * P.r1 / d1
-  @. P.F_Q2 = P.αc * ϵ * P.r2 / d2
+  @. P.F_Q1 = P.αc * E * P.r1 / d1
+  @. P.F_Q2 = P.αc * E * P.r2 / d2
   @. F[c1] -= (P.Fbuf + P.F_Q1) * P.S[1]
   @. F[o1] += P.F_Q1 * P.S[1]
   @. F[c2] += P.Fbuf - P.F_Q2 * P.S[1]

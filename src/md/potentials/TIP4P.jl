@@ -100,7 +100,7 @@ function TIP4Pf!(F, u, p)
       e = 0.0
 
       # O-O vdw Interaction
-      e += _vdw!(F, u, lat, o1, o2, P.ϵoo, P.σoo, P.rc; S=P.S[1])
+      e += vdw!(F, u, lat, o1, o2, P.ϵoo, P.σoo, P.rc; S=P.S[1])
 
       # H-H Coulomb Interactions
       e += coulomb!(F, u, lat, h1, h3, P.Qh, P.Qh, P.rc; S=P.S[1])

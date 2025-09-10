@@ -2,20 +2,22 @@ rbuf = zeros(3)
 Fbuf = zeros(3)
 
 @testset "Morse Test" begin
-  u = [[0.0,0.0,0.0], [1.0,0.0,0.0]]
-  F = zero(u)
-  Z = zeros(3)
+  u  = [[0.0,0.0,0.0], [1.0,0.0,0.0]]
+  F  = zero(u)
+  Z  = zeros(3)
+  L  = zeros(3,3)
+  rc = 10.0
   
   # Test equilibrium
-  E1    = YASS._Morse!(F, u, 1, 2, 50.0, 2.2, 1.0)
-  E2, f = YASS._Morse(1.0, u[2], 50.0, 2.2, 1.0)
+  E1    = YASS.morse!(F, u, L, 1, 2, 50.0, 2.2, 1.0, rc)
+  E2, f = YASS.morse(1.0, u[2], 50.0, 2.2, 1.0)
   @test E1 == 0.0
   @test E2 == 0.0
   @test F[1] == Z
   @test F[2] == Z
   @test f == Z
   
-  E1    = YASS._Morse!(F, u, Fbuf, rbuf, 1, 2, 50.0, 2.2, 1.0)
+  E1    = YASS.morse!(F, u, L, 1, 2, 50.0, 2.2, 1.0, rc)
   @test E1 == 0.0
   @test F[1] == Z
   @test F[2] == Z
@@ -25,8 +27,8 @@ Fbuf = zeros(3)
   Z .= -30.0 * 2.0 * exp(-2.0 * (2.0 - 1.0)) * (1 - exp(-2.0 * (2.0 - 1.0))) .* [1.0, 0.0, 0.0] 
   
   u[2] .+= [1.0, 0.0, 0.0]
-  E1    = YASS._Morse!(F, u, 1, 2, 15.0, 2.0, 1.0)
-  E2, f = YASS._Morse(2.0, u[2], 15.0, 2.0, 1.0)
+  E1    = YASS.morse!(F, u, L, 1, 2, 15.0, 2.0, 1.0, rc)
+  E2, f = YASS.morse(2.0, u[2], 15.0, 2.0, 1.0)
   @test E1 == E
   @test E2 == E
   @test f == Z
@@ -34,7 +36,7 @@ Fbuf = zeros(3)
   @test F[2] == Z
 
   F     = zero(u)
-  E1    = YASS._Morse!(F, u, Fbuf, rbuf, 1, 2, 15.0, 2.0, 1.0)
+  E1    = YASS.morse!(F, u, L, 1, 2, 15.0, 2.0, 1.0, rc)
   @test E1 == E
   @test F[1] == -Z
   @test F[2] == Z
@@ -45,17 +47,19 @@ end
   u = [[0.0,0.0,0.0], [1.0,0.0,0.0]]
   F = zero(u)
   Z = zeros(3)
+  L  = zeros(3,3)
+  rc = 10.0
 
   # Test equilibrium
-  E1    = YASS._harmonicBond!(F, u, 1, 2, 50.0, 1.0)
-  E2, f = YASS._harmonicBond(1.0, u[2], 50.0, 1.0)
+  E1    = YASS.harmonicBond!(F, u, L, 1, 2, 50.0, 1.0, rc)
+  E2, f = YASS.harmonicBond(1.0, u[2], 50.0, 1.0)
   @test E1 == 0.0
   @test E2 == 0.0
   @test F[1] == Z
   @test F[2] == Z
   @test f == Z
 
-  E1    = YASS._harmonicBond!(F, u, Fbuf, rbuf, 1, 2, 50.0, 1.0)
+  E1    = YASS.harmonicBond!(F, u, L, 1, 2, 50.0, 1.0, rc)
   @test E1 == 0.0
   @test F[1] == Z
   @test F[2] == Z
@@ -65,8 +69,8 @@ end
   Z .= - 50.0 * (2.0 - 1.0) .* [1.0,0.0,0.0]
 
   u[2] .+= [1.0, 0.0, 0.0]
-  E1    = YASS._harmonicBond!(F, u, 1, 2, 50.0, 1.0)
-  E2, f = YASS._harmonicBond(2.0, u[2], 50.0, 1.0)
+  E1    = YASS.harmonicBond!(F, u, L, 1, 2, 50.0, 1.0, rc)
+  E2, f = YASS.harmonicBond(2.0, u[2], 50.0, 1.0)
   @test E1 == E
   @test E2 == E
   @test f == Z
@@ -74,7 +78,7 @@ end
   @test F[2] == Z
 
   F     = zero(u)
-  E1    = YASS._harmonicBond!(F, u, Fbuf, rbuf, 1, 2, 50.0, 1.0)
+  E1    = YASS.harmonicBond!(F, u, L, 1, 2, 50.0, 1.0, rc)
   @test E1 == E
   @test F[1] == -Z
   @test F[2] == Z
@@ -84,10 +88,12 @@ end
   u = [[0.0,0.0,0.0], [1.0,0.0,0.0], [0.0,1.0,0.0]]
   F = zero(u)
   Z = zero(u)
+  L  = zeros(3,3)
+  rc = 10.0
 
   # Test equilibrium
-  E1             = YASS._harmonicBondAngle!(F, u, 2, 1, 3, 50.0, pi/2)
-  E2, f1, f2, fo = YASS._harmonicBondAngle(u[2]-u[1], u[3]-u[1], 50.0, pi/2)
+  E1             = YASS.harmonicBondAngle!(F, u, L, 2, 1, 3, 50.0, pi/2, rc)
+  E2, f1, f2, fo = YASS.harmonicBondAngle(u[2]-u[1], u[3]-u[1], 50.0, pi/2)
   @test E1 == 0.0
   @test E2 == 0.0
   @test F[1] == Z[1]
@@ -105,8 +111,8 @@ end
   Z[3] .= a .* (ri .- (rj .* (dot(ri, rj) / dot(rj,rj))))
   Z[1] .= -1 .* (Z[2] .+ Z[3])
 
-  E1    = YASS._harmonicBondAngle!(F, u, 2, 1, 3, 50.0, pi/2)
-  E2, f = YASS._harmonicBondAngle(u[2]-u[1], u[3]-u[1], 50.0, pi/2)
+  E1    = YASS.harmonicBondAngle!(F, u, L, 2, 1, 3, 50.0, pi/2, rc)
+  E2, f = YASS.harmonicBondAngle(u[2]-u[1], u[3]-u[1], 50.0, pi/2)
   @test isapprox(E1, E; atol=1e-8)
   @test isapprox(E2, E; atol=1e-8)
   @test isapprox(F[1], Z[1]; atol=1e-8)
