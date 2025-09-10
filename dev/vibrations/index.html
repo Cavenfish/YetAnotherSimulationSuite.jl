@@ -25,32 +25,32 @@ ipr = getIPR(modes)</code></pre><h2 id="Velocity-Autocorrelation-Function-(VACF)
 
 # Run MD simulation
 molecule = readSystem(&quot;water.xyz&quot;)
-traj = run(TIP4Pf(), molecule, (0.0, 10.0ps), 1.0fs, NVE())
+traj = run(TIP4Pf(), molecule, (0.0u&quot;fs&quot;, 10.0u&quot;ps&quot;), 1.0u&quot;fs&quot;, NVE())
 
 # Extract velocities and masses
 vel, mas = getVelMas(traj)
 
 # Configure VACF calculation
 inp = vacfInps(
-    vel,           # Velocity trajectories
-    mas,           # Atomic masses
-    1e15,        # Sampling frequency (1/fs = 1e15 Hz)
-    true,          # Normalize VACF
-    Hann,          # Window function
-    4,             # FFT padding factor
-    true           # Mirror the data
+    vel,       # Velocity trajectories
+    mas,       # Atomic masses
+    1e15u&quot;Hz&quot;,  # Sampling frequency (1/fs = 1e15 Hz)
+    true,      # Normalize VACF
+    Hann,      # Window function
+    4,         # FFT padding factor
+    true       # Mirror the data
 )
 
 # Calculate VDOS
 out = VDOS(inp)</code></pre><h3 id="VACF-Components"><a class="docs-heading-anchor" href="#VACF-Components">VACF Components</a><a id="VACF-Components-1"></a><a class="docs-heading-anchor-permalink" href="#VACF-Components" title="Permalink"></a></h3><p>The <code>vacfOut</code> structure contains:</p><ul><li><code>out.c</code>: Raw velocity autocorrelation function</li><li><code>out.C</code>: Windowed/processed VACF</li><li><code>out.v</code>: Frequency axis (in cm<span>$^{-1}$</span>)</li><li><code>out.I</code>: Vibrational density of states</li></ul><h3 id="Customizing-the-Analysis"><a class="docs-heading-anchor" href="#Customizing-the-Analysis">Customizing the Analysis</a><a id="Customizing-the-Analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Customizing-the-Analysis" title="Permalink"></a></h3><p>Several parameters can be adjusted:</p><pre><code class="language-julia hljs"># Different window functions
-inp = vacfInps(vel, mas, 1.0/fs, true, Welch, 4, true)   # Welch window
-inp = vacfInps(vel, mas, 1.0/fs, true, HannM, 4, true)   # Modified Hann
+inp = vacfInps(vel, mas, 1e15u&quot;Hz&quot;, true, Welch, 4, true)   # Welch window
+inp = vacfInps(vel, mas, 1e15u&quot;Hz&quot;, true, HannM, 4, true)   # Modified Hann
 
 # Increased padding for better frequency resolution
-inp = vacfInps(vel, mas, 1.0/fs, true, Hann, 8, true)
+inp = vacfInps(vel, mas, 1e15u&quot;Hz&quot;, true, Hann, 8, true)
 
 # Without mirroring
-inp = vacfInps(vel, mas, 1.0/fs, true, Hann, 4, false)</code></pre><h3 id="Atom-Specific-Analysis"><a class="docs-heading-anchor" href="#Atom-Specific-Analysis">Atom-Specific Analysis</a><a id="Atom-Specific-Analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Atom-Specific-Analysis" title="Permalink"></a></h3><p>You can analyze specific atoms or groups:</p><pre><code class="language-julia hljs"># Analyze only oxygen atoms
+inp = vacfInps(vel, mas, 1e15u&quot;Hz&quot;, true, Hann, 4, false)</code></pre><h3 id="Atom-Specific-Analysis"><a class="docs-heading-anchor" href="#Atom-Specific-Analysis">Atom-Specific Analysis</a><a id="Atom-Specific-Analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Atom-Specific-Analysis" title="Permalink"></a></h3><p>You can analyze specific atoms or groups:</p><pre><code class="language-julia hljs"># Analyze only oxygen atoms
 O_idx = findall(x -&gt; x == &quot;O&quot;, traj.symbols)
 out_O = VDOS(inp, atms=O_idx)
 
@@ -82,4 +82,4 @@ plot(out.c,
 plot(out.C,
      xlabel=&quot;Time&quot;,
      ylabel=&quot;VACF&quot;,
-     label=&quot;Processed&quot;)</code></pre><h2 id="Tips-for-Quality-Results"><a class="docs-heading-anchor" href="#Tips-for-Quality-Results">Tips for Quality Results</a><a id="Tips-for-Quality-Results-1"></a><a class="docs-heading-anchor-permalink" href="#Tips-for-Quality-Results" title="Permalink"></a></h2><ol><li><p>For harmonic analysis:</p><ul><li>Ensure structures are well-optimized</li><li>Use tight convergence criteria</li></ul></li><li><p>For VACF analysis:</p><ul><li>Use long enough trajectories (&gt;10 ps)</li><li>Use an appropriate timestep (depends on mode frequency)</li><li>Ensure good energy conservation</li><li>Test different window functions</li><li>Adjust padding for desired resolution</li></ul></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../optimizations/">« Optimization</a><a class="docs-footer-nextpage" href="../md/dynamics/">Molecular Dynamics Simulations »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Wednesday 10 September 2025 13:14">Wednesday 10 September 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+     label=&quot;Processed&quot;)</code></pre><h2 id="Tips-for-Quality-Results"><a class="docs-heading-anchor" href="#Tips-for-Quality-Results">Tips for Quality Results</a><a id="Tips-for-Quality-Results-1"></a><a class="docs-heading-anchor-permalink" href="#Tips-for-Quality-Results" title="Permalink"></a></h2><ol><li><p>For harmonic analysis:</p><ul><li>Ensure structures are well-optimized</li><li>Use tight convergence criteria</li></ul></li><li><p>For VACF analysis:</p><ul><li>Use long enough trajectories (&gt;10 ps)</li><li>Use an appropriate timestep (depends on mode frequency)</li><li>Ensure good energy conservation</li><li>Test different window functions</li><li>Adjust padding for desired resolution</li></ul></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../optimizations/">« Optimization</a><a class="docs-footer-nextpage" href="../md/dynamics/">Molecular Dynamics Simulations »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.14.1 on <span class="colophon-date" title="Wednesday 10 September 2025 20:42">Wednesday 10 September 2025</span>. Using Julia version 1.11.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
