@@ -8,7 +8,10 @@ TIP4P/2005. The Journal of chemical physics, 135(22).
 Link:
 https://pubs.aip.org/aip/jcp/article/135/22/224516/190786
 """
-TIP4Pf(; constraints=nothing) = Calculator(TIP4Pf; EF=TIP4Pf!, constraints=constraints)
+TIP4Pf(; constraints=nothing) = Calculator(
+  TIP4Pf, u"eV", u"eV/angstrom", u"angstrom * u^0.5 * eV^-0.5";
+  EF=TIP4Pf!, constraints=constraints
+)
 
 struct _TIP4P_PotVars{
   F<:Float64, AV3D<:AbstractVector, AV2D<:AbstractVector

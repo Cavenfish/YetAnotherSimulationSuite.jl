@@ -14,9 +14,11 @@ function dynamicTest(calc, f)
   bdys = readSystem(file)
 
   if isa(bdys, YASS.Cell)
-    run(calc, bdys, (0.0, 10fs), 1fs, NVE(bdys))
+    run(calc, bdys, (0.0u"fs", 5u"fs"), 1u"fs", NVE(bdys))
+    run(calc, bdys, 5u"fs", 1u"fs", NVE(bdys))
   else
-    run(calc, bdys, (0.0, 10fs), 1fs, NVE())
+    run(calc, bdys, (0.0u"fs", 5u"fs"), 1u"fs", NVE())
+    run(calc, bdys, 5u"fs", 1u"fs", NVE())
   end
 
   true
@@ -26,7 +28,7 @@ function thermoTest(calc, thermo, f)
   file = joinpath(@__DIR__, f)
   bdys = readSystem(file)
 
-  run(calc, bdys, (0.0, 10fs), 1fs, NVT(thermo); split=2)
+  run(calc, bdys, (0.0u"fs", 10u"fs"), 1u"fs", NVT(thermo); split=2)
 
   true
 end
@@ -64,13 +66,14 @@ end
 
 @testset "Test Thermostat Function Calls" begin
   h2o = "../testingFiles/xyzFiles/h2o-dimer.xyz"
+  calc = TIP4Pf()
 
   # Berendsen
-  @test thermoTest(TIP4Pf(), Berendsen(75.0, 100fs), h2o)
+  @test thermoTest(calc, Berendsen(75.0u"K", 100u"fs", calc), h2o)
 
   # Langevin
-  @test thermoTest(TIP4Pf(), Langevin(75.0, 100fs), h2o)
+  @test thermoTest(calc, Langevin(75.0u"K", 100u"fs", calc), h2o)
 
   # CVR
-  @test thermoTest(TIP4Pf(), CVR(75.0, 100fs), h2o)
+  @test thermoTest(calc, CVR(75.0u"K", 100u"fs", calc), h2o)
 end

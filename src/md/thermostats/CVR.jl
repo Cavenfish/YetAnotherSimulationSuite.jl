@@ -1,14 +1,18 @@
 struct CVR <:ThermoVars
   tau::Float64
+  kB::Float64
 end
 
-function CVR(T::F, tau::F) where F<:AbstractFloat
-  Thermostat(T, CVR!, vars=CVR(tau))
+function CVR(T::Quantity, tau::Quantity, calc::MyCalc)
+  t = uconvert(calc.time_unit, tau) |> ustrip
+
+  Thermostat(T, CVR!, vars=CVR(t, calc.kB))
 end
 
 function CVR!(a, v, m, Tsim, thermostat)
-  N    = length(m)
-  tau  = thermostat.vars.tau
+  N   = length(m)
+  tau = thermostat.vars.tau
+  kB  = thermostat.vars.kB
 
   if Tsim == 0.0
     return

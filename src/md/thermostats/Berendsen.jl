@@ -2,8 +2,10 @@ struct Berendsen{F<:AbstractFloat} <:ThermoVars
   gamma::F
 end
 
-function Berendsen(T::F, gamma::F) where F<:AbstractFloat
-  Thermostat(T, Berendsen!, vars=Berendsen(gamma))
+function Berendsen(T::Quantity, gamma::Quantity, calc::MyCalc)
+  g = uconvert(calc.time_unit, gamma) |> ustrip
+
+  Thermostat(T, Berendsen!, vars=Berendsen(g))
 end
 
 function Berendsen!(a, v, m, Tsim, thermostat)

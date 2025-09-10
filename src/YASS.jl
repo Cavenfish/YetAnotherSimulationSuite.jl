@@ -29,14 +29,15 @@ module YASS
 
   import FiniteDiff: JacobianCache, finite_difference_jacobian!
 
+  using Reexport
+  @reexport using Unitful
+
   # Wrapper for ASE calculator with SCME/f potential
   function __init__()
     @pyinclude(joinpath(@__DIR__, "lib/SCMEf/libscmef.py"))
   end
 
   export
-    #constants
-    fs, ps, ns, kB,
 
     #io.jl
     readSystem,
@@ -79,7 +80,7 @@ module YASS
     processDynamics, processTmpFiles, 
     
     #vacf.jl
-    vacfInps, VDOS, getDiffusionCoefficient,
+    vacfInps, VDOS, getDiffusionCoefficient, Hann, HannM, Welch,
 
     #vibrations.jl
     getHarmonicFreqs, animateMode, getModePES, getModeInteractionPES,
@@ -125,11 +126,6 @@ module YASS
     mbx_getDipole
   
   #end exports
-
-  const fs   = 0.09822694788464063 # 1fs in ASE time
-  const ps   = 1000 * fs
-  const ns   = 1000 * ps
-  const kB   = 8.617333262e-5 # eV / K
 
   include("./types.jl")
 

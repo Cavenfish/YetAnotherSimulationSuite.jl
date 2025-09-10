@@ -166,10 +166,10 @@ function doRun(
     end
 
     files = ["./$(i).tmp" for i = 1:split]
-    return processTmpFiles(files; dt=dt)
+    return processTmpFiles(files, dt)
   else
     solu = singleRun(calc, vel, pos, tspan, simu, algo, dt; kwargs...)
-    return processDynamics(solu)
+    return processDynamics(solu, dt)
   end
 
 end
@@ -193,10 +193,13 @@ Run an MD simulation for a set of atoms.
 - Processed trajectory or solution.
 """
 function Base.run(
-  calc::MyCalc, bdys::Vector{MyAtoms}, tspan::Tuple{Float64, Float64},
-  dt::Float64, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
+  calc::MyCalc, bdys::Vector{MyAtoms}, tspan::Tuple{Quantity, Quantity},
+  dt::Quantity, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
 ) where T <: Union{NVE,NpT,NVT}
 
+  t0      = uconvert(calc.time_unit, tspan[1]) |> ustrip
+  tn      = uconvert(calc.time_unit, tspan[2]) |> ustrip
+  step    = uconvert(calc.time_unit, dt) |> ustrip
   NC      = [0,0,0]
   PBC     = repeat([false], 3)
   symbols = [i.s for i in bdys]
@@ -211,7 +214,50 @@ function Base.run(
     Vector{SVector{3, Float64}}[], potVars, PBC, NC, ensemble
   )
 
-  doRun(calc, vel, pos, tspan, simu, algo, dt, split; kwargs...)
+  doRun(calc, vel, pos, (t0, tn), simu, algo, step, split; kwargs...)
+end
+
+"""
+    run(calc, bdys, tmax, dt, ensemble; algo=VelocityVerlet(), split=1, kwargs...)
+
+Run an MD simulation for a set of atoms.
+
+# Arguments
+- `calc`: Calculator object.
+- `bdys`: Vector of MyAtoms.
+- `tmax`: Time length of simulation.
+- `dt`: Time step.
+- `ensemble`: Ensemble object.
+- `algo`: ODE solver algorithm (default: VelocityVerlet()).
+- `split`: Number of segments (default: 1).
+- `kwargs`: Additional keyword arguments.
+
+# Returns
+- Processed trajectory or solution.
+"""
+function Base.run(
+  calc::MyCalc, bdys::Vector{MyAtoms}, tmax::Quantity,
+  dt::Quantity, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
+) where T <: Union{NVE,NpT,NVT}
+
+  t0      = uconvert(calc.time_unit, 0.0u"fs") |> ustrip
+  tn      = uconvert(calc.time_unit, tmax) |> ustrip
+  step    = uconvert(calc.time_unit, dt) |> ustrip
+  NC      = [0,0,0]
+  PBC     = repeat([false], 3)
+  symbols = [i.s for i in bdys]
+  mas     = [i.m for i in bdys]
+  potVars = calc.b(bdys)
+  mols    = getMols(bdys, 1.2)
+  pos     = [SVector{3}(i.r) for i in bdys]
+  vel     = [SVector{3}(i.v) for i in bdys]
+
+  simu = Dynamics(
+    mas, symbols, mols, Float64[], Float64[], 
+    Vector{SVector{3, Float64}}[], potVars, PBC, NC, ensemble
+  )
+
+  doRun(calc, vel, pos, (t0, tn), simu, algo, step, split; kwargs...)
 end
 
 """
@@ -233,10 +279,13 @@ Run an MD simulation for a cell.
 - Processed trajectory or solution.
 """
 function Base.run(
-  calc::MyCalc, cell::MyCell, tspan::Tuple{Float64, Float64},
-  dt::Float64, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
+  calc::MyCalc, cell::MyCell, tspan::Tuple{Quantity, Quantity},
+  dt::Quantity, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
 ) where T <: Union{NVE,NpT,NVT}
 
+  t0      = uconvert(calc.time_unit, tspan[1]) |> ustrip
+  tn      = uconvert(calc.time_unit, tspan[2]) |> ustrip
+  step    = uconvert(calc.time_unit, dt) |> ustrip
   potVars = calc.b(cell)
   mols    = getMols(cell, 1.2)
   pos     = [SVector{3}(i) for i in getPos(cell)]
@@ -247,5 +296,44 @@ function Base.run(
     Vector{SVector{3, Float64}}[], potVars, cell.PBC, cell.NC, ensemble
   )
 
-  doRun(calc, vel, pos, tspan, simu, algo, dt, split; kwargs...)
+  doRun(calc, vel, pos, (t0, tn), simu, algo, step, split; kwargs...)
+end
+
+"""
+    run(calc, cell, tmax, dt, ensemble; algo=VelocityVerlet(), split=1, kwargs...)
+
+Run an MD simulation for a cell.
+
+# Arguments
+- `calc`: Calculator object.
+- `cell`: MyCell object.
+- `tmax`: Time span tuple.
+- `dt`: Time step.
+- `ensemble`: Ensemble object.
+- `algo`: ODE solver algorithm (default: VelocityVerlet()).
+- `split`: Number of segments (default: 1).
+- `kwargs`: Additional keyword arguments.
+
+# Returns
+- Processed trajectory or solution.
+"""
+function Base.run(
+  calc::MyCalc, cell::MyCell, tmax::Quantity,
+  dt::Quantity, ensemble::T; algo=VelocityVerlet(), split=1, kwargs...
+) where T <: Union{NVE,NpT,NVT}
+
+  t0      = uconvert(calc.time_unit, 0.0u"fs") |> ustrip
+  tn      = uconvert(calc.time_unit, tmax) |> ustrip
+  step    = uconvert(calc.time_unit, dt) |> ustrip
+  potVars = calc.b(cell)
+  mols    = getMols(cell, 1.2)
+  pos     = [SVector{3}(i) for i in getPos(cell)]
+  vel     = [SVector{3}(i) for i in cell.velocity]
+
+  simu = Dynamics(
+    cell.masses, cell.symbols, mols, Float64[], Float64[], 
+    Vector{SVector{3, Float64}}[], potVars, cell.PBC, cell.NC, ensemble
+  )
+
+  doRun(calc, vel, pos, (t0, tn), simu, algo, step, split; kwargs...)
 end

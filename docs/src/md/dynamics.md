@@ -16,13 +16,16 @@ water = readSystem("water.xyz")
 ensemble = NVE()
 
 # Run 5 picosecond simulation with 0.1 fs timestep
-traj = run(TIP4Pf(), water, (0.0, 5ps), 0.1fs, ensemble)
+traj = run(TIP4Pf(), water, 5u"ps", 0.1u"fs", ensemble)
+
+# You can also specify the start time
+traj = run(TIP4Pf(), water, (5u"ps", 10u"ps"), 0.1u"fs", ensemble)
 ```
 
 The `run` function takes the following arguments:
 - Calculator (force field)
 - Initial structure
-- Time span tuple (start, end)
+- Time or time span tuple (start, end)
 - Time step
 - Ensemble
 
@@ -39,14 +42,17 @@ ensemble = NVE()
 The NVT ensemble maintains constant temperature using a thermostat. `YASS.jl` supports several thermostats:
 
 ```julia
+# Thermostats need unit information from calc
+calc = TIP4Pf()
+
 # Berendsen thermostat at 300K with 50fs coupling time
-ensemble = Berendsen(300.0, 50fs) |> NVT
+ensemble = Berendsen(300.0u"K", 50u"fs", calc) |> NVT
 
-# Nosé-Hoover thermostat at 300K
-ensemble = NoseHoover(300.0) |> NVT 
+# Cannonical velocity rescaling thermostat at 300K
+ensemble = CVR(300.0u"K", 100u"fs", calc) |> NVT 
 
-# Langevin thermostat at 300K with γ=1.0
-ensemble = Langevin(300.0, 1.0) |> NVT
+# Langevin thermostat at 300K with 10fs coupling time
+ensemble = Langevin(300.0u"K", 10u"fs") |> NVT
 ```
 
 ## Working with Trajectories
@@ -76,7 +82,7 @@ For longer simulations, you can split them into segments to save memory:
 
 ```julia
 # Run 1 nanosecond simulation split into 10 segments
-traj = run(TIP4Pf(), water, (0.0, 1ns), 1.0fs, ensemble; split=10)
+traj = run(TIP4Pf(), water, 1u"ns", 1.0u"fs", ensemble; split=10)
 ```
 
 ## Saving Trajectories
@@ -101,5 +107,5 @@ For periodic systems, read the structure as a cell:
 cell = readSystem("crystal.xyz")
 
 # Run simulation with PBC
-traj = run(calc, cell, (0.0, 10ps), 1.0fs, NVE(cell))
+traj = run(calc, cell, 10u"ps", 1.0u"fs", NVE(cell))
 ```

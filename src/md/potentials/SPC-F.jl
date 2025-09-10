@@ -8,7 +8,10 @@ motions in water." Physical Review B 31.5 (1985): 2643.
 Link:
 https://journals.aps.org/prb/abstract/10.1103/PhysRevB.31.2643
 """
-SPCF(; constraints=nothing) = Calculator(SPCF; EF=SPCF!, constraints=constraints)
+SPCF(; constraints=nothing) = Calculator(
+  SPCF, u"eV", u"eV/angstrom", u"angstrom * u^0.5 * eV^-0.5";
+  EF=SPCF!, constraints=constraints
+)
 
 struct _SPCF_PotVars{
   F<:Float64, AV3D<:AbstractVector, AV2D<:AbstractVector

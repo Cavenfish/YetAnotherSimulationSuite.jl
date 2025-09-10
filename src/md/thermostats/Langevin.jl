@@ -1,14 +1,18 @@
 struct Langevin{F<:AbstractFloat} <:ThermoVars
   gamma::F
+  kB::F
 end
 
-function Langevin(T::F, gamma::F) where F<:AbstractFloat
-  Thermostat(T, Langevin!, vars=Langevin(gamma))
+function Langevin(T::Quantity, gamma::Quantity, calc::MyCalc)
+  g = uconvert(calc.time_unit, gamma) |> ustrip
+
+  Thermostat(T, Langevin!, vars=Langevin(g, calc.kB))
 end
 
 function Langevin!(a, v, m, Tsim, thermostat)
   N     = length(m)
   gamma = thermostat.vars.gamma
+  kB    = thermostat.vars.kB
 
   # M   = sum(m) / N
   # sig = sqrt(2 * gamma * M * inp.kB * inp.T)

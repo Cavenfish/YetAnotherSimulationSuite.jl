@@ -9,7 +9,10 @@ Chemistry A 119.24 (2015): 6354-6369.
 Link:
 https://pubs.acs.org/doi/full/10.1021/acs.jpca.5b02611
 """
-MvHff(; constraints=nothing) = Calculator(MvHff; EF=MvHff!, constraints=constraints)
+MvHff(; constraints=nothing) = Calculator(
+  MvHff, u"eV", u"eV/angstrom", u"angstrom * u^0.5 * eV^-0.5";
+  EF=MvHff!, constraints=constraints
+)
 
 struct _MvHff_PotVars{
   F<:Float64, AV2D<:AbstractVector, AV3D<:AbstractVector

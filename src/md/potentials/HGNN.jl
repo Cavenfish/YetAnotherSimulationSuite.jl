@@ -38,7 +38,10 @@ Journal of Chemical Physics 153.5 (2020).
 Link:
 https://pubs.aip.org/aip/jcp/article/153/5/054310/1065758
 """
-HGNN(; constraints=nothing) = Calculator(HGNN; EF=HGNN!, constraints=constraints)
+HGNN(; constraints=nothing) = Calculator(
+  HGNN, u"eV", u"eV/angstrom", u"angstrom * u^0.5 * eV^-0.5";
+  EF=HGNN!, constraints=constraints
+)
 
 struct _HGNN_PotVars{MV,PV,D1,D2,D3, F<:AbstractFloat} <: PotVars
   A::Matrix{F}

@@ -15,7 +15,7 @@ Input structure for velocity autocorrelation function (VACF) calculations.
 struct vacfInps{V,B,W, I<:Integer, F<:AbstractFloat}
   vel::V
   mas::Vector{F}
-  Hz::F
+  Hz::typeof(1.0u"Hz")
   norm::B
   win::W
   pad::I
@@ -126,6 +126,7 @@ Compute the vibrational density of states (VDOS) from VACF input.
 """
 function VDOS(inp; atms=nothing)
   # Initialize output
+  Hz  = ustrip(inp.Hz)
   k   = 29979245800.0 # Divide by this to convert from Hz to cm^-1
   c   = length(inp.vel) - 1 |> zeros
   C   = if inp.mir
@@ -134,7 +135,7 @@ function VDOS(inp; atms=nothing)
     length(c)*inp.pad |> zeros
   end
   N   = length(C)
-  tmp = fftfreq(N, inp.Hz) ./ k
+  tmp = fftfreq(N, Hz) ./ k
   n   = div(length(tmp), 2)
   v   = abs.(tmp[1:n])
   I   = length(v) |> zeros

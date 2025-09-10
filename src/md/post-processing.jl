@@ -11,7 +11,7 @@ Convert an ODE solution to a Traj object.
 # Returns
 - Traj object.
 """
-function processDynamics(solu::SciMLBase.ODESolution; dt=fs, step=1)
+function processDynamics(solu::SciMLBase.ODESolution, dt::Float64; step=1)
   N  = length(solu.t)
   
   Traj(
@@ -36,7 +36,7 @@ Append images from an ODE solution to a trajectory.
 # Side Effects
 - Modifies `tj` in-place.
 """
-function Base.push!(tj::MyTraj, solu::SciMLBase.ODESolution; dt=fs, step=1)
+function Base.push!(tj::MyTraj, solu::SciMLBase.ODESolution, dt::Float64; step=1)
   N = length(solu.t)
   
   for i = 1:step:N
@@ -57,12 +57,12 @@ Process a list of temporary files containing ODE solutions into a single traject
 # Returns
 - Traj object.
 """
-function processTmpFiles(files; kwargs...)
+function processTmpFiles(files, dt; kwargs...)
   
   # Process first tmp file into traj obj
   tj = open(files[1], "r") do io
     solu = deserialize(io)
-    processDynamics(solu; kwargs...)
+    processDynamics(solu, dt; kwargs...)
   end
 
   # Free memory. Needed?
@@ -73,7 +73,7 @@ function processTmpFiles(files; kwargs...)
     # Append traj with next tmp file data
     open(file, "r") do io
       solu = deserialize(io)
-      push!(tj, solu; kwargs...)
+      push!(tj, solu, dt; kwargs...)
     end
 
     #Free memory. Needed?

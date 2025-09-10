@@ -63,20 +63,20 @@ using YASS
 
 # Run MD simulation
 molecule = readSystem("water.xyz")
-traj = run(TIP4Pf(), molecule, (0.0, 10.0ps), 1.0fs, NVE())
+traj = run(TIP4Pf(), molecule, (0.0u"fs", 10.0u"ps"), 1.0u"fs", NVE())
 
 # Extract velocities and masses
 vel, mas = getVelMas(traj)
 
 # Configure VACF calculation
 inp = vacfInps(
-    vel,           # Velocity trajectories
-    mas,           # Atomic masses
-    1e15,        # Sampling frequency (1/fs = 1e15 Hz)
-    true,          # Normalize VACF
-    Hann,          # Window function
-    4,             # FFT padding factor
-    true           # Mirror the data
+    vel,       # Velocity trajectories
+    mas,       # Atomic masses
+    1e15u"Hz",  # Sampling frequency (1/fs = 1e15 Hz)
+    true,      # Normalize VACF
+    Hann,      # Window function
+    4,         # FFT padding factor
+    true       # Mirror the data
 )
 
 # Calculate VDOS
@@ -97,14 +97,14 @@ Several parameters can be adjusted:
 
 ```julia
 # Different window functions
-inp = vacfInps(vel, mas, 1.0/fs, true, Welch, 4, true)   # Welch window
-inp = vacfInps(vel, mas, 1.0/fs, true, HannM, 4, true)   # Modified Hann
+inp = vacfInps(vel, mas, 1e15u"Hz", true, Welch, 4, true)   # Welch window
+inp = vacfInps(vel, mas, 1e15u"Hz", true, HannM, 4, true)   # Modified Hann
 
 # Increased padding for better frequency resolution
-inp = vacfInps(vel, mas, 1.0/fs, true, Hann, 8, true)
+inp = vacfInps(vel, mas, 1e15u"Hz", true, Hann, 8, true)
 
 # Without mirroring
-inp = vacfInps(vel, mas, 1.0/fs, true, Hann, 4, false)
+inp = vacfInps(vel, mas, 1e15u"Hz", true, Hann, 4, false)
 ```
 
 ### Atom-Specific Analysis

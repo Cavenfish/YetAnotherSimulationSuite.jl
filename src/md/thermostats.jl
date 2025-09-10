@@ -1,15 +1,17 @@
 
-struct Thermostat{V,A, F<:AbstractFloat} <: MyThermostat
+struct Thermostat{V,A, F<:Float64} <: MyThermostat
   T::F
   vars::V
   act!::A
 end
 
-function Thermostat(T::AbstractFloat, act!::Function; vars=nothing)
+function Thermostat(temp::Quantity, act!::Function; vars=nothing)
+  T = uconvert(u"K", temp) |> ustrip
+  
   Thermostat(T, vars, act!)
 end
 
-function getTemp(m, v)
+function getTemp(m, v, kB)
   # Leave out the 1/2 to get 2Ekin for T calc
   N    = length(m)
   Nf   = 3N - 3

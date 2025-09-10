@@ -1,5 +1,5 @@
 """
-    Calculator{B, E, F, EF, C}
+    Calculator
 
 Structure for a calculator object for MD.
 
@@ -8,6 +8,9 @@ Structure for a calculator object for MD.
 - `e`: Energy function.
 - `f!`: Force function.
 - `ef!`: Energy and force function.
+- `energy_unit`: Unitful energy unit
+- `force_unit`: Unitful force unit
+- `time_unit`: Unitful time unit
 - `constraints`: Constraints.
 """
 struct Calculator{B, E, F, EF, C} <: MyCalc
@@ -15,6 +18,10 @@ struct Calculator{B, E, F, EF, C} <: MyCalc
   e::E
   f!::F
   ef!::EF
+  kB::Float64
+  energy_unit::Unitful.Units
+  force_unit::Unitful.Units
+  time_unit::Unitful.Units
   constraints::C
 end
 
@@ -33,16 +40,30 @@ Construct a Calculator object.
 # Returns
 - Calculator object.
 """
-function Calculator(b; E=nothing, F=nothing, EF=nothing, constraints=nothing)
+function Calculator(
+  b, energy_unit, force_unit, time_unit;
+  E=nothing, F=nothing, EF=nothing, constraints=nothing
+)
+  
   if E == nothing && EF == nothing
-    throw()
+    ArgumentError(
+      "Must have at least one method for calculating the energy."
+    ) |> throw
   end
 
   if F == nothing && EF == nothing
-    throw()
+    ArgumentError(
+      "Must have at least one method for calculating the forces."
+    ) |> throw
   end
 
-  Calculator(b, E, F, EF, constraints)
+  kB = uconvert(energy_unit / u"K", Unitful.k) |> ustrip
+
+  Calculator(
+    b, E, F, EF, kB,
+    energy_unit, force_unit, time_unit,
+    constraints
+  )
 end
 
 """
@@ -153,7 +174,7 @@ function dyn!(dv, v, u, p, t, calc)
   end
 
   dv .= F ./ p.m
-  T   = getTemp(p.m, v)
+  T   = getTemp(p.m, v, calc.kB)
 
   if isa(p.ensemble, NVT)
     thermostat = p.ensemble.thermostat
