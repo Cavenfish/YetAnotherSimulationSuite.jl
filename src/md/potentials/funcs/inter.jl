@@ -73,10 +73,10 @@ function _Buckingham!(
   a    = A * exp(-B * r)
   b    = C / r^6
   E    = a - b
-  f    = @. (B * a / r * buf.ri) - (6b / r^2 * buf.ri)
+  @. buf.fi = (B * a / r * buf.ri) - (6b / r^2 * buf.ri)
 
-  F[i] .-= f * S
-  F[j] .+= f * S
+  @. F[i] -= buf.fi * S
+  @. F[j] += buf.fi * S
 
   E
 end
@@ -94,8 +94,8 @@ function _Buckingham!(
   
   @. buf.fi = (B * a / r * buf.ri) - (6b / r^2 * buf.ri)
 
-  F[i] .-= buf.fi * S
-  F[j] .+= buf.fi * S
+  @. F[i] -= buf.fi * S
+  @. F[j] += buf.fi * S
 
   E
 end
