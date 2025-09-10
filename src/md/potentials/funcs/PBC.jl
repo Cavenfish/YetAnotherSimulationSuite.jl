@@ -7,9 +7,9 @@ end
 const _pbc_buf = _PBC_Cache(MVector{3}(zeros(3)), MVector{3}(zeros(3)))
 
 function pbcVec!(
-  rbuf::AbstractVector, ri::AV, rj::AV, rc::Float64, lat::AbstractMatrix;
+  rbuf::AbstractVector, ri::RI, rj::RJ, rc::Float64, lat::AbstractMatrix;
   buf=_pbc_buf
-) where {AV<:AbstractVector}
+) where {RI<:AbstractVector, RJ<:AbstractVector}
   @. rbuf = rj - ri
   d       = norm(rbuf)
 
