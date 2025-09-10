@@ -143,7 +143,7 @@ function _harmonicBondAngle!(
   F::Vf, u::Vu, lat::AbstractMatrix, i::Int64, o::Int64, j::Int64,
   K::Float64, θeq::Float64, rc::Float64;
   buf=_func_buffs
-) where {Vf <: AbstractVector, Vu <: AbstractVector, AV<:AbstractVector}
+) where {Vf <: AbstractVector, Vu <: AbstractVector}
 
   di  = pbcVec!(buf.ri, u[o], u[i], rc, lat)
   dj  = pbcVec!(buf.rj, u[o], u[j], rc, lat)

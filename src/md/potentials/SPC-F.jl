@@ -39,7 +39,7 @@ SPCF(bdys::Union{Vector{MyAtoms}, MyCell}) = _SPCF_PotVars(
   0.5 * 2.959855,
   9.0,
   10.0,
-  MVector{2}(zeros(2))
+  MVector{2}(zeros(2)),
   MVector{3}(zeros(3)),
   MVector{3}(zeros(3))
 )
