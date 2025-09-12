@@ -1,9 +1,9 @@
 """
-Yet Another Simulation Suite (YASS.jl)
+YetAnotherSimulationSuite.jl (YASS)
 
 A simulation suite for molecular dynamics in Julia. 
 """
-module YASS
+module YetAnotherSimulationSuite
 
   # These are part of the Julia Standard Library
   using TOML
@@ -39,11 +39,15 @@ module YASS
 
   export
 
+    #types.jl
+    MyAtoms, MyCell, MyCalc, PotVars, ThermoVars, MyThermostat,
+    MyConstraint, MyTraj,
+
     #io.jl
     readSystem,
 
     #helpers.jl
-    CoM, vCoM, zeroVCoM!, getForces,
+    CoM, vCoM, zeroVCoM!, getForces, reducedMass,
 
     #energetics.jl
     vibExcite!, transExcite!, getPotEnergy, getRotEnergy, getTransEnergy,
@@ -66,6 +70,16 @@ module YASS
 
     #trajectories.jl
     getVelMas,
+
+    #intra.jl
+    morse, morse!, harmonicBond, harmonicBond!, harmonicBondAngle,
+    harmonicBondAngle!,
+
+    #inter.jl
+    vdw, vdw!, buckingham, buckingham!, coulomb, coulomb!,
+
+    #cutoff.jl
+    switchLR!, switchSR!, switchAP!,
 
     #potentials
     MvHff, HGNN, MBX, SPCF, TIP4Pf, SCMEf,

@@ -15,16 +15,16 @@
   A     = zeros(Float64, 7, 45)
   dv    = zeros(Float64, 6)
 
-  YASS.getUnitVectors!(hats, r[1],r[2],r[3],r[4])
+  YetAnotherSimulationSuite.getUnitVectors!(hats, r[1],r[2],r[3],r[4])
 
-  f        = YASS.jldopen(
+  f        = YetAnotherSimulationSuite.jldopen(
     joinpath(@__DIR__, "../../src/md/potentials/params/hgnn.jld2")
   )
   molVars  = f["molVars"]
   pairVars = f["pairVars"]
 
-  vco1   = YASS.molPot!(F, r, [1,2], molVars)
-  vco2   = YASS.molPot!(F, r, [3,4], molVars)
+  vco1   = YetAnotherSimulationSuite.molPot!(F, r, [1,2], molVars)
+  vco2   = YetAnotherSimulationSuite.molPot!(F, r, [3,4], molVars)
 
   # pull magnitude of force
   diff   = r[2] .- r[1]
@@ -39,7 +39,7 @@
   dvco2  = dot(F[3], v)
 
   # pull magnitude of forces
-  vint   = YASS.pairPot!(F, r, [1,2] => [3,4], pairVars, rhats, dPdr, P, A)
+  vint   = YetAnotherSimulationSuite.pairPot!(F, r, [1,2] => [3,4], pairVars, rhats, dPdr, P, A)
   for i in 1:6
     dv[i] = dot(rhats[i,:], hats[i,:])
   end

@@ -1,19 +1,20 @@
 # Geometry Optimizations
 
-`YASS.jl` provides geometry optimization capabilities through [Optim.jl](https://julianlsolvers.github.io/Optim.jl/stable/). This section explains how to optimize molecular structures and crystal cells.
+YASS provides geometry optimization capabilities through [Optim.jl](https://julianlsolvers.github.io/Optim.jl/stable/). This section explains how to optimize molecular structures and crystal cells.
 
 ## Basic Usage
 
 The simplest way to optimize a molecular structure is:
 
 ```julia
-using YASS
+using Optim
+using YetAnotherSimulationSuite
 
 # Read initial structure
 molecule = readSystem("water.xyz")
 
 # Run geometry optimization
-optimized = opt(TIP4Pf(), YASS.LBFGS(), molecule)
+optimized = opt(TIP4Pf(), LBFGS(), molecule)
 
 # Save optimized structure
 write("optimized.xyz", optimized)
@@ -21,24 +22,16 @@ write("optimized.xyz", optimized)
 
 ## Optimization Algorithms
 
-`YASS.jl` provides access to all Optim.jl algorithms. You can either use them through `YASS`:
+YASS optimizations can be done with any optimizer in `Optim.jl`
 
 ```julia
-# Using algorithms through YASS
-opt(calc, YASS.LBFGS(), molecule)      # L-BFGS algorithm
-opt(calc, YASS.ConjugateGradient(), molecule)  # Conjugate gradient
-opt(calc, YASS.NelderMead(), molecule)  # Derivative-free
-```
-
-Or import Optim.jl directly:
-
-```julia
-using YASS
 using Optim
+using YetAnotherSimulationSuite
 
 # Using algorithms directly from Optim
 opt(calc, LBFGS(), molecule)
 opt(calc, ConjugateGradient(), molecule)
+opt(calc, OACCEL(), molecule)
 ```
 
 ## Configuring Optimizations

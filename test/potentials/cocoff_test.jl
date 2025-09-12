@@ -8,7 +8,7 @@
   calc = MvHff()
 
   # Optimize dimer
-  new = opt(calc, YASS.LBFGS(), bdys, iterations=1000, g_tol=1e-8)
+  new = opt(calc, LBFGS(), bdys, iterations=1000, g_tol=1e-8)
 
   # Get distances and interaction energy
   r1 = new[1].r - new[2].r |> norm

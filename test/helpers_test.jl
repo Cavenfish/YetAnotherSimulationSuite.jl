@@ -11,8 +11,8 @@
   vel  = [i.v for i in bdys]
   mas  = [i.m for i in bdys]
 
-  @test YASS.reducedMass(bdys) == μ
-  @test YASS.reducedMass(mas) == μ
+  @test reducedMass(bdys) == μ
+  @test reducedMass(mas) == μ
   @test CoM(bdys ) == com
   @test vCoM(bdys) == vcom
   @test CoM(pos,mas) == com

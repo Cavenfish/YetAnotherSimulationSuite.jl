@@ -3,14 +3,14 @@
   file = joinpath(@__DIR__, "../testingFiles/xyzFiles/h2o.xyz")
   bdys = readSystem(file)
   calc = TIP4Pf()
-  new  = opt(calc, YASS.LBFGS(), bdys; g_tol=1e-10, iterations=500)
+  new  = opt(calc, LBFGS(), bdys; g_tol=1e-10, iterations=500)
   v,m  = getHarmonicFreqs(calc, new)
 
   vibExcite!(new, m[:, end], 0.05)
 
   tj       = run(TIP4Pf(), new, (0.0u"fs", 15u"ps"), 0.1u"fs", NVE())
   vel, mas = getVelMas(tj)
-  inps     = vacfInps(vel, mas, 1e16u"Hz", true, YASS.HannM, 8, true)
+  inps     = vacfInps(vel, mas, 1e16u"Hz", true, HannM, 8, true)
   out      = VDOS(inps)
 
   # Get peaks to test they match with water peak

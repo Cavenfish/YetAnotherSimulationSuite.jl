@@ -1,10 +1,11 @@
 using Aqua
 using Test
-using YASS
+using Optim
 using LinearAlgebra
+using YetAnotherSimulationSuite
 
 @testset "Aqua.jl" begin
-  Aqua.test_all(YASS)
+  Aqua.test_all(YetAnotherSimulationSuite)
 end
 
 @testset "IO" begin

@@ -1,6 +1,6 @@
 # Simulation Bodies
 
-`YASS.jl` provides two main types of simulation objects: `Particle` and `Cell`. Each serves different purposes in molecular simulations:
+YASS provides two main types of simulation objects: `Particle` and `Cell`. Each serves different purposes in molecular simulations:
 
 - `Particle`: Represents individual atoms or particles
 - `Cell`: Represents periodic systems like crystals
@@ -19,13 +19,13 @@ The `Particle` type is the fundamental building block for molecular simulations.
 You can create particles in several ways:
 
 ```julia
-using YASS
+using YetAnotherSimulationSuite
 
 # Read from XYZ file
 atoms = readSystem("molecule.xyz")
 
 # Create manually
-water::Vector{YASS.MyAtoms} = [
+water::Vector{MyAtoms} = [
     Particle([0.000,  0.000, 0.000], zeros(3), 15.999, "O"),
     Particle([0.757,  0.586, 0.000], zeros(3),  1.008, "H"),
     Particle([0.757, -0.586, 0.000], zeros(3),  1.008, "H")
@@ -95,7 +95,7 @@ The `Cell` type represents periodic systems and contains:
 ### Creating Cells
 
 ```julia
-using YASS
+using YetAnotherSimulationSuite
 
 # Read from file with lattice information
 cell = readSystem("crystal.xyz")
@@ -124,7 +124,7 @@ write("nacl.xyz", cell)
 
 ### Cell Operations
 
-`YASS.jl` provides various functions for cell manipulation:
+YASS provides various functions for cell manipulation:
 
 ```julia
 # Wrap atoms back into primary cell

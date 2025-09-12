@@ -1,13 +1,13 @@
 # Molecular Dynamics Simulations
 
-`YASS.jl` provides functionality for classical molecular dynamics simulations in different ensembles. This guide explains how to set up and run MD simulations.
+YASS provides functionality for classical molecular dynamics simulations in different ensembles. This guide explains how to set up and run MD simulations.
 
 ## Basic Usage
 
 The simplest way to run an MD simulation is in the NVE (microcanonical) ensemble:
 
 ```julia
-using YASS
+using YetAnotherSimulationSuite
 
 # Read initial structure
 water = readSystem("water.xyz")
@@ -39,7 +39,7 @@ ensemble = NVE()
 ```
 
 ### NVT Ensemble 
-The NVT ensemble maintains constant temperature using a thermostat. `YASS.jl` supports several thermostats:
+The NVT ensemble maintains constant temperature using a thermostat. YASS supports several thermostats:
 
 ```julia
 # Thermostats need unit information from calc

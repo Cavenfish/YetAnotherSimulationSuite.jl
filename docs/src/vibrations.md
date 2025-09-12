@@ -1,6 +1,6 @@
 # Vibrational Analysis
 
-`YASS.jl` provides multiple methods for analyzing vibrational properties of molecular systems:
+YASS provides multiple methods for analyzing vibrational properties of molecular systems:
 1. Harmonic frequency analysis
 2. Velocity autocorrelation function (VACF)
 
@@ -9,7 +9,7 @@
 The harmonic approximation calculates vibrational frequencies by diagonalizing the mass-weighted Hessian matrix:
 
 ```julia
-using YASS
+using YetAnotherSimulationSuite
 
 # Read molecular structure
 molecule = readSystem("water.xyz")
@@ -59,7 +59,7 @@ ipr = getIPR(modes)
 The VACF analyzes vibrational properties from MD trajectories:
 
 ```julia
-using YASS
+using YetAnotherSimulationSuite
 
 # Run MD simulation
 molecule = readSystem("water.xyz")

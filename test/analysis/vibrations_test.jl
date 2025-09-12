@@ -5,7 +5,7 @@
   calc = MvHff()
   
   # ensure bdys are optimized
-  new = opt(calc, YASS.LBFGS(), bdys; g_tol=1e-9, iterations=500)
+  new = opt(calc, LBFGS(), bdys; g_tol=1e-9, iterations=500)
 
   v,m = getHarmonicFreqs(calc, new)
 

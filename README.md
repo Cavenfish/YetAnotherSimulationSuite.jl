@@ -1,17 +1,17 @@
-[ci-img]: https://github.com/Cavenfish/YASS.jl/actions/workflows/CI.yml/badge.svg
-[ci-url]: https://github.com/Cavenfish/YASS.jl/actions/workflows/CI.yml
+[ci-img]: https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/actions/workflows/CI.yml/badge.svg
+[ci-url]: https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/actions/workflows/CI.yml
 
 [aqua-img]: https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg
 [aqua-url]: https://github.com/JuliaTesting/Aqua.jl
 
-[codecov-img]: https://codecov.io/github/Cavenfish/YASS.jl/branch/main/graph/badge.svg
-[codecov-url]: https://app.codecov.io/github/Cavenfish/YASS.jl
+[codecov-img]: https://codecov.io/github/Cavenfish/YetAnotherSimulationSuite.jl/branch/main/graph/badge.svg
+[codecov-url]: https://app.codecov.io/github/Cavenfish/YetAnotherSimulationSuite.jl
 
 [docs-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-url]: https://cavenfish.github.io/YASS.jl/stable/
+[docs-url]: https://cavenfish.github.io/YetAnotherSimulationSuite.jl/stable/
 
 [ddocs-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[ddocs-url]: https://cavenfish.github.io/YASS.jl/dev/
+[ddocs-url]: https://cavenfish.github.io/YetAnotherSimulationSuite.jl/dev/
 
 [![][ddocs-img]][ddocs-url]
 [![][ci-img]][ci-url]
@@ -19,11 +19,11 @@
 [![][aqua-img]][aqua-url]
 
 
-<img src="https://github.com/Cavenfish/YASS.jl/blob/dev/docs/src/assets/logo.png" alt="Logo" width=350 >
+<img src="https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/blob/dev/docs/src/assets/logo.png" alt="Logo" width=350 >
 
-# Yet Another Simulation Suite (YASS.jl)
+# YetAnotherSimulationSuite.jl (YASS)
 
-`YASS.jl` is a modern, flexible atomic simulation suite written in Julia. It aims to provide:
+YASS is a modern, flexible atomic simulation suite written in Julia. It aims to provide:
 
 - 🎯 Simple, and intuitive API
 - ⚡ High performance native Julia implementation
@@ -33,7 +33,7 @@
 ## Quick Start
 
 ```julia
-using YASS
+using YetAnotherSimulationSuite
 
 # Read molecule
 water = readSystem("water.xyz")
@@ -60,7 +60,7 @@ temperatures = [img.temp for img in traj.images]
 
 ```julia
 using Pkg
-Pkg.add("https://github.com/Cavenfish/YASS.jl.git")
+Pkg.add("https://github.com/Cavenfish/YetAnotherSimulationSuite.jl.git")
 ```
 
 ## Contributing
@@ -72,11 +72,11 @@ We welcome contributions! Whether it's:
 - 📚 Documentation improvements
 - 🧪 Additional test cases
 
-If you find `YASS.jl` useful or just want to show support, please consider starring the repository!
+If you find YASS useful or just want to show support, please consider starring the repository!
 
 ## Development Status
 
-**YASS.jl is currently in pre-release phase.** 
+**YASS is currently in pre-release phase.** 
 
 Here's what we're working on:
 
@@ -96,18 +96,18 @@ Here's what we're working on:
 
 ## License
 
-`YASS.jl` is MIT licensed. See [LICENSE](LICENSE) for details.
+YASS is MIT licensed. See [LICENSE](LICENSE) for details.
 
 ## Citation
 
-If you use `YASS.jl` in your research, please cite:
+If you use YASS in your research, please cite:
 
 ```bibtex
 @misc{yass2023,
   author = {Brian C. Ferrari},
-  title = {YASS.jl: Yet Another Simulation Suite},
+  title = {YetAnotherSimulationSuite.jl},
   year = {2023},
   publisher = {GitHub},
-  url = {https://github.com/Cavenfish/YASS.jl}
+  url = {https://github.com/Cavenfish/YetAnotherSimulationSuite.jl}
 }
 ```

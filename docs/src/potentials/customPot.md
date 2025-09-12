@@ -1,15 +1,15 @@
 # Custom Potentials
 
-`YASS.jl` allows you to implement custom potentials for molecular simulations. This guide demonstrates how to create a custom potential using a Lennard-Jones potential for gold (Au) as an example. To create a custom potential, you need three components:
+YASS allows you to implement custom potentials for molecular simulations. This guide demonstrates how to create a custom potential using a Lennard-Jones potential for gold (Au) as an example. To create a custom potential, you need three components:
 
 1. `PotVars` struct - Holds potential parameters
 2. Initializer function - Sets up the potential
 3. Evaluation functions - Calculate energies and forces
 
 ```julia
-using YASS
+using YetAnotherSimulationSuite
 
-struct AuLJPotVars{F<:Float64} <: YASS.PotVars
+struct AuLJPotVars{F<:Float64} <: PotVars
     ε::F    # Well depth (eV)
     σ::F    # Equilibrium distance (Å)
     rc::F   # Cutoff radius (Å)
@@ -17,7 +17,7 @@ struct AuLJPotVars{F<:Float64} <: YASS.PotVars
 end
 
 # Initialize potential with Au parameters
-function AuLJPotential(x::Union{Vector{YASS.MyAtoms}, YASS.MyCell})
+function AuLJPotential(x::Union{Vector{MyAtoms}, MyCell})
     ε = 5.29e-3  # eV
     σ = 2.951    # Å (minimum at 2^(1/6)σ ≈ 3.31Å)
     rc = 8.0     # Å
@@ -151,7 +151,7 @@ end
 
 ```julia
 # Create gold cluster
-atoms::Vector{YASS.MyAtoms} = [
+atoms::Vector{MyAtoms} = [
     Particle([0.0, 0.0, 0.0], zeros(3), 196.97, "Au"),
     Particle([3.0, 0.0, 0.0], zeros(3), 196.97, "Au"),
     Particle([0.0, 3.0, 0.0], zeros(3), 196.97, "Au")
@@ -194,4 +194,4 @@ println("Trajectory length: $(length(traj)) frames")
    - Implement all three evaluation functions for flexibility
    - Test energy conservation in MD simulations
 
-For more examples, check the source code of built-in potentials in `YASS.jl`.
+For more examples, check the source code of built-in potentials in YASS.

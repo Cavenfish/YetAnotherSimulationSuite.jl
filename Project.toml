@@ -1,4 +1,4 @@
-name = "YASS"
+name = "YetAnotherSimulationSuite"
 uuid = "d3ec4d54-14c5-4f6e-8d2e-82ae0926cfed"
 version = "0.1.0"
 
@@ -54,7 +54,8 @@ julia = "^1.9.0"
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Optim = "429524aa-4258-5aef-a3af-852621145aeb"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "Test", "LinearAlgebra"]
+test = ["Aqua", "Test", "LinearAlgebra", "Optim"]
