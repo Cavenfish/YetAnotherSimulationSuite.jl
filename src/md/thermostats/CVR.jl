@@ -14,31 +14,27 @@ function CVR!(a, v, m, Tsim, thermostat)
   tau = thermostat.vars.tau
   kB  = thermostat.vars.kB
 
-  if Tsim == 0.0
-    return
-  end
+  Tsim == 0.0 && return
 
   Nf = (3N) - 3
   n  = Normal(0.0,1.0)
   R1 = rand(n)
-  if (Nf-1)%2 == 0
+  
+  R2 = if (Nf-1)%2 == 0
     alpha = (Nf - 1)/2
     G     = Gamma(alpha, 1)
-    R2    = 2 .* rand(G)
+    
+    2 .* rand(G)
   else
     alpha = (Nf - 2)/2
     G     = Gamma(alpha, 1)
-    R2    = 2 .* rand(G) .+ (rand(n) .^2)
+    
+    2 .* rand(G) .+ (rand(n) .^2)
   end
 
-  if tau > 0.1
-    c1 = exp(-1/tau)
-  else
-    c1 = 0.0
-  end
+  tau > 0.1 ? c1 = exp(-1/tau) : c1 = 0.0
 
-  v2    = [i'i for i in v]
-  K     = sum(0.5 .* m .* v2)
+  K     = 0.5 * Nf * kB * Tsim
   sigma = 0.5 * Nf * kB * thermostat.T
 
   Knew   = @. ( 
