@@ -19,7 +19,7 @@
 [![][aqua-img]][aqua-url]
 
 
-<img src="https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/blob/dev/docs/src/assets/logo.png" alt="Logo" width=350 >
+<img src="https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/blob/docs/src/assets/logo.png" alt="Logo" width=350 >
 
 # YetAnotherSimulationSuite.jl (YASS)
 
