@@ -29,7 +29,7 @@ research methods more accessible to the average user.
 YASS features a wide variety of capabilities useful for
 molecular simulations:
 
-- Reading and writing over 50 different file types
+- Reading and writing over 20 different file types
 - Basic manipulation of atomic structures
 - Geometry and cell optimizations
 - Harmonic frequency calculations
