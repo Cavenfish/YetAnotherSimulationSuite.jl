@@ -15,7 +15,7 @@ makedocs(;
     "Vibrations" => "vibrations.md",
     "Molecular Dynamics" => ["md/dynamics.md", "md/thermostats.md"],
     "Potentials" => ["potentials/potList.md", "potentials/customPot.md"],
-    "API" => "api.md"
+    "API" => "api.md",
     "Credits" => "dependencies.md"
   ]
 )
