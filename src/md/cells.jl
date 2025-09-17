@@ -427,24 +427,6 @@ function replicate!(super, cell, N)
 end
 
 """
-    getMIC(cell::MyCell)
-
-Get the minimum image convention cell.
-
-# Arguments
-- `cell`: MyCell object.
-
-# Returns
-- New MyCell object with minimum image convention applied.
-"""
-function getMIC(cell::MyCell)
-  bdys = makeBdys(cell)
-  new  = getMIC(bdys, cell.lattice)
-
-  makeCell(new, cell.lattice*3, mask=cell.mask, PBC=cell.PBC, NC=cell.NC)
-end
-
-"""
     makeSuperCell(cell, T)
 
 Create a supercell from a cell and transformation matrix.

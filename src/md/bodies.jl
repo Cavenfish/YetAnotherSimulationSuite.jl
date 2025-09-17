@@ -207,39 +207,6 @@ function getScaledPos(bdys::Vector{MyAtoms}, lattice)
 end
 
 """
-    getMIC(bdys::Vector{MyAtoms}, lattice)
-
-Get the minimum image convention positions for a set of atoms.
-
-# Arguments
-- `bdys`: Vector of MyAtoms.
-- `lattice`: Lattice matrix.
-
-# Returns
-- Vector of MyAtoms with minimum image convention applied.
-"""
-function getMIC(bdys::Vector{MyAtoms}, lattice)
-  a,b,c  = eachrow(lattice)
-  new    = MyAtoms[]
-  s      = repeat([i.s for i in bdys], 27)
-  m      = repeat([i.m for i in bdys], 27)
-  v      = repeat([i.v for i in bdys], 27)
-
-  # I think it is
-  f = [MVector(i*a + j*b + k*c + bdys[q].r)
-        for i = -1:1 
-          for j = -1:1 
-            for k = -1:1 
-              for q = 1:length(bdys)]
-
-  for i = 1:length(f)
-    push!(new, Particle(f[i], v[i], m[i], s[i]))
-  end
-
-  new
-end
-
-"""
     wrap!(bdys::Vector{MyAtoms}, lattice)
 
 Wrap all atoms into the primary unit cell.

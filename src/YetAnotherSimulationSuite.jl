@@ -61,7 +61,7 @@ module YetAnotherSimulationSuite
 
     #cells.jl
     makeCell, makeBdys, getScaledPos, getPos, wrap!, makeSuperCell,
-    makeSuperCell!, getMIC, center!, getVolume, reorder!,
+    makeSuperCell!, center!, getVolume, reorder!,
 
     #constraints.jl
     fixAtoms,
