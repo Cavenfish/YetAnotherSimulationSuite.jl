@@ -1,4 +1,5 @@
 using Documenter
+using YetAnotherSimulationSuite
 
 makedocs(;
   sitename = "YetAnotherSimulationSuite.jl",
@@ -14,12 +15,13 @@ makedocs(;
     "Vibrations" => "vibrations.md",
     "Molecular Dynamics" => ["md/dynamics.md", "md/thermostats.md"],
     "Potentials" => ["potentials/potList.md", "potentials/customPot.md"],
+    "API" => "api.md"
     "Credits" => "dependencies.md"
   ]
 )
 
 deploydocs(;
-  repo = "github.com/Cavenfish/YetAnotherSimulationSuite.jl.git",
-  devbranch = "dev",
+  repo = "github.com/Cavenfish/YetAnotherSimulationSuite.jl",
+  devbranch = "main",
   push_preview = true
 )

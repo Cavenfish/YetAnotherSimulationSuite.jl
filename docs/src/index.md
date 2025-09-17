@@ -3,20 +3,20 @@
 !!! warning "YetAnotherSimulationSuite.jl is still in the pre-release phase"
     This package is still very early in its development, and there are more mature molecular dynamics packages in Julia. For instance, [Molly.jl](https://juliamolsim.github.io/Molly.jl/stable/) and [NQCDynamics.jl](https://nqcd.github.io/NQCDynamics.jl/stable/) both offer molecular dyanmics in Julia.
 
-Yet Another Simulation Suite (YASS) aims to offer users a simple, intuitive and easy-to-use molecular dynamics enviornment. It draws inspiration from Python's [ASE](https://wiki.fysik.dtu.dk/ase/index.html), but is intended to be faster and offer users more flexibility. The flexibility comes from the relative ease with which users can add their own methods to dynamics or other components of YASS.
+`YetAnotherSimulationSuite.jl` (YASS) aims to offer users a simple, intuitive and easy-to-use molecular dynamics enviornment. It draws inspiration from Python's [ASE](https://wiki.fysik.dtu.dk/ase/index.html), but is intended to be faster and offer users more flexibility. The flexibility comes from the relative ease with which users can add their own methods to dynamics or other components of YASS.
 
 ### Installation
 
 YASS is not yet on the general registry, so for now installation can be done via GitHub.
 
 ```julia-repl
-pkg> add https://github.com/Cavenfish/YetAnotherSimulationSuite.jl
+pkg> add YetAnotherSimulationSuite
 ```
 
-If you are more adventerous, you can consider installing the `dev` branch of YASS. This will get updates more frequently, which gives users more features but also comes with increased chances of bugs. 
+If you are more adventerous, you can consider installing YASS from GitHub. This will get updates more frequently, which gives users more features but also comes with increased chances of bugs. 
 
 ```julia-repl
-pkg> add https://github.com/Cavenfish/YetAnotherSimulationSuite.jl#dev
+pkg> add https://github.com/Cavenfish/YetAnotherSimulationSuite.jl
 ```
 
 ### Features
