@@ -17,7 +17,6 @@ module YetAnotherSimulationSuite
   using FFTW
   using Optim
   using PyCall
-  using Spglib
   using Chemfiles
   using Distances
   using DataFrames
@@ -62,8 +61,7 @@ module YetAnotherSimulationSuite
 
     #cells.jl
     makeCell, makeBdys, getScaledPos, getPos, wrap!, makeSuperCell,
-    makeSuperCell!, getMIC, center!, getPrimitiveCell, getVolume,
-    reorder!,
+    makeSuperCell!, getMIC, center!, getVolume, reorder!,
 
     #constraints.jl
     fixAtoms,

@@ -137,9 +137,6 @@ center!(cell)
 transform = [2 0 0; 0 2 0; 0 0 2]  # 2x2x2 supercell
 super = makeSuperCell(cell, transform)
 
-# Get primitive cell (with symmetry precision)
-primitive = getPrimitiveCell(cell, 1e-5)
-
 # Convert between cell and atoms
 atoms = makeBdys(cell)        # Cell -> Atoms
 cell = makeCell(atoms, lat)   # Atoms -> Cell

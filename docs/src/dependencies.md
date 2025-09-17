@@ -15,7 +15,6 @@ Packages within the Julia standard library are listed seperately since they are 
   - [FFTW](https://github.com/JuliaMath/FFTW.jl):
   - [Optim](https://github.com/JuliaNLSolvers/Optim.jl):
   - [PyCall](https://github.com/JuliaPy/PyCall.jl):
-  - [Spglib](https://github.com/spglib/spglib):
   - [Chemfiles](https://github.com/chemfiles/chemfiles):
   - [Distances](https://github.com/JuliaStats/Distances.jl):
   - [Clustering](https://github.com/JuliaStats/Clustering.jl):

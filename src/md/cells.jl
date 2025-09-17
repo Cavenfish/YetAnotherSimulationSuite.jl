@@ -511,35 +511,3 @@ function makeSuperCell!(super, cell, T)
   wrap!(super)
 
 end
-
-"""
-    getPrimitiveCell(cell, symprec)
-
-Get the primitive cell using spglib.
-
-# Arguments
-- `cell`: MyCell object.
-- `symprec`: Symmetry precision.
-
-# Returns
-- Primitive Cell object.
-"""
-function getPrimitiveCell(cell, symprec)
-  amu  = TOML.parsefile(joinpath(@__DIR__, "../data/Atoms.toml"))["Mass"]
-  num  = TOML.parsefile(joinpath(@__DIR__, "../data/Atoms.toml"))["Number"]
-  rnum = Dict(values(num) .=> keys(num))
-  atms = string.(cell.symbols) |> (x -> [num[i] for i in x])
-  
-  L    = transpose(cell.lattice)
-  tmp  = Spglib.Cell(L, cell.scaled_pos, atms)
-  stan = standardize_cell(tmp, symprec)
- 
-  syms = [rnum[i] for i in stan.atoms]
-  mas  = [ amu[i] for i in syms]
-  L    = transpose(stan.lattice)
-
-  Cell(
-    L, stan.positions, cell.velocity, mas, 
-    only.(syms), cell.mask, cell.PBC, cell.NC
-  )
-end

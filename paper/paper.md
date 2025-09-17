@@ -31,7 +31,6 @@ molecular simulations:
 
 - Reading and writing over 50 different file types
 - Basic manipulation of atomic structures
-- Spacegroup identification
 - Geometry and cell optimizations
 - Harmonic frequency calculations
 - Velocity autocorrelation
@@ -145,7 +144,6 @@ credited.
 - `OrdinaryDiffEq.jl` [@diffeq] is used as the integrator for MD simulations.
 - `FiniteDifferences.jl` is used for computing Jacobians for harmonic frequency analysis.
 - `FFTW` [@fftw] is used for fast Fourier transforms.
-- `Spglib` [@spglib] is used for space group analysis.
 - `StaticArrays.jl` is used for memory efficiency.
 - `JLD2.jl` is used to store complex data structures.
 - `Clustering.jl` is used for molecular identification.
