@@ -4,6 +4,9 @@ using Optim
 using LinearAlgebra
 using YetAnotherSimulationSuite
 
+# Less typing
+const YASS = YetAnotherSimulationSuite
+
 @testset "Aqua.jl" begin
   Aqua.test_all(YetAnotherSimulationSuite)
 end
@@ -28,6 +31,10 @@ end
 
   @testset "Intra Funcs" begin
     include("./potentials/funcs/intra_test.jl")
+  end
+
+  @testset "Cutoffs" begin
+    include("./md/cutoff_test.jl")
   end
 
   @testset "Call Test" begin
@@ -58,12 +65,20 @@ end
     include("./mathtk/geometric_operations_test.jl")
   end
 
+  @testset "Stress Tensor" begin
+    include("./mathtk/stress_test.jl")
+  end
+
 end
 
 @testset "Structural" begin
 
   @testset "Distributions" begin
     include("./structural/distributions_test.jl")
+  end
+
+  @testset "Mols and Pairs" begin
+    include("./structural/molsAndPairs_test.jl")
   end
 
 end
