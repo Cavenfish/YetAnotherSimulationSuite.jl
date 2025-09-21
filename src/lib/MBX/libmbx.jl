@@ -183,29 +183,36 @@ function mbx_getDipole(bdys::Vector{MyAtoms})
   μ
 end
 
-function mbx_getInducedDipoles(cell::MyCell)
-  _ = getPotEnergy(MBX(), cell)
-  N = length(cell.masses) * 4 |> Int
-  μ = zeros(N)
+function mbx_getDipoles(cell::MyCell)
+  _  = getPotEnergy(MBX(), cell)
+  N  = length(cell.masses) * 4 |> Int
+  μi = zeros(N)
+  μp = zeros(N)
 
-  mbx_get_induced_dipoles(μ)
+  mbx_get_dipoles(μi, μp)
   mbx_finalize_system()
 
-  μ = [μ[i:i+2] for i = 1:3:length(μ)]
-  deleteat!(μ, 4:4:length(μ))
+  μi = [μi[i:i+2] for i = 1:3:length(μi)]
+  deleteat!(μi, 4:4:length(μi))
+  μp = [μp[i:i+2] for i = 1:3:length(μp)]
+  deleteat!(μp, 4:4:length(μp))
 
-  μ
+  μi, μp
 end
 
-function mbx_getInducedDipoles(bdys::Vector{MyAtoms})
-  _ = getPotEnergy(MBX(), bdys)
-  N = length(bdys) * 3 |> Int
-  μ = zeros(N)
+function mbx_getDipoles(bdys::Vector{MyAtoms})
+  _  = getPotEnergy(MBX(), bdys)
+  N  = length(bdys) * 3 |> Int
+  μi = zeros(N)
+  μp = zeros(N)
 
-  mbx_get_induced_dipoles(μ)
+  mbx_get_dipoles(μi, μp)
   mbx_finalize_system()
 
-  [μ[i:i+2] for i = 1:3:length(μ)]
+  μi = [μi[i:i+2] for i = 1:3:length(μi)]
+  μp = [μp[i:i+2] for i = 1:3:length(μp)]
+
+  μi, μp
 end
 
 function mbx_getConstituentEnergies(obj::Union{Vector{MyAtoms}, MyCell})
