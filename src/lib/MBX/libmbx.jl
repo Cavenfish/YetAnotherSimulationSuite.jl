@@ -127,6 +127,15 @@ function mbx_get_induced_dipoles(μ)
 
 end
 
+function mbx_get_dipoles(μi, μp)
+
+  ccall(
+    (:get_dipoles_, libmbx), Cvoid,
+    (Ptr{Cdouble}, Ptr{Cdouble},), μi, μp
+  )
+
+end
+
 function mbx_get_charges(q)
   ccall(
     (:get_charges_, libmbx), Cvoid,

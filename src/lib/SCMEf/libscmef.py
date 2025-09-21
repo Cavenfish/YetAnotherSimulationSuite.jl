@@ -89,6 +89,13 @@ def scmef_get_total_dipoles(pos, cell, pbc=True, **kwargs):
 
     return bdys.calc.scme.dipole_moments
 
+def scmef_get_indu_and_perm_dipoles(pos, cell, pbc=True, **kwargs):
+    bdys = scmef_init(pos, cell, pbc=pbc)
+    di_i = bdys.calc.scme.dipole_moments
+    di_p = bdys.calc.scme.static_dipole_moments
+
+    return di_i, di_p
+
 def scmef_get_constituent_energies(pos, cell, pbc=True, **kwargs):
     
     bdys = scmef_init(pos, cell, pbc=pbc)
