@@ -24,14 +24,14 @@ function scmef_getTotalDipoles(cell::MyCell)
   py"scmef_get_total_dipoles"(pos, cell.lattice, NC=cell.NC)
 end
 
-function scmef_getInduAndPermDipoles(bdys::Vector{MyAtoms})
+function scmef_getDipoles(bdys::Vector{MyAtoms})
   pos = [i.r for i in bdys]
   lat = [100 0 0;0 100 0; 0 0 100]
 
   py"scmef_get_indu_and_perm_dipoles"(pos, lat, pbc=false)
 end
 
-function scmef_getInduAndPermDipoles(cell::MyCell)
+function scmef_getDipoles(cell::MyCell)
   pos = getPos(cell)
 
   py"scmef_get_indu_and_perm_dipoles"(pos, cell.lattice, NC=cell.NC)
