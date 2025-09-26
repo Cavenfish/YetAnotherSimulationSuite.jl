@@ -67,7 +67,7 @@ module YetAnotherSimulationSuite
     fixAtoms,
 
     #trajectories.jl
-    getVelMas,
+    getVelMas, getLastFrame!,
 
     #intra.jl
     morse, morse!, harmonicBond, harmonicBond!, harmonicBondAngle,
