@@ -56,7 +56,7 @@ end
   @testset "Hit and Stick" begin
     include("./building/hitAndStick_test.jl")
   end
-  s
+  
 end
 
 @testset "Math Toolkit" begin
