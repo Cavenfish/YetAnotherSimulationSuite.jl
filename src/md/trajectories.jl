@@ -136,3 +136,12 @@ function getVelMas(tj::MyTraj)
   
   vel, tj.masses
 end
+
+function getLastFrame!(bdys::Vector{MyAtoms}, tj::MyTraj)
+  n = length(tj)
+
+  for i = 1:length(bdys)
+    bdys[i].r .= tj.images[n].pos[i]
+    bdys[i].v .= tj.images[n].vel[i]
+  end
+end

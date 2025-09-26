@@ -1,14 +1,13 @@
 struct HnS
   size::UInt16
-  htime::UInt16
-  stime::UInt16
-  KE::Float64
+  htime::Quantity
+  stime::Quantity
+  KE::Quantity
   xyz::String
   mol::String
   save::String
-  dt::Float64
-  thermo
-  thermoInps
+  dt::Quantity
+  thermo::MyThermostat
 end
 
 function randVector()
@@ -34,12 +33,9 @@ function spawnMol(mol, bdys, com)
   v     = randVector()
   d     = maximum([dot(i.r-com, v) for i in bdys]) + 8
   R     = d * v + com
-  spawn = Atom[]
+  spawn = deepcopy(mol)
 
-  for i in mol
-    r = i.r + R
-    push!(spawn, Atom(r, i.v, i.m, i.s))
-  end
+  translate!(spawn, R)
 
   spawn
 end
@@ -47,7 +43,7 @@ end
 function giveKE!(mol, com, KE)
   r  = com - CoM(mol)
   r /= norm(r)
-  ke = KE * 8.6173e-5 #convert Kelvin to eV
+  ke = uconvert(u"eV", KE) |> ustrip
 
   for i in mol
     i.v += sqrt(2ke / i.m) .* r
@@ -56,9 +52,12 @@ end
 
 function hitAndStick(EoM, inp; callback=nothing)
 
+  nve = NVE()
+  nvt = inp.thermo |> NVT
+
   #Initialize System at Center
-  bdys = readXyz(inp.xyz)
-  mol  = readXyz(inp.mol)
+  bdys = readSystem(inp.xyz)
+  mol  = readSystem(inp.mol)
 
   while length(bdys) < inp.size
     #Get current center of mass
@@ -79,8 +78,7 @@ function hitAndStick(EoM, inp; callback=nothing)
     push!(bdys, new...)
     
     #Run NVE
-    time = inp.htime * ps
-    solu = runNVE(EoM, (0, time), inp.dt, bdys)
+    solu = run(EoM, bdys, inp.htime, inp.dt, nve)
     getLastFrame!(bdys, solu)
     zeroVCoM!(bdys)
     
@@ -88,8 +86,7 @@ function hitAndStick(EoM, inp; callback=nothing)
     @free solu
 
     #Run NVT
-    time = inp.stime * ps
-    solu = runNVT(EoM, (0, time), inp.dt, bdys, inp.thermo, inp.thermoInps)
+    solu = run(EoM, bdys, inp.htime, inp.dt, nvt)
     getLastFrame!(bdys, solu)
     
     #Free memory
@@ -102,5 +99,5 @@ function hitAndStick(EoM, inp; callback=nothing)
 
   end
 
-  writeXyz(inp.save, bdys)
+  write(inp.save, bdys)
 end
