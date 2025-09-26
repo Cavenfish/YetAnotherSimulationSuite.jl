@@ -51,6 +51,14 @@ end
 
 end
 
+@testset "Building" begin
+
+  @testset "Hit and Stick" begin
+    include("./building/hitAndStick_test.jl")
+  end
+  s
+end
+
 @testset "Math Toolkit" begin
 
   @testset "Peak Finding" begin
