@@ -142,14 +142,14 @@ function getMsiteVars!(
   _ = pbcVec!(P.r34, u[h3], u[h4], P.rc, lat)
 
   # Get M1 stuff
-  @. P.rbuf = P.r1o + (0.5 * P.r12)
-  γ1        = P.drel / norm(P.rbuf)
-  P.m1     .= u[o1] .+ P.drel .* (P.rbuf ./ norm(P.rbuf))
+  @. P.rbuf2 = P.r1o + (0.5 * P.r12)
+  γ1         = P.drel / norm(P.rbuf2)
+  P.m1      .= u[o1] .+ P.drel .* (P.rbuf2 ./ norm(P.rbuf2))
 
   # Get M2 stuff
-  @. P.rbuf = P.r3o + (0.5 * P.r34)
-  γ2        = P.drel / norm(P.rbuf)
-  P.m2     .= u[o2] .+ P.drel .* (P.rbuf ./ norm(P.rbuf))
+  @. P.rbuf2 = P.r3o + (0.5 * P.r34)
+  γ2         = P.drel / norm(P.rbuf2)
+  P.m2      .= u[o2] .+ P.drel .* (P.rbuf2 ./ norm(P.rbuf2))
 
   γ1, γ2
 end
