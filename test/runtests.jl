@@ -41,12 +41,10 @@ end
     include("./potentials/calls_test.jl")
   end
   
-  @testset "HGNN" begin
-    include("./potentials/hgnn_test.jl")
-  end
-
-  @testset "MvHff" begin
+  @testset "Test Specific Potentials" begin
     include("./potentials/cocoff_test.jl")
+    include("./potentials/hgnn_test.jl")
+    include("./potentials/lj_test.jl")
   end
 
 end

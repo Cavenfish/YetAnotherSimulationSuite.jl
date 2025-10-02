@@ -80,7 +80,7 @@ module YetAnotherSimulationSuite
     switchLR!, switchSR!, switchAP!,
 
     #potentials
-    MvHff, HGNN, MBX, SPCF, TIP4Pf, SCMEf,
+    MvHff, HGNN, MBX, SPCF, TIP4Pf, SCMEf, LJ,
 
     #thermostats
     Berendsen, Langevin, CVR,
@@ -162,6 +162,7 @@ module YetAnotherSimulationSuite
   include("./md/thermostats/Langevin.jl")
   include("./md/thermostats/Berendsen.jl")
 
+  include("./md/potentials/LJ.jl")
   include("./md/potentials/MvHff.jl")
   include("./md/potentials/HGNN.jl")
   include("./md/potentials/TIP4P.jl")
