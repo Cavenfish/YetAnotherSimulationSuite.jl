@@ -80,7 +80,7 @@ module YetAnotherSimulationSuite
     switchLR!, switchSR!, switchAP!,
 
     #potentials
-    MvHff, HGNN, MBX, SPCF, TIP4Pf, SCMEf, LJ,
+    MvHff, HGNN, MBX, SPC, TIP4Pf, SCMEf, LJ,
 
     #thermostats
     Berendsen, Langevin, CVR,

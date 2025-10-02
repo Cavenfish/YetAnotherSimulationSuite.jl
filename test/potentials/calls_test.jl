@@ -56,11 +56,11 @@ end
   @test staticTest(TIP4Pf(), ice)
   @test dynamicTest(TIP4Pf(), ice)
 
-  # SPCF
-  @test staticTest(SPCF(), h2o)
-  @test dynamicTest(SPCF(), h2o)
-  @test staticTest(SPCF(), ice)
-  @test dynamicTest(SPCF(), ice)
+  # SPC
+  @test staticTest(SPC("SPC/F"), h2o)
+  @test dynamicTest(SPC("SPC/Fw"), h2o)
+  @test staticTest(SPC("SPC/Fd"), ice)
+  @test dynamicTest(SPC("SPC/F"), ice)
 
 end
 

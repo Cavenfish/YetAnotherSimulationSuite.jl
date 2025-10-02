@@ -2,9 +2,10 @@
 @testset "Stress Tensor" begin
   fnam = joinpath(@__DIR__, "../testingFiles/xyzFiles/iceIh_small.xyz")
   cell = readSystem(fnam)
+  calc = SPC("SPC/F")
 
-  g1 = getNumericalStress(SPCF(), cell)
-  g2 = getNumericalStressOrthogonal(SPCF(), cell)
+  g1 = getNumericalStress(calc, cell)
+  g2 = getNumericalStressOrthogonal(calc, cell)
 
   @test g1[1] == g2[1]
   @test g1[5] == g2[5]

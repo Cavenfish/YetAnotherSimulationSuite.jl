@@ -1,5 +1,7 @@
 """
-SPC-F
+# Simple Point Charge (SPC) Models
+
+## SPC/F
 
 Based on:
 Toukan, Kahled, and Aneesur Rahman. "Molecular-dynamics study of atomic
@@ -7,10 +9,30 @@ motions in water." Physical Review B 31.5 (1985): 2643.
 
 Link:
 https://journals.aps.org/prb/abstract/10.1103/PhysRevB.31.2643
+
+## SPC/Fd
+
+Based on:
+Dang, Liem X., and B. Montgomery Pettitt. "Simple intramolecular model
+potentials for water." Journal of physical chemistry 91.12 (1987): 3349-3354.
+
+Link:
+https://doi.org/10.1021/j100296a048
+
+## SPC/Fw
+
+Based on:
+Wu, Yujie, Harald L. Tepper, and Gregory A. Voth. "Flexible simple
+point-charge water model with improved liquid-state properties." The Journal
+of chemical physics 124.2 (2006).
+
+Link:
+https://doi.org/10.1063/1.2136877
 """
-SPCF(; constraints=nothing) = Calculator(
-  SPCF, u"eV", u"eV/angstrom", u"angstrom * u^0.5 * eV^-0.5";
-  EF=SPCF!, constraints=constraints
+SPC(name::String; constraints=nothing) = Calculator(
+  x -> SPC(x, name), 
+  u"eV", u"eV/angstrom", u"angstrom * u^0.5 * eV^-0.5";
+  EF=SPC_ef!, constraints=constraints
 )
 
 struct _SPCF_PotVars{
@@ -31,23 +53,67 @@ struct _SPCF_PotVars{
   rbuf::AV3D
 end
 
-SPCF(bdys::Union{Vector{MyAtoms}, MyCell}) = _SPCF_PotVars(
-  48.05913,
-  1.0,
-  3.97,
-  1.910611,
-  3.145, 
-  0.007,
-  -2.959855,
-  0.5 * 2.959855,
-  9.0,
-  10.0,
-  MVector{2}(zeros(2)),
-  MVector{3}(zeros(3)),
-  MVector{3}(zeros(3))
-)
+function SPC(bdys::Union{Vector{MyAtoms}, MyCell}, name::String) 
+  
+  if name == "SPC/F"
+    return _SPCF_PotVars(
+      48.05913,
+      1.0,
+      3.97,
+      1.910611,
+      3.145, 
+      0.007,
+      -2.959855,
+      0.5 * 2.959855,
+      9.0,
+      10.0,
+      MVector{2}(zeros(2)),
+      MVector{3}(zeros(3)),
+      MVector{3}(zeros(3))
+    )
+  end
 
-function SPCF!(F, u, p)
+  if name == "SPC/Fd"
+    return _SPCF_PotVars(
+      45.71445, # g
+      1.0, # g
+      3.2913, # g
+      1.911135, # g
+      3.165492, # g
+      0.0067398, # g
+      -3.1116428, # g
+      0.5 * 3.1116428, # g
+      9.0,
+      10.0,
+      MVector{2}(zeros(2)),
+      MVector{3}(zeros(3)),
+      MVector{3}(zeros(3))
+    )
+  end
+
+  if name == "SPC/Fw"
+    return _SPCF_PotVars(
+      45.9296231, # g
+      1.012, # g
+      3.2913, # g
+      1.976410, # g
+      3.165492, # g
+      0.0067398, # g
+      -3.1116428, # g
+      0.5 * 3.1116428, # g
+      9.0,
+      10.0,
+      MVector{2}(zeros(2)),
+      MVector{3}(zeros(3)),
+      MVector{3}(zeros(3))
+    )
+  end
+
+  ArgumentError("$(name) is not an available SPC potential") |> throw
+
+end
+
+function SPC_ef!(F, u, p)
   E   = 0.0
   P   = p.potVars
   lat = isa(p, optVars) ? p.lattice : p.ensemble.lattice

@@ -2,7 +2,7 @@
 @testset "Test Energetics Functions" begin
   file = joinpath(@__DIR__, "../testingFiles/xyzFiles/h2o.xyz")
   bdys = readSystem(file)
-  calc = SPCF()
+  calc = SPC("SPC/F")
   new1 = opt(calc, LBFGS(), bdys; g_tol=1e-9, iterations=500)
   new2 = deepcopy(new1)
 
