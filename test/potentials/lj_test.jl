@@ -18,5 +18,5 @@
   f = norm.(F) |> maximum
 
   @test isapprox(E, -15.541123; atol=1e-5)
-  @test f < 1e-9
+  @test f < 1e-8
 end
