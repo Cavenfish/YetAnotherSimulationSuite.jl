@@ -52,21 +52,18 @@ memory efficiency offered by the faster simulation suite. The
 Julia programming language offers the perfect solution to this
 problem, as it can be as performant as C++ with the simplicity
 of Python.
- 
-In theoretical chemistry, it is quite common for two packages with
-similar functionality to flourish; for instance, both LAMMPS and
-GROMACS offer similar functionality, but users tend to prefer the
-interface of one over the other. This helps ensure that for all
-types of users there is an interface that feels more natural for
-them. Currently, `Molly.jl` [@molly] and `NQCDynamics.jl`
-[@nqcdynamics] are the only packages in the Julia ecosystem that
-perform molecular dynamics (MD) simulations. The latter focuses
-on the more niche topic of nonadiabatic quantum classical dynamics
-(NQCD), leaving only the former as an option for users wanting a
-general atomic simulation suite. This creates a problem for users
-who dislike the `Molly.jl` interface but want to perform MD in
-Julia. YASS solves this problem by offering users an alternative
-interface for atomic simulations.
+
+YASS offers users a similarly simple and easy-to-use interface
+as ASE, while also offering significant speedups. JaxMD can also
+offer a simple interface and high performance, but is limited
+in the available optimization algorithms. YASS (through `Optim.jl`
+[@optim]) offers a wide variety of optimization algorithms for
+geometry and cell optimizations. Within the Julia ecosystem, YASS
+is one of the only atomistic simulation suites that offers both MD
+simulations and geometry optimizations. A major shortcoming of
+the current state of YASS is a lack of support for parallelisation
+and GPU acceleration. Future versions of YASS will aim to offer
+these features to further improve performance.
 
 # Examples
 
