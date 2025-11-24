@@ -16,6 +16,8 @@ makedocs(;
     "Molecular Dynamics" => ["md/dynamics.md", "md/thermostats.md"],
     "Potentials" => ["potentials/potList.md", "potentials/customPot.md"],
     "API" => "api.md",
+    "Benchmark" => "benchmark.md",
+    "Memory Considerations" => "memory.md",
     "Credits" => "dependencies.md"
   ]
 )

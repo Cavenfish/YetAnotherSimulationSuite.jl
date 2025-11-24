@@ -63,6 +63,18 @@ using Pkg
 Pkg.add("https://github.com/Cavenfish/YetAnotherSimulationSuite.jl.git")
 ```
 
+## Performance
+
+Julia often delivers substantial performance gains over Python for numerical and scientific code because it is JIT‑compiled, type‑stable, and generates native LLVM code, so well‑written Julia can approach C/Fortran speeds. However, that speed comes with trade‑offs: just‑in‑time compilation (and package precompilation) introduces startup latency, and Julia’s compilation artifacts and runtime can consume more memory than lightweight Python interpreters. In practice, Julia is most advantageous for long‑running, compute‑intensive workflows; for short scripts or very memory‑constrained environments you should weigh the startup and memory overheads or use precompilation strategies to mitigate them.
+
+A benchmark comparing YASS to other similar packages can be found in the [documentation](https://cavenfish.github.io/YetAnotherSimulationSuite.jl/benchmarks/).
+
+## Memory Considerations
+
+Currently, YASS has a roughly 1 GB memory overhead due to dependencies, buffer allocations, and compilation artifacts. This overhead is typical for Julia packages with similar functionality, but may be significant for users with limited memory resources. This overhead is static and does not scale with system size, so larger simulations will see a smaller relative impact. Future optimizations may reduce this overhead.
+
+A few examples of memory usage for different system sizes can be found in the [documentation](https://cavenfish.github.io/YetAnotherSimulationSuite.jl/memory/).
+
 ## Contributing
 
 We welcome contributions! Whether it's:
