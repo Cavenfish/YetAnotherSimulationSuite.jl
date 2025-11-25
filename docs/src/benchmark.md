@@ -13,11 +13,9 @@ All files used in the benchmark can be found in the [GitHub repo](https://github
 `YetAnotherSimulationSuite.jl` (YASS) was benchmarked against Atomistic Simulation Environment (ASE) for geometry optimization, harmonic frequency calculations, and molecular dynamics simulations. For both packages, a simple Lennard-Jones potential for gold atoms was used.
 The results are shown below.
 
-### Short-Running Simulations
-
 In all cases, YASS outperforms ASE once the computational workload is sufficiently large to overcome YASS's initial compilation overhead. The speedups observed can still increase further for longer-running simulations.
 
-#### Geometry Optimization
+### Geometry Optimization
 
 Geometry optimizations using the LBFGS algorithm were performed on gold clusters containing 100, 500, 1000, and 5000 atoms. The results are shown in the table below.
 
@@ -27,7 +25,7 @@ Geometry optimizations using the LBFGS algorithm were performed on gold clusters
 | 500             | 1500       | **29.6**      | 64.0         | 2.16x        |
 | 1000            | 1500       | **108.7**     | 218.8        | 2.01x        |
 
-#### Harmonic Frequencies
+### Harmonic Frequencies
 
 Harmonic frequency calculations were performed on gold clusters containing 100, 500, and 1000 atoms. The results are shown in the table below.
 
@@ -37,7 +35,7 @@ Harmonic frequency calculations were performed on gold clusters containing 100, 
 | 500             | **22.7**      | 89.8         | 3.95x        |
 | 1000            | **87.1**      | 490.8        | 5.63x        |
 
-#### Molecular Dynamics
+### Molecular Dynamics
 
 Molecular dynamics simulations were performed on gold clusters containing 100, 500, and 1000 atoms for 1000, 2000 and 5000 time steps. The results are shown in the table below.
 
@@ -52,3 +50,4 @@ Molecular dynamics simulations were performed on gold clusters containing 100, 5
 | 1000            | 1000       | **35.6**      | 79.4         | 2.23x        |
 | 1000            | 2000       | **55.9**      | 165.3        | 2.95x        |
 | 1000            | 5000       | **112.5**     | 406.1        | 3.61x        |
+| 1000            | 15000      | **315.3**     | 1332.8       | 4.22x        |
