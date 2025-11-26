@@ -58,9 +58,8 @@ temperatures = [img.temp for img in traj.images]
 
 ## Installation
 
-```julia
-using Pkg
-Pkg.add("https://github.com/Cavenfish/YetAnotherSimulationSuite.jl.git")
+```
+pkg> add YetAnotherSimulationSuite
 ```
 
 ## Performance
