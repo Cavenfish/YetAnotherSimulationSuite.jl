@@ -6,7 +6,7 @@ A few examples of memory usage for different system sizes are provided below, th
 
 ## Geometry Optimization
 
-| Number of Atoms | Iterations | Memory Usage (MB) |
+| Number of Atoms | Iterations | Memory Usage (GB) |
 |-----------------|------------|-------------------|
 | 100             | 1500       | 1.06              |
 | 500             | 1500       | 1.06              |
