@@ -58,12 +58,15 @@ as ASE, while also offering significant speedups. JaxMD can also
 offer a simple interface and high performance, but is limited
 in the available optimization algorithms. YASS (through `Optim.jl`
 [@optim]) offers a wide variety of optimization algorithms for
-geometry and cell optimizations. Within the Julia ecosystem, YASS
-is one of the only atomistic simulation suites that offers both MD
-simulations and geometry optimizations. A major shortcoming of
-the current state of YASS is a lack of support for parallelisation
-and GPU acceleration. Future versions of YASS will aim to offer
-these features to further improve performance.
+geometry and cell optimizations. Within the Julia ecosystem, 
+`Molly.jl` [@molly] and `NQCDynamics.jl` [@nqcdynamics] are the 
+dominant packages for performing molecular dynamics (MD) simulations.
+However, YASS not only performs MD simulations but also
+geometry/cell optimizations and harmonic frequency calculations.
+A major shortcoming of the current state of YASS is a lack of 
+support for parallelisation and GPU acceleration. Future
+versions of YASS will aim to offer these features to
+further improve performance.
 
 # Examples
 
