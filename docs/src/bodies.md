@@ -5,6 +5,8 @@ YASS provides two main types of simulation objects: `Particle` and `Cell`. Each 
 - `Particle`: Represents individual atoms or particles
 - `Cell`: Represents periodic systems like crystals
 
+Several xyz files of different molecules, small clusters and periodic cells can be found in the [testing directory](https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/tree/main/test/testingFiles/xyzFiles) of the main repo. These can be used as dummy systems to play with while learning how to use YASS.
+
 ## Particle Objects
 
 The `Particle` type is the fundamental building block for molecular simulations. Each particle has:
