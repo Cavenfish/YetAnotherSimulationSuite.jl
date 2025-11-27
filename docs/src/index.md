@@ -7,7 +7,7 @@
 
 ### Installation
 
-YASS is not yet on the general registry, so for now installation can be done via GitHub.
+YASS can be installed using the Julia package manger via:
 
 ```julia-repl
 pkg> add YetAnotherSimulationSuite
