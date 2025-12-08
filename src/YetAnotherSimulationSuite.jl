@@ -95,7 +95,7 @@ module YetAnotherSimulationSuite
     vacfInps, VDOS, getDiffusionCoefficient, Hann, HannM, Welch,
 
     #vibrations.jl
-    getHarmonicFreqs, animateMode, getModePES, getModeInteractionPES,
+    getHarmonicFreqs, animateMode, getModePES,
 
     #optimizations.jl
     opt, hiddenOpt, optCell,
