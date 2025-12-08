@@ -96,62 +96,27 @@ end
 Compute the potential energy surface (PES) along a vibrational mode.
 
 # Arguments
-- `EoM`: Energy function.
-- `bdys`: Vector of `MyAtoms` objects.
+- `calc`: Calculator object (`MyCalc`).
+- `obj`: `MyCell` or vector of `MyAtoms`.
 - `mode`: Mode vector.
 - `range`: (Optional) Range of displacements (default: -1:0.001:2).
 
 # Returns
-- Tuple: (displacement values, energy values).
+- Tuple: (`range`, energy values).
 """
-function getModePES(EoM, bdys, mode; range=collect(-1:0.001:2))
+function getModePES(calc::MyCalc, obj::Union{MyCell, Vector{MyAtoms}}, mode; range=collect(-1:0.001:2))
 
-  x0, vars = prep4pot(EoM, bdys)
+  x0, vars = prep4pot(calc.b, obj)
 
-  x, y = [], []
+  y = zero(range)
 
-  for i in range
+  for (i,c) in enumerate(range)
     
-    j = @. x0 + i * mode 
+    j = @. x0 + c * mode 
 
-    push!(x, i)
-    push!(y, EoM(true, nothing, j, vars))
+    y[i] = fg!(true, nothing, j, vars, calc)
 
   end
-  return x, y
+
+  (range, y)
 end
-
-"""
-    getModeInteractionPES(EoM!, bdys, mode; range=collect(-1:0.001:2))
-
-Compute the interaction potential energy surface along a vibrational mode.
-
-# Arguments
-- `EoM!`: Energy function.
-- `bdys`: Vector of `MyAtoms` objects.
-- `mode`: Mode vector.
-- `range`: (Optional) Range of displacements (default: -1:0.001:2).
-
-# Returns
-- Tuple: (displacement values, interaction energy values).
-"""
-function getModeInteractionPES(EoM!, bdys, mode; range=collect(-1:0.001:2))
-
-  x0, vars = prep4pot(bdys)
-  molVar   = optVars(vars.mols, [])
-
-  x, y = [], []
-
-  for i in range
-    
-    j = @. x0 + i * mode 
-
-    E = EoM!(true, nothing, j, vars) - EoM!(true, nothing, j, molVar)
-
-    push!(x, i)
-    push!(y, E)
-
-  end
-  return x, y
-end
-    
