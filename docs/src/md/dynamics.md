@@ -98,7 +98,7 @@ using JLD2
 @save "trajectory.jld2" traj
 ```
 
-## Periodic Boundary Conditions
+## Periodic Boundary Conditions (PBC)
 
 For periodic systems, read the structure as a cell:
 

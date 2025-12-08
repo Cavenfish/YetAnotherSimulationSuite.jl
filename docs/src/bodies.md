@@ -7,6 +7,14 @@ YASS provides two main types of simulation objects: `Particle` and `Cell`. Each 
 
 Several xyz files of different molecules, small clusters and periodic cells can be found in the [testing directory](https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/tree/main/test/testingFiles/xyzFiles) of the main repo. These can be used as dummy systems to play with while learning how to use YASS.
 
+!!! note "Visualizing Simulations"
+    YASS does not have visualization functionality, however, many third-party apps can visualize the files
+    YASS writes. Check out the following options:
+        - [ASE](https://ase-lib.org/ase/gui/basics.html) 
+        - [Jmol](https://jmol.sourceforge.net/)
+        - [VMD](https://en.wikipedia.org/wiki/Visual_Molecular_Dynamics)
+        - [Blender](https://www.blender.org/) (higher compelexity)
+
 ## Particle Objects
 
 The `Particle` type is the fundamental building block for molecular simulations. Each particle has:
