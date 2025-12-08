@@ -73,9 +73,11 @@ further improve performance.
 Two simple examples are shown here to illustrate how YASS can
 be used for vibrational frequency analysis of molecular systems.
 The examples focus only on this topic, as the process also
-utilizes many additional YASS features. The first example below
-shows the steps required to calculate the harmonic frequencies of
-a water molecule.
+utilizes many additional YASS features. For both examples
+the necessary xyz file can be found in the YASS 
+[repo](https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/tree/main/test/testingFiles/xyzFiles)
+The first example below shows the steps required to calculate 
+the harmonic frequencies of a water molecule.
 
 ```julia
 using Optim
@@ -96,25 +98,39 @@ freqs, modes = getHarmonicFreqs(TIP4Pf(), optimized)
 
 The second example, shown below, calculates the vibrational
 density of states (VDOS) using the velocity autocorrelation
-function (VACF). In this example, the `water_at_250K.xyz` file
-should contain a cell with water at 250 Kelvin. YASS can also be
-used to generate this initial configuration, but for simplicity,
-it is not shown here. 
+function (VACF).  
 
 ```julia
 using YetAnotherSimulationSuite
 
 # Read initial structure
-water = readSystem("water_at_250K.xyz")
+iceIh = readSystem("iceIh_small.xyz")
+
+# Initialize calculator
+calc = TIP4Pf()
+
+# Create NVT ensemble with the
+# Canonical Velocity Rescaling thermostat
+# set to 50 Kelvin temp and 100 fs time constant
+nvt_ensemble = NVT(iceIh, CVR(50.0u"K", 100u"fs", calc))
+
+# Run 2 picosecond NVT simulation
+nvt_traj = run(calc, iceIh, 2u"ps", 1u"fs", nvt_ensemble)
+
+# Get last frame from NVT
+bdys = makeBdys(nvt_traj, length(nvt_traj.images))
+
+# Make it periodic
+iceIh_50K = makeCell(bdys, iceIh.lattice)
 
 # Create NVE ensemble
-ensemble = NVE(water)
+nve_ensemble = NVE(iceIh)
 
 # Run 10 picosecond simulation with 0.1 fs timestep
-traj = run(TIP4Pf(), water, 10u"ps", 0.1u"fs", ensemble)
+nve_traj = run(calc, iceIh_50K, 10u"ps", 0.1u"fs", nve_ensemble)
 
 # Extract velocities and masses
-vel, mas = getVelMas(traj)
+vel, mas = getVelMas(nve_traj)
 
 # Configure VACF calculation
 inp = vacfInps(
