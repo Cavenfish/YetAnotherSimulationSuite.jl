@@ -75,7 +75,7 @@ be used for vibrational frequency analysis of molecular systems.
 The examples focus only on this topic, as the process also
 utilizes many additional YASS features. For both examples
 the necessary xyz file can be found in the YASS 
-[repo](https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/tree/main/test/testingFiles/xyzFiles)
+[repo](https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/tree/main/test/testingFiles/xyzFiles).
 The first example below shows the steps required to calculate 
 the harmonic frequencies of a water molecule.
 
