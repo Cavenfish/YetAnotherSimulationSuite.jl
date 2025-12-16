@@ -147,7 +147,7 @@ out = VDOS(inp)
 ```
 
 More examples and detailed explanations can be found in the YASS
-[documentation](https://cavenfish.github.io/YetAnotherSimulationSuite.jl/dev/).
+[documentation](https://cavenfish.github.io/YetAnotherSimulationSuite.jl/stable/).
 
 # Dependencies
 
