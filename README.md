@@ -87,17 +87,7 @@ If you find YASS useful or just want to show support, please consider starring t
 
 ## Development Status
 
-**YASS is currently in pre-release phase.** 
-
 Here's what we're working on:
-
-### Roadmap
-- [x] Core functionality cleanup
-- [x] Comprehensive documentation
-- [ ] Example scripts and tutorials
-- [x] Test coverage >70%
-- [x] Unitful.jl integration
-- [x] Chemfiles.jl integration
 
 ### Upcoming Features
 - [ ] NPT ensemble simulations
