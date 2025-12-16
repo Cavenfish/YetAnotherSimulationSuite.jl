@@ -19,28 +19,27 @@ bibliography: paper.bib
 ---
 
 # Summary
-`YetAnotherSimulationSuite.jl` (YASS) is a simulation suite
-for atomic simulations in Julia [@julia]. YASS aims to be
+`YetAnotherSimulationSuite.jl` (YASS) is software
+for atomic simulations in Julia. YASS aims to be
 highly performant, memory efficient, flexible, and extensible.
 YASS was developed with a focus on making it incredibly easy
 to add or customize anything within the package, making niche
 research methods more accessible to the average user. 
 
 YASS features a wide variety of capabilities useful for
-molecular simulations:
-
-- Reading and writing over 20 different file types
-- Basic manipulation of atomic structures
-- Geometry and cell optimizations
-- Harmonic frequency calculations
-- Velocity autocorrelation
-- Molecular dynamics simulations
-- Radial and angular distribution functions
+molecular simulations including:
+reading and writing over 20 different file types,
+basic manipulation of atomic structures,
+geometry and cell optimization,
+harmonic frequency calculation,
+calculation of velocity autocorrelation,
+molecular dynamics simulation,
+evaluation of radial and angular distribution functions.
 
 # Statement of Need
 
-Within the field of atomic simulations, there exists a vast
-number of software packages for performing these simulations.
+There exists a vast
+number of software packages for performing atomic scale simulations.
 There are those that focus on ease of use and flexibility (i.e.,
 ASE [@ase]), and those that focus on speed and memory efficiency
 (i.e., LAMMPS[@lammps], GROMACS[@gromacs1; @gromacs2; @gromacs3;
@@ -49,7 +48,7 @@ and speed, ASE offers interfaces to many of the performance-
 focused simulation suites. However, using these interfaces limits
 the flexibility originally offered by ASE and can reduce the
 memory efficiency offered by the faster simulation suite. The
-Julia programming language offers the perfect solution to this
+Julia programming language [@julia] offers the perfect solution to this
 problem, as it can be as performant as C++ with the simplicity
 of Python.
 
