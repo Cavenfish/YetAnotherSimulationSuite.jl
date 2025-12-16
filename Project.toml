@@ -1,6 +1,6 @@
 name = "YetAnotherSimulationSuite"
 uuid = "d3ec4d54-14c5-4f6e-8d2e-82ae0926cfed"
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 Chemfiles = "46823bd8-5fb3-5f92-9aa0-96921f3dd015"
