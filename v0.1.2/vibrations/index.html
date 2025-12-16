@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Vibrations · YetAnotherSimulationSuite.jl</title><meta name="title" content="Vibrations · YetAnotherSimulationSuite.jl"/><meta property="og:title" content="Vibrations · YetAnotherSimulationSuite.jl"/><meta property="twitter:title" content="Vibrations · YetAnotherSimulationSuite.jl"/><meta name="description" content="Documentation for YetAnotherSimulationSuite.jl."/><meta property="og:description" content="Documentation for YetAnotherSimulationSuite.jl."/><meta property="twitter:description" content="Documentation for YetAnotherSimulationSuite.jl."/><meta property="og:url" content="https://Cavenfish.github.io/YetAnotherSimulationSuite.jl/vibrations/"/><meta property="twitter:url" content="https://Cavenfish.github.io/YetAnotherSimulationSuite.jl/vibrations/"/><link rel="canonical" href="https://Cavenfish.github.io/YetAnotherSimulationSuite.jl/vibrations/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.png" alt="YetAnotherSimulationSuite.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">YetAnotherSimulationSuite.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../bodies/">Bodies</a></li><li><a class="tocitem" href="../optimizations/">Optimization</a></li><li class="is-active"><a class="tocitem" href>Vibrations</a><ul class="internal"><li><a class="tocitem" href="#Harmonic-Frequencies"><span>Harmonic Frequencies</span></a></li><li><a class="tocitem" href="#Velocity-Autocorrelation-Function-(VACF)"><span>Velocity Autocorrelation Function (VACF)</span></a></li><li><a class="tocitem" href="#Visualization"><span>Visualization</span></a></li><li><a class="tocitem" href="#Tips-for-Quality-Results"><span>Tips for Quality Results</span></a></li></ul></li><li><span class="tocitem">Molecular Dynamics</span><ul><li><a class="tocitem" href="../md/dynamics/">Molecular Dynamics Simulations</a></li><li><a class="tocitem" href="../md/thermostats/">Thermostats</a></li></ul></li><li><span class="tocitem">Potentials</span><ul><li><a class="tocitem" href="../potentials/potList/">Available Potentials</a></li><li><a class="tocitem" href="../potentials/customPot/">Custom Potentials</a></li></ul></li><li><a class="tocitem" href="../api/">API</a></li><li><a class="tocitem" href="../benchmark/">Benchmark</a></li><li><a class="tocitem" href="../memory/">Memory Considerations</a></li><li><a class="tocitem" href="../dependencies/">Credits</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Vibrations</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Vibrations</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/Cavenfish/YetAnotherSimulationSuite.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/blob/main/docs/src/vibrations.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Vibrational-Analysis"><a class="docs-heading-anchor" href="#Vibrational-Analysis">Vibrational Analysis</a><a id="Vibrational-Analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Vibrational-Analysis" title="Permalink"></a></h1><p>YASS provides multiple methods for analyzing vibrational properties of molecular systems:</p><ol><li>Harmonic frequency analysis</li><li>Velocity autocorrelation function (VACF)</li></ol><h2 id="Harmonic-Frequencies"><a class="docs-heading-anchor" href="#Harmonic-Frequencies">Harmonic Frequencies</a><a id="Harmonic-Frequencies-1"></a><a class="docs-heading-anchor-permalink" href="#Harmonic-Frequencies" title="Permalink"></a></h2><p>The harmonic approximation calculates vibrational frequencies by diagonalizing the mass-weighted Hessian matrix:</p><pre><code class="language-julia hljs">using YetAnotherSimulationSuite
+
+# Read molecular structure
+molecule = readSystem(&quot;water.xyz&quot;)
+
+# Calculate frequencies and normal modes
+freqs, modes = getHarmonicFreqs(TIP4Pf(), molecule)</code></pre><p>The outputs are:</p><ul><li><code>freqs</code>: Vector of vibrational frequencies (in cm<span>$^{-1}$</span>)</li><li><code>modes</code>: Matrix where each column is a normal mode eigenvector</li></ul><h3 id="Analyzing-Normal-Modes"><a class="docs-heading-anchor" href="#Analyzing-Normal-Modes">Analyzing Normal Modes</a><a id="Analyzing-Normal-Modes-1"></a><a class="docs-heading-anchor-permalink" href="#Analyzing-Normal-Modes" title="Permalink"></a></h3><p>You can visualize and analyze individual modes:</p><pre><code class="language-julia hljs"># Get the first normal mode
+mode1 = modes[:,1]
+
+# Animate a specific mode
+animateMode(molecule, mode1, &quot;mode1.xyz&quot;, c=0.5)  # c controls amplitude
+
+# Calculate potential energy surface along mode
+pes = getModePES(TIP4Pf(), molecule, mode1)</code></pre><h3 id="Mode-Selection"><a class="docs-heading-anchor" href="#Mode-Selection">Mode Selection</a><a id="Mode-Selection-1"></a><a class="docs-heading-anchor-permalink" href="#Mode-Selection" title="Permalink"></a></h3><p>For larger molecules, you can filter and analyze specific modes:</p><pre><code class="language-julia hljs"># Find modes in a frequency range
+range = 3000:4000  # OH stretch region
+idx = findall(f -&gt; f in range, real.(freqs))
+stretch_modes = modes[:,idx]
+
+# Calculate mode participation ratios
+pr = getPR(modes)  # Shows which atoms participate in each mode
+
+# Get inverse participation ratio
+ipr = getIPR(modes)</code></pre><h2 id="Velocity-Autocorrelation-Function-(VACF)"><a class="docs-heading-anchor" href="#Velocity-Autocorrelation-Function-(VACF)">Velocity Autocorrelation Function (VACF)</a><a id="Velocity-Autocorrelation-Function-(VACF)-1"></a><a class="docs-heading-anchor-permalink" href="#Velocity-Autocorrelation-Function-(VACF)" title="Permalink"></a></h2><p>The VACF analyzes vibrational properties from MD trajectories:</p><pre><code class="language-julia hljs">using YetAnotherSimulationSuite
+
+# Run MD simulation
+molecule = readSystem(&quot;water.xyz&quot;)
+traj = run(TIP4Pf(), molecule, (0.0u&quot;fs&quot;, 10.0u&quot;ps&quot;), 1.0u&quot;fs&quot;, NVE())
+
+# Extract velocities and masses
+vel, mas = getVelMas(traj)
+
+# Configure VACF calculation
+inp = vacfInps(
+    vel,       # Velocity trajectories
+    mas,       # Atomic masses
+    1e15u&quot;Hz&quot;,  # Sampling frequency (1/fs = 1e15 Hz)
+    true,      # Normalize VACF
+    Hann,      # Window function
+    4,         # FFT padding factor
+    true       # Mirror the data
+)
+
+# Calculate VDOS
+out = VDOS(inp)</code></pre><h3 id="VACF-Components"><a class="docs-heading-anchor" href="#VACF-Components">VACF Components</a><a id="VACF-Components-1"></a><a class="docs-heading-anchor-permalink" href="#VACF-Components" title="Permalink"></a></h3><p>The <code>vacfOut</code> structure contains:</p><ul><li><code>out.c</code>: Raw velocity autocorrelation function</li><li><code>out.C</code>: Windowed/processed VACF</li><li><code>out.v</code>: Frequency axis (in cm<span>$^{-1}$</span>)</li><li><code>out.I</code>: Vibrational density of states</li></ul><h3 id="Customizing-the-Analysis"><a class="docs-heading-anchor" href="#Customizing-the-Analysis">Customizing the Analysis</a><a id="Customizing-the-Analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Customizing-the-Analysis" title="Permalink"></a></h3><p>Several parameters can be adjusted:</p><pre><code class="language-julia hljs"># Different window functions
+inp = vacfInps(vel, mas, 1e15u&quot;Hz&quot;, true, Welch, 4, true)   # Welch window
+inp = vacfInps(vel, mas, 1e15u&quot;Hz&quot;, true, HannM, 4, true)   # Modified Hann
+
+# Increased padding for better frequency resolution
+inp = vacfInps(vel, mas, 1e15u&quot;Hz&quot;, true, Hann, 8, true)
+
+# Without mirroring
+inp = vacfInps(vel, mas, 1e15u&quot;Hz&quot;, true, Hann, 4, false)</code></pre><h3 id="Atom-Specific-Analysis"><a class="docs-heading-anchor" href="#Atom-Specific-Analysis">Atom-Specific Analysis</a><a id="Atom-Specific-Analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Atom-Specific-Analysis" title="Permalink"></a></h3><p>You can analyze specific atoms or groups:</p><pre><code class="language-julia hljs"># Analyze only oxygen atoms
+O_idx = findall(x -&gt; x == &quot;O&quot;, traj.symbols)
+out_O = VDOS(inp, atms=O_idx)
+
+# Analyze only hydrogen atoms
+H_idx = findall(x -&gt; x == &quot;H&quot;, traj.symbols)
+out_H = VDOS(inp, atms=H_idx)
+
+# Compare spectra
+using Plots
+plot(out_O.v, out_O.I, label=&quot;Oxygen&quot;, alpha=0.6)
+plot!(out_H.v, out_H.I, label=&quot;Hydrogen&quot;, alpha=0.6)
+xlabel!(&quot;Wavenumber (cm-1)&quot;)
+ylabel!(&quot;VDOS&quot;)</code></pre><h2 id="Visualization"><a class="docs-heading-anchor" href="#Visualization">Visualization</a><a id="Visualization-1"></a><a class="docs-heading-anchor-permalink" href="#Visualization" title="Permalink"></a></h2><p>YASS provides several ways to visualize vibrational properties:</p><pre><code class="language-julia hljs">using Plots
+
+# Plot VDOS spectrum
+plot(out.v, out.I,
+     xlabel=&quot;Wavenumber (cm⁻¹)&quot;,
+     ylabel=&quot;VDOS&quot;,
+     label=&quot;Total&quot;,
+     linewidth=2)
+
+# Plot raw VACF
+plot(out.c,
+     xlabel=&quot;Time&quot;,
+     ylabel=&quot;VACF&quot;,
+     label=&quot;Raw&quot;)
+
+# Plot windowed VACF
+plot(out.C,
+     xlabel=&quot;Time&quot;,
+     ylabel=&quot;VACF&quot;,
+     label=&quot;Processed&quot;)</code></pre><h2 id="Tips-for-Quality-Results"><a class="docs-heading-anchor" href="#Tips-for-Quality-Results">Tips for Quality Results</a><a id="Tips-for-Quality-Results-1"></a><a class="docs-heading-anchor-permalink" href="#Tips-for-Quality-Results" title="Permalink"></a></h2><ol><li><p>For harmonic analysis:</p><ul><li>Ensure structures are well-optimized</li><li>Use tight convergence criteria</li></ul></li><li><p>For VACF analysis:</p><ul><li>Use long enough trajectories (&gt;10 ps)</li><li>Use an appropriate timestep (depends on mode frequency)</li><li>Ensure good energy conservation</li><li>Test different window functions</li><li>Adjust padding for desired resolution</li></ul></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../optimizations/">« Optimization</a><a class="docs-footer-nextpage" href="../md/dynamics/">Molecular Dynamics Simulations »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Tuesday 16 December 2025 11:13">Tuesday 16 December 2025</span>. Using Julia version 1.12.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
