@@ -40,10 +40,10 @@ evaluation of radial and angular distribution functions.
 
 There exists a vast
 number of software packages for performing atomic scale simulations.
-There are those that focus on ease of use and flexibility (i.e.,
-ASE [@ase]), and those that focus on speed and memory efficiency
-(i.e., LAMMPS[@lammps], GROMACS[@gromacs1; @gromacs2; @gromacs3;
-@gromacs4], JaxMD[@jaxmd]). In an effort to offer both ease of use
+There are those that focus on ease of use and flexibility, such as 
+ASE [@ase], and those that focus on speed and memory efficiency, such as 
+LAMMPS [@lammps], GROMACS [@gromacs1; @gromacs2; @gromacs3;
+@gromacs4], and JaxMD [@jaxmd]. In an effort to offer both ease of use
 and speed, ASE offers interfaces to many of the performance-
 focused simulation suites. However, using these interfaces limits
 the flexibility originally offered by ASE and can reduce the
@@ -55,8 +55,8 @@ of Python.
 YASS offers users a similarly simple and easy-to-use interface
 as ASE, while also offering significant speedups. JaxMD can also
 offer a simple interface and high performance, but is limited
-in the available optimization algorithms. YASS (through `Optim.jl`
-[@optim]) offers a wide variety of optimization algorithms for
+in the available optimization algorithms. YASS, through `Optim.jl`
+[@optim], offers a wide variety of optimization algorithms for
 geometry and cell optimizations. Within the Julia ecosystem, 
 `Molly.jl` [@molly] and `NQCDynamics.jl` [@nqcdynamics] are the 
 dominant packages for performing molecular dynamics (MD) simulations.
@@ -155,7 +155,7 @@ YASS relies on several packages and libraries that deserve to be
 credited.
 
 - `Chemfiles` is used for I/O operations.
-- `Optim.jl`[@optim] is used for geometry and cell optimization.
+- `Optim.jl` [@optim] is used for geometry and cell optimization.
 - `OrdinaryDiffEq.jl` [@diffeq] is used as the integrator for MD simulations.
 - `FiniteDifferences.jl` is used for computing Jacobians for harmonic frequency analysis.
 - `FFTW` [@fftw] is used for fast Fourier transforms.
