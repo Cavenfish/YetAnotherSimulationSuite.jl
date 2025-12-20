@@ -26,3 +26,22 @@ Currently, YASS is able to perform the following simulations/calculations on mol
   - Geometry optimizations
   - Harmonic frequency calculations
   - Classical molecular dynamics in the NVE and NVT ensemble
+
+### Citation
+
+If you use YASS in your research, please cite:
+
+```bibtex
+@article{Ferrari2025,
+  doi = {10.21105/joss.09480},
+  url = {https://doi.org/10.21105/joss.09480},
+  year = {2025},
+  publisher = {The Open Journal},
+  volume = {10},
+  number = {116},
+  pages = {9480},
+  author = {Ferrari, Brian C.},
+  title = {YetAnotherSimulationSuite.jl: An Atomic Simulation Suite in Julia},
+  journal = {Journal of Open Source Software}
+}
+```

@@ -13,12 +13,15 @@
 [ddocs-img]: https://img.shields.io/badge/docs-dev-blue.svg
 [ddocs-url]: https://cavenfish.github.io/YetAnotherSimulationSuite.jl/dev/
 
+[joss-img]: https://joss.theoj.org/papers/10.21105/joss.09480/status.svg
+[joss-url]: https://doi.org/10.21105/joss.09480
+
 [![][docs-img]][docs-url]
 [![][ddocs-img]][ddocs-url]
 [![][ci-img]][ci-url]
 [![][codecov-img]][codecov-url]
 [![][aqua-img]][aqua-url]
-
+[![][joss-img]][joss-url]
 
 <img src="https://github.com/Cavenfish/YetAnotherSimulationSuite.jl/blob/main/docs/src/assets/logo.png" alt="Logo" width=350 >
 
@@ -105,11 +108,16 @@ YASS is MIT licensed. See [LICENSE](LICENSE) for details.
 If you use YASS in your research, please cite:
 
 ```bibtex
-@misc{yass2023,
-  author = {Brian C. Ferrari},
-  title = {YetAnotherSimulationSuite.jl},
-  year = {2023},
-  publisher = {GitHub},
-  url = {https://github.com/Cavenfish/YetAnotherSimulationSuite.jl}
+@article{Ferrari2025,
+  doi = {10.21105/joss.09480},
+  url = {https://doi.org/10.21105/joss.09480},
+  year = {2025},
+  publisher = {The Open Journal},
+  volume = {10},
+  number = {116},
+  pages = {9480},
+  author = {Ferrari, Brian C.},
+  title = {YetAnotherSimulationSuite.jl: An Atomic Simulation Suite in Julia},
+  journal = {Journal of Open Source Software}
 }
 ```
