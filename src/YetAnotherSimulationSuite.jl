@@ -25,6 +25,7 @@ module YetAnotherSimulationSuite
   using Distributions
   using KernelDensity
   using OrdinaryDiffEq
+  using NLSolversBase
 
   import FiniteDiff: JacobianCache, finite_difference_jacobian!
 
