@@ -151,7 +151,7 @@ Optimize the geometry of a set of atoms.
 """
 function opt(calc::MyCalc, algo, bdys::Vector{MyAtoms}; kwargs...)
   x0, vars = prep4pot(calc.b, bdys)
-  optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
+  optFunc  = NLSolversBase.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   optBdys  = getNewBdys(bdys, res)
@@ -175,7 +175,7 @@ Optimize the geometry of a cell.
 """
 function opt(calc::MyCalc, algo, cell::MyCell; kwargs...)
   x0, vars = prep4pot(calc.b, cell)
-  optFunc  = Optim.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
+  optFunc  = NLSolversBase.only_fg!((F,G,x) -> fg!(F,G,x, vars, calc))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
@@ -250,7 +250,7 @@ function hiddenOpt(calc::MyCalc, algo, cell, T; kwargs...)
     T
   )
 
-  optFunc  = Optim.only_fg!((F,G,x) -> hiddenEoM(F,G,Γ,calc,hideVars,x))
+  optFunc  = NLSolversBase.only_fg!((F,G,x) -> hiddenEoM(F,G,Γ,calc,hideVars,x))
   convCrit = Optim.Options(; kwargs...)
   res      = optimize(optFunc, x0, algo, convCrit)
   spos     = getScaledPos(res.minimizer, cell.lattice)
@@ -321,7 +321,7 @@ function optCell(calc::MyCalc, algo, cell::MyCell; precon=nothing, kwargs...)
   ret          = deepcopy(cell)
   diag         = isdiag(ret.lattice)
   lat0         = reshape(ret.lattice, 9) |> Vector
-  optFunc      = Optim.only_fg!(
+  optFunc      = NLSolversBase.only_fg!(
     (F,G,x) -> st!(F,G,x, ret, calc; precon=precon, diag=diag)
   )
   convCrit     = Optim.Options(; kwargs...)
